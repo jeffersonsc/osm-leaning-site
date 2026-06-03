@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Open Sound Meter · Guia visual</title>
+  <title>Open Sound Meter · Guia visual · Church Audio Tech</title>
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -16,13 +16,17 @@
       </div>
     </div>
 
+    <nav class="crumb">
+      <a href="../index.html">← Church Audio Tech</a>
+    </nav>
+
     <header class="index-hero">
       <h1>Open Sound Meter<br><span>Guia visual</span></h1>
-      <p>15 infográficos sobre medição e alinhamento de sistemas de áudio. Conceitos visuais, workflows passo a passo, do básico ao alinhamento de sub+top.</p>
+      <p>Medição e alinhamento de sistemas de áudio: conceitos visuais e manual da ferramenta em português. Do básico de fase ao alinhamento de sub + top.</p>
     </header>
 
     <section class="bloco">
-      <h2>Bloco 1 · Fundamentos</h2>
+      <h2>Conceitos · Bloco 1 · Fundamentos</h2>
       <div class="cards">
         <a href="01-fase.html" class="card">
           <div class="num">INFOGRÁFICO 01</div>
@@ -53,7 +57,7 @@
     </section>
 
     <section class="bloco">
-      <h2>Bloco 2 · Alinhamento prático</h2>
+      <h2>Conceitos · Bloco 2 · Alinhamento prático</h2>
       <div class="cards">
         <a class="card coming-soon"><div class="num">INFOGRÁFICO 06</div><div class="title">Soma vetorial</div><div class="desc">Por que duas caixas somam ou cancelam.</div></a>
         <a class="card coming-soon"><div class="num">INFOGRÁFICO 07</div><div class="title">Alinhando sub + top</div><div class="desc">Casando fase na frequência de crossover.</div></a>
@@ -65,7 +69,7 @@
     </section>
 
     <section class="bloco">
-      <h2>Bloco 3 · Casos práticos</h2>
+      <h2>Conceitos · Bloco 3 · Casos práticos</h2>
       <div class="cards">
         <a class="card coming-soon"><div class="num">INFOGRÁFICO 12</div><div class="title">Igreja · workflow completo</div><div class="desc">Calibração do zero ao culto.</div></a>
         <a class="card coming-soon"><div class="num">INFOGRÁFICO 13</div><div class="title">Eventos · medição rápida</div><div class="desc">Lidando com vento e ruído.</div></a>
@@ -74,12 +78,39 @@
       </div>
     </section>
 
+    <section class="bloco" style="margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--border);">
+      <h2>Manual do OSM v1.5 · em português</h2>
+      <p style="color: var(--text-muted); margin-bottom: 24px; max-width: 720px;">Tradução guiada do manual oficial. Para quem nunca abriu o programa e quer aprender o que cada controle faz, com screenshots da interface real.</p>
+      <div class="cards">
+
+        <a href="manual/01-instalacao.html" class="card">
+          <div class="num">PÁGINA 01</div>
+          <div class="title">Instalação e primeiros passos</div>
+          <div class="desc">Onde baixar (Mac, Windows, Linux), abrir pela primeira vez, configurar a interface de áudio.</div>
+        </a>
+
+        <a href="manual/02-tela-principal.html" class="card">
+          <div class="num">PÁGINA 02</div>
+          <div class="title">A tela principal e os modos</div>
+          <div class="desc">Layout: gráfico, barra direita, controles de baixo. Single, Double, Three — 1, 2 ou 3 gráficos ao mesmo tempo.</div>
+        </a>
+
+        <a class="card coming-soon"><div class="num">PÁGINA 03</div><div class="title">Os 9 tipos de gráfico</div><div class="desc">RTA, Spectrum, Magnitude, Phase, Coherence, Impulse, Step, Group Delay, Spectrogram. Quando usar cada um.</div></a>
+        <a class="card coming-soon"><div class="num">PÁGINA 04</div><div class="title">Barra direita: Generator e Measurements</div><div class="desc">Fonte de sinal (Pink, Sin, MLS+), criar e gerenciar medições.</div></a>
+        <a class="card coming-soon"><div class="num">PÁGINA 05</div><div class="title">Barra direita: Groups e Stores</div><div class="desc">Organizar medições em pastas (Mics, Math, Stores). Salvar trace para comparar depois.</div></a>
+        <a class="card coming-soon"><div class="num">PÁGINA 06</div><div class="title">Barra inferior de controles</div><div class="desc">FFT power, janela, smoothing, canais de mic e referência, dispositivo de áudio, calibrate, STORE.</div></a>
+        <a class="card coming-soon"><div class="num">PÁGINA 07</div><div class="title">Equalizer e SPL Meters</div><div class="desc">Desenhar filtros (HPF, Peak, Notch, HighShelf) e usar o medidor de pressão sonora.</div></a>
+        <a class="card coming-soon"><div class="num">PÁGINA 08</div><div class="title">Math, Remote Control e menus</div><div class="desc">Vector Sum, Server/Client para medir com tablet, View > Dark Mode, atalhos.</div></a>
+
+      </div>
+    </section>
+
   </div>
 
   <nav class="nav-footer">
-    <div></div>
+    <a href="../index.html">← Início</a>
     <div class="center">Open Sound Meter · Guia visual</div>
-    <a href="01-fase.html">Começar →</a>
+    <a href="manual/01-instalacao.html">Manual →</a>
   </nav>
 </body>
 </html>

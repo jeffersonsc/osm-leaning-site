@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instalação e primeiros passos · Manual do OSM v1.5</title>
+  <meta name="description" content="Como baixar, instalar e abrir o Open Sound Meter pela primeira vez. Configurar dispositivo de áudio e permissões de microfone no Mac, Windows e Linux.">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="../index.html">OSM</a>
+      <span class="sep">/</span>
+      <a href="index.html">Manual</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Página 1 / 8</div>
+        <h1>Instalação e primeiros passos</h1>
+      </div>
+      <div class="subtitle">onde baixar, abrir pela primeira vez<br>e configurar o áudio</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>O OSM é gratuito e open-source. Não tem versão paga, não tem propaganda, não pede cadastro. Você baixa e usa.</p>
+
+      <h2>Onde baixar</h2>
+
+      <p>O download oficial está no site do projeto: <strong><a href="https://opensoundmeter.com/" style="color: var(--terra);" target="_blank" rel="noopener">opensoundmeter.com</a></strong>. Tem versão para os quatro sistemas que mais aparecem em igreja:</p>
+
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Sistema</th>
+            <th>Arquivo</th>
+            <th>Tamanho</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="label">macOS</td>
+            <td><span class="ui-term">.dmg</span> — arraste para a pasta Applications</td>
+            <td>~20 MB</td>
+          </tr>
+          <tr>
+            <td class="label">Windows</td>
+            <td><span class="ui-term">.exe</span> — instalador padrão, clique avançar até o fim</td>
+            <td>~30 MB</td>
+          </tr>
+          <tr>
+            <td class="label">Linux</td>
+            <td><span class="ui-term">.AppImage</span> — dá permissão de execução e roda direto</td>
+            <td>~40 MB</td>
+          </tr>
+          <tr>
+            <td class="label">Android</td>
+            <td><span class="ui-term">.apk</span> ou Google Play Store</td>
+            <td>~25 MB</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="tip-box">
+        <div class="title">Qual usar na visita técnica</div>
+        <p>Mac ou Windows são os mais práticos porque a tela é grande e o teclado ajuda a navegar entre as medições. A versão Android serve para usar como segundo medidor (controle remoto via tablet), explicada na Página 8 do manual.</p>
+      </div>
+
+      <h2>Permissão de microfone</h2>
+
+      <p>Quando você abre o OSM pela primeira vez, o sistema operacional vai pedir <strong>permissão para usar o microfone</strong>. Sem isso, o programa não recebe sinal nenhum. Diga sim.</p>
+
+      <ul>
+        <li><strong>macOS:</strong> aparece uma janela "OSM deseja acessar o microfone" → clique em <span class="ui-term">OK</span>. Se você apertou "Não" sem querer, vá em <span class="ui-term">Ajustes do Sistema → Privacidade e Segurança → Microfone</span> e ative o OSM.</li>
+        <li><strong>Windows:</strong> aparece o pop-up de privacidade → clique em <span class="ui-term">Permitir</span>. Se não aparecer, vá em <span class="ui-term">Configurações → Privacidade → Microfone</span> e habilite o acesso para o OSM.</li>
+        <li><strong>Linux:</strong> normalmente já tem acesso, depende da distribuição.</li>
+      </ul>
+
+      <h2>Plugar a interface de áudio</h2>
+
+      <p>O OSM funciona com o microfone embutido do notebook para testar — mas para medição séria você precisa de uma interface USB profissional ligada a um microfone de medição (omnidirecional, com resposta plana, tipo Behringer ECM8000, dBx RTA-M, ou similar).</p>
+
+      <p>Sequência prática:</p>
+
+      <ol style="counter-reset: step; list-style: none; padding-left: 0;">
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">1</span>
+          <strong>Plugue a interface USB</strong> no computador <em>antes</em> de abrir o OSM. Sistemas operacionais detectam novos dispositivos de áudio quando ligados, e se o OSM já está aberto, ele pode não enxergar.
+        </li>
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">2</span>
+          <strong>Conecte o microfone de medição</strong> na entrada XLR da interface, e <strong>ligue o phantom power (+48V)</strong> se for um microfone condensador (a maioria dos mics de medição é).
+        </li>
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">3</span>
+          <strong>Abra o OSM</strong>. Na barra inferior da janela vai aparecer uma lista de dispositivos de áudio — escolha sua interface (algo como <span class="ui-term">Scarlett 2i2 USB</span>, <span class="ui-term">Behringer UMC22</span>, etc).
+        </li>
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">4</span>
+          <strong>Escolha o canal de entrada</strong> (<span class="ui-term">M:</span>, abreviação de "microfone") correspondente à porta XLR onde plugou o mic. Geralmente <span class="ui-term">M: 1</span> ou <span class="ui-term">M: Mic 1</span>.
+        </li>
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">5</span>
+          <strong>Suba o ganho da interface</strong> até falar perto do microfone fazer o medidor da interface acender (verde, sem chegar no vermelho). Esse é o gain stage que vimos no <a href="../../curso/02-niveis-de-sinal.html" style="color: var(--terra);">Bloco 2 do curso</a>.
+        </li>
+      </ol>
+
+      <div class="warn-box">
+        <div class="title">Sobre microfone de medição barato</div>
+        <p>Não use o microfone vocal SM58 (ou similar) para medição — ele é direcional e tem curva moldada, vai te enganar. Microfone de medição é omnidirecional e calibrado para resposta plana. Os mais usados em igreja: <strong>Behringer ECM8000</strong> (~R$ 400) ou <strong>dBx RTA-M</strong> (~R$ 500). É a peça mais importante do seu kit de medição.</p>
+      </div>
+
+      <h2>O primeiro teste de som</h2>
+
+      <p>Com tudo plugado e o canal certo selecionado, aponte o microfone para uma caixa que esteja tocando música (ou bata palmas perto dele). Você deve ver o gráfico se mover. Se vê — parabéns, está funcionando. Se não vê:</p>
+
+      <ul>
+        <li>Confira se o phantom power (+48V) está ligado na interface.</li>
+        <li>Confira se o ganho da interface está aberto (e não no zero).</li>
+        <li>Confira se o canal <span class="ui-term">M:</span> selecionado é o correto (às vezes o mic está na entrada 2, não na 1).</li>
+        <li>No macOS, confira se a permissão de microfone foi dada (veja acima).</li>
+      </ul>
+
+      <p>Se chegou até aqui, o OSM está respirando sinal. A próxima página explica o que você está vendo — o layout da tela e os modos Single, Double e Three.</p>
+
+      <p style="margin-top: 36px; text-align: center;">
+        <a href="02-tela-principal.html" style="display: inline-block; background: var(--terra); color: white; padding: 12px 22px; border-radius: 6px; text-decoration: none; font-weight: 600;">Próximo: a tela principal →</a>
+      </p>
+
+      <p style="margin-top: 24px;">
+        <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">← Voltar para o índice do manual</a>
+      </p>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="index.html">← Índice do manual</a>
+    <div class="center">Página 1 / 8 · Instalação</div>
+    <a href="02-tela-principal.html">Página 2 →</a>
+  </nav>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A tela principal e os modos · Manual do OSM v1.5</title>
+  <meta name="description" content="Layout da tela do Open Sound Meter: área do gráfico, painel direito, controles de baixo. Os três modos de exibição: Single, Double e Three.">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="../index.html">OSM</a>
+      <span class="sep">/</span>
+      <a href="index.html">Manual</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Página 2 / 8</div>
+        <h1>A tela principal e os modos</h1>
+      </div>
+      <div class="subtitle">o que cada parte da janela faz<br>e quantos gráficos mostrar</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>Quando você abre o OSM pela primeira vez, ele aparece com um gráfico só, no modo padrão chamado <span class="ui-term">Spectrum</span>. Pode parecer pouco — mas essa janela tem três regiões bem definidas, e entender o que cada uma faz é o ponto de partida do manual.</p>
+
+      <h2>As três regiões da tela</h2>
+
+      <figure class="fig">
+        <img src="img/spectrum-single.png" alt="Tela principal do OSM mostrando Spectrum view com um único gráfico, painel direito com Generator e Measurement, e barra de controles na parte inferior">
+        <figcaption><strong>Tela inicial do OSM no modo Spectrum.</strong> O gráfico ocupa o centro. À direita está o painel de medições. Embaixo, duas linhas de controles que definem como o OSM se comporta.</figcaption>
+      </figure>
+
+      <p>Essas três regiões aparecem em qualquer modo, e cada uma tem uma função distinta:</p>
+
+      <ol class="ctrl-list">
+        <li>
+          <strong>Área do gráfico (centro)</strong>
+          É onde a medição é desenhada. Ocupa a maior parte da tela. No canto superior direito de cada gráfico tem o <strong>seletor de tipo</strong> (Spectrum, RTA, Magnitude, Phase, etc) — a Página 3 do manual explica todos os 9 tipos.
+        </li>
+        <li>
+          <strong>Painel direito (medições e gerador)</strong>
+          Lista as medições ativas, controla o gerador de sinal interno, e tem o botão <span class="ui-term">ABOUT</span> que mostra a versão do programa. Páginas 4 e 5 do manual cobrem este painel em detalhe.
+        </li>
+        <li>
+          <strong>Barra inferior (controles globais)</strong>
+          FFT power, janela, smoothing, canais de entrada (M e R), dispositivo de áudio, <span class="ui-term">calibrate</span>, <span class="ui-term">STORE</span>. Página 6 do manual cobre cada um.
+        </li>
+      </ol>
+
+      <h2>Os três modos: Single, Double, Three</h2>
+
+      <p>No topo do painel direito tem um dropdown que define <strong>quantos gráficos o OSM mostra ao mesmo tempo</strong>. As opções são:</p>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="key">Single</div>
+          <div class="val">1 gráfico</div>
+          <div class="desc">Padrão. Um único gráfico ocupa a tela. Use para análise focada numa coisa só, ou em tela pequena (notebook 13").</div>
+        </div>
+        <div class="stat">
+          <div class="key">Double</div>
+          <div class="val">2 gráficos</div>
+          <div class="desc">Dois empilhados, geralmente Magnitude em cima e Phase embaixo. É o modo mais usado em alinhamento.</div>
+        </div>
+        <div class="stat">
+          <div class="key">Three</div>
+          <div class="val">3 gráficos</div>
+          <div class="desc">Três empilhados (ex: Impulse + Coherence + RTA). Bom em monitor maior, quando você quer ver tudo de uma vez.</div>
+        </div>
+      </div>
+
+      <figure class="fig">
+        <img src="img/rta-single.png" alt="OSM em modo Single mostrando apenas o RTA view, com painel direito apenas com Generator e uma Measurement">
+        <figcaption><strong>Modo Single com gráfico RTA.</strong> Um único gráfico ocupando toda a área central. Note o dropdown <span class="ui-term">Single</span> no canto superior direito do painel.</figcaption>
+      </figure>
+
+      <figure class="fig">
+        <img src="img/magnitude-phase-views-dropdown.png" alt="OSM em modo Double mostrando Magnitude em cima e Phase em baixo, com o dropdown de tipo de gráfico aberto listando RTA, Magnitude, Phase, Impulse, Step, Coherence, Group Delay, Spectrogram">
+        <figcaption><strong>Modo Double mostrando Magnitude (em cima) + Phase (em baixo).</strong> O dropdown aberto no canto superior direito do gráfico de cima mostra todos os tipos disponíveis. <strong>Cada gráfico tem seu próprio seletor</strong> — você pode mostrar combinações diferentes.</figcaption>
+      </figure>
+
+      <figure class="fig">
+        <img src="img/three-mode-overview.png" alt="OSM em modo Three mostrando Impulse no topo, Coherence no meio e RTA embaixo">
+        <figcaption><strong>Modo Three.</strong> Três gráficos empilhados, neste exemplo: Impulse, Coherence e RTA. Útil em monitor grande quando você quer comparar várias medições da mesma fonte ao mesmo tempo.</figcaption>
+      </figure>
+
+      <div class="tip-box">
+        <div class="title">Que modo usar e quando</div>
+        <p><strong>Single</strong> para uma análise rápida ou ajustar uma coisa específica. <strong>Double</strong> com Magnitude em cima e Phase embaixo é o setup do dia a dia em alinhamento — você sempre quer ver os dois juntos (veja o <a href="../04-transfer.html" style="color: var(--terra);">Infográfico 04 sobre função de transferência</a>). <strong>Three</strong> só vale a pena em tela ≥17" — em monitor pequeno, os gráficos ficam apertados demais para ler.</p>
+      </div>
+
+      <h2>O painel direito muda com o modo</h2>
+
+      <figure class="fig">
+        <img src="img/sidebar-double-groups.png" alt="Painel direito do OSM em modo Double mostrando Generator, Target Trace, três pastas (Mics, Math, Stores) com checkboxes coloridos, e várias medições armazenadas (TM1 em diferentes horários)">
+        <figcaption><strong>Painel direito em modo Double.</strong> Aqui aparecem mais opções: <strong>Target Trace</strong> (curva-alvo de referência), três pastas (<strong>Mics</strong>, <strong>Math</strong>, <strong>Stores</strong>) para organizar medições, e uma lista de medições armazenadas (<span class="ui-term">TM1 @ 14:43</span>, etc).</figcaption>
+      </figure>
+
+      <p>No modo Single o painel é mais enxuto (só Generator + medição ativa). No modo Double e Three ele cresce com novos elementos:</p>
+
+      <ul>
+        <li><strong>Target Trace:</strong> uma curva-alvo de referência (importada ou criada manualmente) para você comparar a medição contra ela.</li>
+        <li><strong>Mics:</strong> pasta com microfones de medição ativos. Cada mic tem sua cor.</li>
+        <li><strong>Math:</strong> pasta com medições calculadas (Vector Sum, diferenças). Veja Página 8.</li>
+        <li><strong>Stores:</strong> traces salvos para comparar antes/depois de uma mudança.</li>
+        <li><strong>Lista de stored:</strong> medições congeladas no tempo, com timestamp (<span class="ui-term">@ 14:43</span>) para você lembrar quando foi feita.</li>
+      </ul>
+
+      <h2>O essencial pra reter desta página</h2>
+
+      <ul>
+        <li>A janela tem <strong>três regiões fixas</strong>: gráfico (centro), painel direito (medições), barra inferior (controles).</li>
+        <li><strong>Cada gráfico</strong> tem seu próprio seletor de tipo (Spectrum, RTA, Magnitude, etc) no canto superior direito.</li>
+        <li>O dropdown <span class="ui-term">Single / Double / Three</span> no topo do painel direito controla quantos gráficos mostrar.</li>
+        <li>Para o dia a dia, <strong>Double com Magnitude + Phase</strong> é o que você vai usar mais.</li>
+      </ul>
+
+      <p style="margin-top: 36px; text-align: center;">
+        <a href="03-tipos-de-grafico.html" style="display: inline-block; background: var(--terra); color: white; padding: 12px 22px; border-radius: 6px; text-decoration: none; font-weight: 600; pointer-events: none; opacity: 0.5;">Próximo: os 9 tipos de gráfico → <span style="font-size: 12px; font-weight: 400;">(em breve)</span></a>
+      </p>
+
+      <p style="margin-top: 24px;">
+        <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">← Voltar para o índice do manual</a>
+      </p>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="01-instalacao.html">← Página 1</a>
+    <div class="center">Página 2 / 8 · A tela principal e os modos</div>
+    <a class="nav-disabled">Página 3 →</a>
+  </nav>
+</body>
+</html>

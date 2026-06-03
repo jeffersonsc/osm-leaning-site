@@ -1132,6 +1132,131 @@ table.viz .muted {
   opacity: 0.88;
 }
 
+/* ============================================
+   Figura com screenshot do manual + legenda
+   ============================================ */
+.fig {
+  margin: 28px 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.fig img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: white;
+}
+
+.fig figcaption {
+  padding: 12px 18px;
+  font-size: 13px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  line-height: 1.5;
+}
+
+.fig figcaption strong {
+  color: var(--terra);
+  font-weight: 700;
+}
+
+/* Anotação de área da imagem — chip discreto */
+.fig-callouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 0;
+}
+
+.fig-callouts .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 3px 10px 3px 8px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.fig-callouts .chip .badge {
+  background: var(--terra);
+  color: white;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Lista numerada estilo "controles" */
+.ctrl-list {
+  margin: 18px 0 24px;
+  padding: 0;
+  list-style: none;
+  counter-reset: ctrl;
+}
+
+.ctrl-list li {
+  position: relative;
+  padding: 12px 14px 12px 48px;
+  margin-bottom: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  counter-increment: ctrl;
+}
+
+.ctrl-list li::before {
+  content: counter(ctrl);
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  background: var(--terra);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.ctrl-list li strong {
+  color: var(--text);
+  font-weight: 700;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.ctrl-list li .ui-term {
+  font-family: var(--font-mono);
+  background: var(--bg-elev);
+  color: var(--terra);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.92em;
+}
+
+.lesson-prose .ui-term {
+  font-family: var(--font-mono);
+  background: var(--bg-elev);
+  color: var(--terra);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.92em;
+}
+
 /* Crumb (caminho de volta no topo de páginas internas) */
 .crumb {
   display: flex;
