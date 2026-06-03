@@ -1,84 +1,118 @@
-# OSM Visual Guide · Bilingual
+# Church Audio Tech
 
-Visual guide on **Open Sound Meter** — measurement and alignment of audio systems.
+Site educacional sobre áudio para igrejas, em português, com duas trilhas de aprendizado e um manual traduzido do Open Sound Meter.
 
-Guia visual sobre **Open Sound Meter** — medição e alinhamento de sistemas de áudio.
+🌐 **Produção:** [igreja-audio-tech.vercel.app](https://igreja-audio-tech.vercel.app/)
 
-## Structure / Estrutura
+## Para quem é
+
+- **Operadores de igreja** que querem entender de verdade o que fazem na mesa de som — do "som é ar se mexendo" até a mesa digital.
+- **Técnicos intermediários** que querem aprender medição e alinhamento de sistemas com o Open Sound Meter (OSM).
+
+## As três trilhas
+
+### 1. Curso para operadores de igreja `/curso/`
+Conteúdo iniciante, 6 blocos baseados na apostila do curso presencial:
+
+1. Como o som funciona (frequência, dB, caminho do som)
+2. Níveis de sinal (mic, linha, alto-falante, ganho, clip)
+3. Cabos e conectores (XLR, P10, balanceado vs desbalanceado)
+4. Impedância e potência (Ω, série/paralelo, microfonia)
+5. A mesa de som por dentro (ordem dos controles, sequência prática)
+6. O que existe além (mesa digital, GEQ, crossover, DSP)
+
+### 2. Open Sound Meter — Conceitos `/pt/`
+15 infográficos visuais sobre medição e alinhamento, em PT (5 originais também em EN):
+
+- **Fundamentos** (01–05): fase, coerência, atraso, função de transferência, FFT.
+- **Alinhamento prático** (06–11): soma vetorial, sub+top, delay zones, phase trace, polaridade, coupling vs comb.
+- **Casos práticos** (12–15): workflow de igreja, eventos ao vivo, estúdio, erros mais comuns.
+
+### 3. Open Sound Meter — Manual em português `/pt/manual/`
+Tradução guiada do manual oficial do OSM v1.5, 8 páginas com screenshots originais e legendas em PT:
+
+1. Instalação e primeiros passos
+2. A tela principal e os modos (Single/Double/Three)
+3. Os 9 tipos de gráfico (RTA, Spectrum, Magnitude, Phase, Coherence, Impulse, Step, Group Delay, Spectrogram)
+4. Barra direita: Generator e Measurements
+5. Barra direita: Groups e Stores
+6. Barra inferior de controles
+7. Equalizer, SPL e Numeric
+8. Math, Remote Control e menus
+
+## Materiais para download `/materiais/`
+
+- `apostila-curso-audio.pdf` — apostila completa do curso (17 páginas).
+- `checklist-visita-igreja.pdf` — formulário de inventário da igreja para visita técnica.
+
+## Estrutura de arquivos
 
 ```
-osm_site/
-├── index.html               ← language picker / seletor de idioma
-├── style.css                ← shared styles
-├── pt/
-│   ├── index.html           ← índice PT
-│   ├── 01-fase.html
-│   ├── 02-coerencia.html
-│   ├── 03-atraso.html
-│   ├── 04-transfer.html
-│   └── 05-fft.html
-└── en/
-    ├── index.html           ← EN index
-    ├── 01-phase.html
-    ├── 02-coherence.html
-    ├── 03-delay.html
-    ├── 04-transfer.html
-    └── 05-fft.html
+osm_site_v2/
+├── index.html               ← hub raiz com 2 trilhas
+├── style.css                ← estilos compartilhados (tema escuro + responsivo)
+├── CLAUDE.md                ← notas técnicas para futuras edições
+├── curso/                   ← trilha iniciante (PT)
+│   ├── index.html
+│   ├── 01-como-som-funciona.html
+│   ├── 02-niveis-de-sinal.html
+│   ├── 03-cabos-e-conectores.html
+│   ├── 04-impedancia-e-potencia.html
+│   ├── 05-mesa-de-som.html
+│   ├── 06-alem-da-mesa.html
+│   └── e-agora.html
+├── pt/                      ← OSM conceitos (PT)
+│   ├── index.html
+│   ├── 01-fase.html ... 15-erros-comuns.html
+│   └── manual/              ← manual OSM v1.5 traduzido
+│       ├── index.html
+│       ├── 01-instalacao.html ... 08-math-remote-menus.html
+│       └── img/             ← screenshots originais do manual
+├── en/                      ← OSM conceitos (EN, só blocos 01-05)
+└── materiais/               ← PDFs para download
 ```
 
-## Deploy on Vercel
+## Desenvolvimento
 
-### Drag & drop (easiest)
-1. Extract the zip into a folder
-2. Go to [vercel.com/new](https://vercel.com/new)
-3. Drag the folder onto the upload area
-4. Vercel detects as "Other" (static), click Deploy
-5. Site goes live at `https://your-project.vercel.app/` in ~30 seconds
+Site 100% estático, sem build, sem dependências, sem framework. Para rodar localmente:
 
-### Via GitHub (recommended)
-1. Create a GitHub repo and push the contents
-2. At [vercel.com/new](https://vercel.com/new), import the repo
-3. Click Deploy — Vercel auto-detects everything
-4. Every `git push` triggers automatic redeploy
+```bash
+python3 -m http.server 8000
+# ou
+npx serve .
+```
 
-### Via CLI
+Abra `http://localhost:8000`.
+
+### Como editar
+
+- **Cores e tipografia:** variáveis CSS no topo de `style.css` (`--bg`, `--terra`, `--navy`, etc).
+- **Conteúdo de uma página:** edita o `.html` direto. Cada página é independente.
+- **Nova página em uma trilha:** copia uma existente da mesma trilha, ajusta conteúdo + `nav-footer` prev/next + cards na landing.
+- **Responsivo:** breakpoints em 640px e 800px no `style.css`. Testa em mobile/tablet/desktop antes de fazer deploy.
+
+## Deploy
+
+Configurado para Vercel via `.vercel/`. Cada `git push` na master gera deploy automático em produção.
+
+Para deploy manual via CLI:
+
 ```bash
 npm i -g vercel
-cd osm_site
 vercel
 ```
 
-## Language toggle / Alternador de idioma
+## Licença e atribuições
 
-Each page has a PT/EN toggle in the top right corner that takes you directly to the equivalent page in the other language.
+Código e conteúdo originais sob licença [MIT](./LICENSE) — veja o arquivo.
 
-Cada página tem um alternador PT/EN no canto superior direito que leva diretamente pra página equivalente no outro idioma.
+**Atribuições terceiros:**
 
-## Customize / Personalizar
+- **Open Sound Meter** é desenvolvido por Pavel Smokotnin sob licença GPL v3. Os screenshots da interface usados em `pt/manual/img/` vêm do manual oficial v1.5, reproduzidos para fins de documentação e tradução para português. Veja [opensoundmeter.com](https://opensoundmeter.com/).
+- A apostila e o checklist em `/materiais/` foram produzidos como material de apoio do curso presencial.
 
-- **Colors / Cores**: edit CSS variables at the top of `style.css` (`--navy`, `--terra`, etc.)
-- **Content / Conteúdo**: each `.html` is independent, edit what you need
-- **Adding pages**: copy an existing one, adjust content and the prev/next navigation in the footer
+## Autor
 
-## Status
+**Jefferson Silva** — Consultor de áudio com foco em sistemas de igreja.
 
-### Block 1 / Bloco 1 — Fundamentals / Fundamentos ✅
-- 01 — What is phase / O que é fase
-- 02 — Coherence / Coerência
-- 03 — Delay and delay finder / Atraso e delay finder
-- 04 — Transfer function / Função de transferência
-- 05 — FFT window and resolution / Janela FFT e resolução
-
-### Block 2 / Bloco 2 — Practical alignment / Alinhamento prático 🚧
-- 06 — Vector summation / Soma vetorial
-- 07 — Aligning sub + top / Alinhando sub + top
-- 08 — Delay zones
-- 09 — Phase trace ideal vs real
-- 10 — Polarity inversion / Inversão de polaridade
-- 11 — Coupling vs comb filtering
-
-### Block 3 / Bloco 3 — Use cases / Casos práticos 🚧
-- 12 — Church · full workflow / Igreja · workflow completo
-- 13 — Events · quick measurement / Eventos · medição rápida
-- 14 — Studio · room response / Estúdio · resposta de sala
-- 15 — Most common mistakes / Erros mais comuns
+Para sugestões, correções ou contribuições, abra uma issue ou PR no [repositório do GitHub](https://github.com/jeffersonsc/osm-leaning-site).

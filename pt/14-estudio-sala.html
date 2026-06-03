@@ -118,9 +118,12 @@
       let db = 0;
       // modos: picos em ~50Hz, 100Hz, 150Hz
       if (fLog < 200) {
-        db += 8 * Math.exp(-((fLog - 50) / 8) ** 2);
-        db += 6 * Math.exp(-((fLog - 100) / 12) ** 2);
-        db -= 4 * Math.exp(-((fLog - 75) / 8) ** 2);
+        const mode50  = ((fLog -  50) /  8) ** 2;
+        const mode100 = ((fLog - 100) / 12) ** 2;
+        const dip75   = ((fLog -  75) /  8) ** 2;
+        db += 8 * Math.exp(-mode50);
+        db += 6 * Math.exp(-mode100);
+        db -= 4 * Math.exp(-dip75);
       }
       // comb em médios (200-1000Hz)
       if (fLog >= 200 && fLog < 1500) {

@@ -143,7 +143,8 @@
     drawCurve(t => {
       const ideal = -180 - t * 540;
       const hpfTilt = 80 * Math.exp(-t * 12); // sobe nos graves
-      const xoverKink = -20 * Math.exp(-((t - 0.7) * 12) ** 2); // dip em 2kHz
+      const kink = ((t - 0.7) * 12) ** 2;
+      const xoverKink = -20 * Math.exp(-kink); // dip em 2kHz
       return ideal + hpfTilt + xoverKink;
     }, 'terra');
 
