@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barra inferior de controles · Manual do OSM v1.5</title>
+  <meta name="description" content="Cada controle da barra inferior do Open Sound Meter explicado: filtro de average, FFT power, janela, smoothing, canais M e R, dispositivo de áudio, calibrate e STORE.">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="../index.html">OSM</a>
+      <span class="sep">/</span>
+      <a href="index.html">Manual</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Página 6 / 8</div>
+        <h1>Barra inferior de controles</h1>
+      </div>
+      <div class="subtitle">a fileira dupla de botões no rodapé<br>onde a medição é configurada de verdade</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>A barra inferior é onde mora a configuração mais importante da medição. Cada botão ali decide algo sobre como o OSM processa o sinal — e nenhuma medição séria começa sem você passar por todos eles, pelo menos uma vez.</p>
+
+      <h2>As duas fileiras</h2>
+
+      <p>A barra é dividida em duas linhas. A de cima cuida do <strong>tratamento da medição</strong> (filtros, average, calibração). A de baixo cuida do <strong>setup técnico</strong> (FFT, janela, canais, dispositivo).</p>
+
+      <figure class="fig">
+        <img src="img/bottom-bar-single.png" alt="Barra inferior do OSM em modo Single com microfone embutido. Primeira fileira: LPF, 0.25Hz, +/-, refresh, calibrate, Measurement (em azul), 0,0dB, 0,0dB, 94 dB, 0,00ms, 0,00 ms. Segunda fileira: 14, Hann, Z, M: 1, R: 2, Built-in Microphone, STORE">
+        <figcaption><strong>Barra inferior com microfone embutido (modo Single).</strong> Note os medidores de nível e tempo na linha de cima, e a configuração de FFT/canais/dispositivo na linha de baixo.</figcaption>
+      </figure>
+
+      <figure class="fig">
+        <img src="img/bottom-bar-scarlett.png" alt="Barra inferior do OSM com Scarlett 18i6 USB e modo Double. Primeira fileira: LPF, 0.25Hz, +/-, refresh, calibrate, Measurement, 0,00dB, 5,40ms, 0,02 ms. Segunda fileira: LTW, Hann, M: Mic 1, R: Line 3, Scarlett 18i6 USB, STORE">
+        <figcaption><strong>Mesma barra com interface profissional Scarlett 18i6.</strong> Note as diferenças: janela <span class="ui-text">LTW</span> em vez de <span class="ui-text">14</span>, canais <span class="ui-text">M: Mic 1</span> e <span class="ui-text">R: Line 3</span> em vez de M:1 R:2, e delay já calculado em <span class="ui-text">5,40ms</span> em vez de zero.</figcaption>
+      </figure>
+
+      <h2>Fileira de cima: tratamento da medição</h2>
+
+      <ol class="ctrl-list">
+        <li>
+          <strong>Filtro (LPF / HPF)</strong>
+          Por padrão fica em <span class="ui-text">LPF</span> (low-pass filter — filtro passa-baixa). Aplica um filtro no average da medição, suavizando flutuações rápidas. Deixe em LPF.
+        </li>
+        <li>
+          <strong>Frequência de average</strong> (<span class="ui-term">0.25Hz</span>)
+          Define o quão "lento" o average reage a mudanças. 0.25Hz é o padrão e funciona para a maioria dos casos — a medição leva alguns segundos para estabilizar mas fica muito limpa. Suba para mudanças mais rápidas (1Hz, 10Hz), abaixe para mais suavidade.
+        </li>
+        <li>
+          <strong>Polaridade (+/-)</strong>
+          Inverte a polaridade da medição. Use para teste rápido: ver como ficaria a curva se a caixa estivesse com polaridade invertida.
+        </li>
+        <li>
+          <strong>Refresh</strong> (ícone de seta circular)
+          Reseta o average e começa do zero. Use quando você muda algo no sistema (move um cabo, troca de microfone) e quer que o average esqueça o que viu antes.
+        </li>
+        <li>
+          <strong>Calibrate</strong>
+          Checkbox para entrar em modo de calibração de SPL. Ao marcar, o OSM vira medidor de pressão sonora calibrado. Você precisa de um calibrador externo (que gera 94 dB ou 114 dB de referência) para calibrar de fato. Sem calibrador, deixe desmarcado — os valores em dB serão relativos, não absolutos.
+        </li>
+        <li>
+          <strong>Identificador da medição</strong> (<span class="ui-term">Measurement</span> com bolinha colorida)
+          Mostra qual medição os campos de gain/delay à direita estão controlando. Clica para escolher outra.
+        </li>
+        <li>
+          <strong>Gain</strong> (<span class="ui-term">0,0dB</span>)
+          Ganho aplicado pelo OSM na curva da medição selecionada. Útil para deixar duas medições na mesma altura no gráfico (subtraindo o offset entre elas).
+        </li>
+        <li>
+          <strong>Delay manual</strong> (<span class="ui-term">5,40ms</span>)
+          Atraso aplicado manualmente. Quando o OSM calcula o delay automaticamente (pelo botão de delay finder), o valor aparece aqui.
+        </li>
+        <li>
+          <strong>SPL de referência</strong> (<span class="ui-term">94 dB</span>)
+          Nível do calibrador. 94 dB é o padrão da maioria dos calibradores de mercado. Se o seu gera 114, mude para 114.
+        </li>
+        <li>
+          <strong>Delay aplicado / Estimado</strong>
+          Os campos finais mostram o atraso aplicado e o atraso estimado pelo delay finder.
+        </li>
+      </ol>
+
+      <h2>Fileira de baixo: setup técnico</h2>
+
+      <ol class="ctrl-list">
+        <li>
+          <strong>FFT Power</strong> (<span class="ui-term">14</span> ou <span class="ui-term">LTW</span>)
+          Controla o tamanho da janela FFT. Valor 14 = 2^14 = 16.384 amostras. Mais alto = mais resolução nas frequências graves, mas resposta mais lenta. Para alinhamento de igreja, 13-15 funciona bem. <span class="ui-text">LTW</span> ativa a janela log-time-weighted (resolução variável, melhor para sistemas reais). Veja <a href="../05-fft.html" style="color: var(--terra);">Infográfico 05 sobre FFT</a>.
+        </li>
+        <li>
+          <strong>Janela</strong> (<span class="ui-term">Hann</span>)
+          Tipo de janela aplicada na FFT. Hann é o padrão e quase ninguém precisa mudar. Outras opções (Hamming, Blackman, etc) só interessam em casos específicos.
+        </li>
+        <li>
+          <strong>Smoothing</strong> (<span class="ui-term">Z</span>, <span class="ui-term">Notch</span>)
+          Suavização do gráfico. <span class="ui-text">Z</span> é "sem suavização", mostra todos os detalhes. <span class="ui-text">Notch</span> aplica filtro que destaca picos estreitos (microfonia). Outras opções: 1/3, 1/6, 1/12 de oitava para suavização progressiva. <strong>Setup recomendado: comece em 1/6 ou 1/12 para ver "a forma" da resposta sem ruído.</strong>
+        </li>
+        <li>
+          <strong>Canal M (microfone)</strong> (<span class="ui-term">M: 1</span> ou <span class="ui-term">M: Mic 1</span>)
+          Canal de entrada onde está o microfone de medição. Em interface profissional aparece o nome do canal (<span class="ui-text">Mic 1</span>); em mic embutido aparece só o número.
+        </li>
+        <li>
+          <strong>Canal R (referência)</strong> (<span class="ui-term">R: 2</span> ou <span class="ui-term">R: Line 3</span>)
+          Canal de entrada onde está a referência (sinal antes de entrar na caixa). Geralmente vem de um insert/direct out da mesa para a entrada Line da interface. Sem R configurado, Magnitude e Phase não funcionam.
+        </li>
+        <li>
+          <strong>Dispositivo de áudio</strong> (<span class="ui-term">Built-in Microphone</span> / <span class="ui-term">Scarlett 18i6 USB</span>)
+          A interface ou microfone que o OSM está usando. <strong>Mude isso primeiro</strong> — os canais M e R só listam depois que o dispositivo correto está selecionado.
+        </li>
+        <li>
+          <strong>STORE</strong>
+          Congela a medição ativa e cria uma stored na pasta Stores. Página 5 explica como usar.
+        </li>
+      </ol>
+
+      <h2>Sequência prática para configurar uma medição do zero</h2>
+
+      <ol style="counter-reset: step; list-style: none; padding-left: 0;">
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">1</span>
+          Plugue a interface e o microfone. <strong>Escolha o dispositivo de áudio</strong> (penúltimo dropdown da fileira de baixo).
+        </li>
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">2</span>
+          Configure <strong>canal M</strong> (microfone de medição) e <strong>canal R</strong> (referência da mesa). Verifique que os medidores de nível das medições no painel direito estão verdes.
+        </li>
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">3</span>
+          Ajuste <strong>FFT Power</strong> conforme o que vai medir. 13-15 para resposta de caixa geral; 16-18 se precisar olhar muito nos graves.
+        </li>
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">4</span>
+          Ajuste <strong>Smoothing</strong> para 1/6 ou 1/12 de oitava — fica mais fácil de ler.
+        </li>
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">5</span>
+          Ligue o <strong>Generator</strong> (painel direito) em pink noise, nível baixo. Suba até a curva de Magnitude estabilizar bem acima do ruído de fundo.
+        </li>
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">6</span>
+          Use o <strong>delay finder</strong> para calcular o atraso do sistema, aplique, e a partir daí Magnitude e Phase ficam estáveis e prontas para análise.
+        </li>
+      </ol>
+
+      <div class="warn-box">
+        <div class="title">Sem o canal R configurado, função de transferência não funciona</div>
+        <p>Erro clássico de quem está começando: ligar o microfone, configurar M, esquecer R. Magnitude fica vazia ou em -90 dB sem variação, e o usuário acha que "o OSM está bugado". <strong>Sempre configure os dois canais</strong>, e tenha certeza que tem sinal vivo entrando em ambos (medidores verdes).</p>
+      </div>
+
+      <h2>O essencial pra reter desta página</h2>
+
+      <ul>
+        <li>A barra tem <strong>duas fileiras</strong>: tratamento da medição (cima) e setup técnico (baixo).</li>
+        <li>O primeiro passo é sempre <strong>escolher o dispositivo de áudio</strong> — sem isso, os canais ficam vazios.</li>
+        <li><strong>M = microfone, R = referência da mesa.</strong> Sem R, Magnitude/Phase não funcionam.</li>
+        <li>FFT Power 13-15 + Smoothing 1/6 ou 1/12 = setup confortável para alinhamento de igreja.</li>
+        <li><span class="ui-term">STORE</span> congela a medição ativa para virar comparação no futuro.</li>
+      </ul>
+
+      <p style="margin-top: 36px; text-align: center;">
+        <a href="07-equalizer-spl.html" style="display: inline-block; background: var(--terra); color: white; padding: 12px 22px; border-radius: 6px; text-decoration: none; font-weight: 600;">Próximo: Equalizer e SPL Meters →</a>
+      </p>
+
+      <p style="margin-top: 24px;">
+        <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">← Voltar para o índice do manual</a>
+      </p>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="05-groups-stores.html">← Página 5</a>
+    <div class="center">Página 6 / 8 · Barra inferior</div>
+    <a href="07-equalizer-spl.html">Página 7 →</a>
+  </nav>
+</body>
+</html>

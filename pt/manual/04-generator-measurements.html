@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generator e Measurements · Manual do OSM v1.5</title>
+  <meta name="description" content="Como usar o gerador de sinal interno do OSM (Pink, Sin, Music Noise, MLS+) e como criar, duplicar e gerenciar medições no painel direito.">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="../index.html">OSM</a>
+      <span class="sep">/</span>
+      <a href="index.html">Manual</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Página 4 / 8</div>
+        <h1>Generator e Measurements</h1>
+      </div>
+      <div class="subtitle">a fonte de sinal interna e<br>como organizar suas medições</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>O painel direito do OSM faz duas coisas: gera o sinal de teste que você manda para o sistema, e lista as medições ativas. Esta página cobre as duas.</p>
+
+      <h2>O gerador interno (Generator)</h2>
+
+      <p>No alto do painel direito tem um interruptor com a palavra <span class="ui-term">Generator</span> e um valor em dB ao lado (ex: <span class="ui-term">-25dB</span>). Quando você liga esse interruptor, o OSM <strong>gera um sinal de teste e manda pela saída de áudio do computador</strong> (ou pela interface, se você escolheu uma). Esse sinal precisa chegar na entrada da mesa, ser amplificado, e tocar pela caixa — aí o microfone captura, e o OSM compara o que saiu com o que voltou.</p>
+
+      <p>Sem o gerador ligado, o OSM só "escuta" — não há referência para função de transferência. Por isso Magnitude e Phase só fazem sentido com Generator ligado (ou com um sinal externo entrando pela entrada de referência <span class="ui-term">R:</span>).</p>
+
+      <h3>Os quatro tipos de sinal</h3>
+
+      <p>Clicando no nome do sinal (ex: <span class="ui-term">Pink</span>) abre um dropdown com os quatro tipos disponíveis. Cada um tem um uso diferente:</p>
+
+      <figure class="fig">
+        <img src="img/generator-pink.png" alt="Painel inferior mostrando dropdown Pink selecionado, -25dB, modo Local, dispositivo Soundflower 64 canais, botão EVEN INV, canais 1, 2, 3, 4">
+        <figcaption><strong>Pink noise: o sinal mais usado em medição.</strong> Tem energia igual em cada oitava — perfeito para Magnitude/Phase porque excita todo o espectro de uma vez. O <span class="ui-text">-25dB</span> é o nível: comece sempre baixo e suba. <span class="ui-text">EVEN INV</span> inverte os canais pares (útil para teste de polaridade).</figcaption>
+      </figure>
+
+      <figure class="fig">
+        <img src="img/generator-sin.png" alt="Painel inferior mostrando dropdown Sin selecionado, -25dB, 1000Hz, botões OCTAVE DOWN e OCTAVE UP">
+        <figcaption><strong>Sin (onda senoidal pura): para teste de UMA frequência específica.</strong> Os botões <span class="ui-text">OCTAVE DOWN / OCTAVE UP</span> mudam a frequência em oitavas. Útil para identificar microfonia ou testar distorção em frequência específica.</figcaption>
+      </figure>
+
+      <figure class="fig">
+        <img src="img/generator-music-noise.png" alt="Painel inferior mostrando dropdown Music Noise selecionado, 0dB, Soundflower 2 canais, canais 1, 2">
+        <figcaption><strong>Music Noise: ruído com distribuição de energia parecida com música real.</strong> Mais natural que pink noise puro. Bom para teste de sistema sob "condição de programa" — você ouve algo semelhante a música ao calibrar.</figcaption>
+      </figure>
+
+      <figure class="fig">
+        <img src="img/generator-mls.png" alt="Painel inferior mostrando dropdown MLS+ selecionado, -18dB, Built-in Output, canais 1, 2">
+        <figcaption><strong>MLS+ (Maximum Length Sequence): para resposta a impulso.</strong> Soa como ruído branco mas é matematicamente determinado. É o sinal usado pelo gráfico Impulse — quando você quer medir delay finder, MLS+ é a fonte adequada.</figcaption>
+      </figure>
+
+      <div class="tip-box">
+        <div class="title">Que sinal escolher para alinhamento de igreja</div>
+        <p>Para o trabalho de alinhamento que cobrimos no curso, <strong>Pink noise</strong> é o que você vai usar em 90% das medições — ele excita todas as frequências de uma vez e dá uma boa Magnitude/Phase rapidamente. Use <strong>Sin</strong> para caçar uma microfonia específica. Use <strong>MLS+</strong> quando precisar do gráfico Impulse para medir delay.</p>
+      </div>
+
+      <h2>Por onde o sinal sai</h2>
+
+      <p>Lembre que o gerador só funciona se a saída de áudio do programa estiver ligada na entrada da mesa. Duas formas comuns:</p>
+
+      <ul>
+        <li><strong>Cabo direto:</strong> saída de fone do notebook (P2) → entrada P2 ou RCA da mesa.</li>
+        <li><strong>Pela interface USB:</strong> output da interface (P10 ou XLR) → entrada de canal da mesa. Mais limpo, e o mesmo cabo serve para devolver a referência (canal <span class="ui-term">R:</span>) para o OSM.</li>
+      </ul>
+
+      <p>O dispositivo de saída é escolhido na barra inferior — <strong>cuidado:</strong> se você escolher <span class="ui-term">Built-in Output</span> e seu notebook estiver tocando música pelo Spotify ao mesmo tempo, a música vai junto com o sinal de teste. Mude a saída do sistema operacional para outro dispositivo enquanto mede.</p>
+
+      <div class="warn-box">
+        <div class="title">Comece com o nível baixo</div>
+        <p>O gerador começa no nível que você deixou da última vez. Antes de ligar, confira: nível em <strong>-25 dB ou menos</strong>, fader da mesa em zero, e amplificador no volume normal. Depois liga o generator e sobe o nível devagar olhando o LED da mesa. Pink noise no nível errado queima tweeter.</p>
+      </div>
+
+      <h2>O painel de medições (Measurements)</h2>
+
+      <p>Abaixo do Generator, o painel lista as medições ativas. Em modo Single, geralmente tem uma só:</p>
+
+      <figure class="fig">
+        <img src="img/spectrum-single.png" alt="Painel direito mostrando dropdown Single, Generator desligado em 0dB, e uma única entrada Measurement com checkbox marcado e ícones de duplicar e deletar">
+        <figcaption><strong>O painel em modo Single: uma medição só.</strong> O checkbox liga/desliga a exibição. O ícone de duplicar (à direita) cria uma cópia. O ícone de lixeira deleta.</figcaption>
+      </figure>
+
+      <h3>Anatomia de uma entrada de medição</h3>
+
+      <ol class="ctrl-list">
+        <li>
+          <strong>Checkbox colorido</strong>
+          A cor representa essa medição em todos os gráficos. Desmarcar oculta a curva (sem deletar).
+        </li>
+        <li>
+          <strong>Nome (clicável)</strong>
+          Clica no nome para renomear. Use nomes descritivos: <em>"Mesa 1 metro"</em>, <em>"Fundo igreja"</em>, <em>"Pulpito"</em>. Não deixe tudo como <span class="ui-text">Measurement</span>, <span class="ui-text">Measurement 1</span>, <span class="ui-text">Measurement 2</span> — você vai se perder.
+        </li>
+        <li>
+          <strong>Indicadores de nível</strong>
+          As barrinhas verdes abaixo do nome mostram o nível atual entrando pelos canais M e R. <strong>Devem estar verdes e nem perto do final.</strong> Se ficarem cheias ou vermelhas, o sinal está clipando.
+        </li>
+        <li>
+          <strong>Ícone duplicar</strong> (dois quadrados)
+          Cria uma cópia da medição. Útil para "congelar" o estado atual antes de mudar algo na mesa.
+        </li>
+        <li>
+          <strong>Ícone lixeira</strong>
+          Remove a medição. Não tem desfazer — se for stored (medição congelada), pense duas vezes.
+        </li>
+      </ol>
+
+      <h2>Criar uma nova medição</h2>
+
+      <p>Há três jeitos de criar:</p>
+
+      <ul>
+        <li><strong>Menu File → Add measurement</strong> (atalho <span class="ui-term">⌘ A</span> no macOS, <span class="ui-term">Ctrl+A</span> no Windows). Adiciona uma medição vazia que você configura nos canais M e R.</li>
+        <li><strong>Botão duplicar de uma medição existente</strong> — copia configurações e cria a nova ao lado.</li>
+        <li><strong>Importar de arquivo:</strong> File → Import. O OSM aceita arquivos <span class="ui-term">.csv</span> com curva de magnitude. Veja por exemplo a medição "Melodie.csv" que apareceu na Página 3.</li>
+      </ul>
+
+      <p>Cada medição usa canais independentes de M e R, então você pode rodar 2, 3, 4 microfones diferentes na mesma sessão (interface multicanal) e ver todos juntos. Em alinhamento de igreja é comum usar 1 medição, mas pode ser útil ter 2 (uma na mesa, outra no fundo) para comparar.</p>
+
+      <h2>O essencial pra reter desta página</h2>
+
+      <ul>
+        <li>O <strong>Generator</strong> é o sinal de teste — precisa estar ligado para função de transferência funcionar.</li>
+        <li><strong>Pink noise</strong> é o sinal padrão para alinhamento. <strong>Sin</strong> para caça de microfonia. <strong>MLS+</strong> quando precisa medir Impulse.</li>
+        <li><strong>Comece sempre com nível baixo</strong> (-25 dB) e suba devagar para não queimar tweeter.</li>
+        <li>Cada medição tem checkbox de cor, nome editável, medidores de nível, duplicar e deletar.</li>
+        <li><strong>Renomeie as medições</strong> com nomes descritivos. Não deixe como "Measurement 1, 2, 3".</li>
+      </ul>
+
+      <p style="margin-top: 36px; text-align: center;">
+        <a href="05-groups-stores.html" style="display: inline-block; background: var(--terra); color: white; padding: 12px 22px; border-radius: 6px; text-decoration: none; font-weight: 600;">Próximo: Groups e Stores →</a>
+      </p>
+
+      <p style="margin-top: 24px;">
+        <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">← Voltar para o índice do manual</a>
+      </p>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="03-tipos-de-grafico.html">← Página 3</a>
+    <div class="center">Página 4 / 8 · Generator e Measurements</div>
+    <a href="05-groups-stores.html">Página 5 →</a>
+  </nav>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math, Remote Control e menus · Manual do OSM v1.5</title>
+  <meta name="description" content="Vector Sum (somar medições), Remote Control com tablet/celular via Wi-Fi, atalhos de teclado, Dark Mode e menus File/View/Help do Open Sound Meter.">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="../index.html">OSM</a>
+      <span class="sep">/</span>
+      <a href="index.html">Manual</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Página 8 / 8</div>
+        <h1>Math, Remote e menus</h1>
+      </div>
+      <div class="subtitle">somar medições, controlar com tablet,<br>atalhos e Dark Mode</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>Última página do manual. Cobrimos três temas que não cabiam nas anteriores: o sistema de Math (Vector Sum), o Remote Control (medir com tablet ou outro computador), e os menus File/View/Help com atalhos.</p>
+
+      <h2>Math: Vector Sum</h2>
+
+      <p>O recurso mais útil da pasta Math é o <strong>Vector Sum</strong> — somar duas medições para simular como vão soar juntas. Use isto antes de alinhar fisicamente duas caixas: você vê na tela se vão somar (good) ou cancelar (bad) em frequências críticas.</p>
+
+      <figure class="fig">
+        <img src="img/vector-sum-summation.png" alt="OSM em modo Double mostrando Magnitude em cima e Phase embaixo, com três curvas: rosa (HF), verde (MF) e azul (Vector Sum). A curva Vector Sum mostra como ficará a soma das outras duas. No painel direito: Measurement vazio, Measurement vazio, MF marcado, HF marcado, Vector Sum marcado. Barra inferior em modo Summation, Vector, 2 com 'Sources must have the same transform mode' e dropdowns HF e MF">
+        <figcaption><strong>Vector Sum entre HF (rosa) e MF (verde), resultando na curva azul.</strong> No rodapé, os controles do summation: modo <span class="ui-text">Summation</span>, tipo <span class="ui-text">Vector</span>, 2 fontes, e os dropdowns para escolher cada fonte (HF e MF). O aviso <em>"Sources must have the same transform mode"</em> indica que as duas fontes têm que ser do mesmo tipo (ambas magnitude+phase, por exemplo).</figcaption>
+      </figure>
+
+      <h3>Como criar um Vector Sum</h3>
+
+      <ol class="ctrl-list">
+        <li>
+          Tenha pelo menos <strong>duas medições</strong> ativas e configuradas (com canal R, para que tenham fase).
+        </li>
+        <li>
+          Vá em <strong>File → Add Math source</strong> (atalho <span class="ui-term">⌘ M</span> no macOS, <span class="ui-term">Ctrl+M</span> no Windows).
+        </li>
+        <li>
+          Na nova entrada que aparece na pasta Math, configure tipo = <span class="ui-term">Summation</span>, método = <span class="ui-term">Vector</span>.
+        </li>
+        <li>
+          Selecione as <strong>2 fontes</strong> nos dropdowns embaixo. Elas precisam ter o mesmo tipo de gráfico ativo.
+        </li>
+        <li>
+          A nova curva (Vector Sum) aparece no gráfico. Você pode mudar a cor dela clicando no checkbox colorido.
+        </li>
+      </ol>
+
+      <figure class="fig">
+        <img src="img/math-source-dropdown.png" alt="Em modo Three, parte inferior mostra o dropdown da fonte Math aberto com opções: None, Measurement, Measure @ 09:23, Measurement, Measure @ 09:23, Vector Sum. Outras três fileiras de dropdowns ao redor mostram outras configurações de SPL meter">
+        <figcaption><strong>O dropdown de seleção de fonte mostrando o que você pode somar.</strong> Aparecem todas as medições ativas e stored — você pode somar uma ativa com uma stored, duas stored, duas ativas, etc.</figcaption>
+      </figure>
+
+      <div class="tip-box">
+        <div class="title">O uso clássico em igreja: simular sub + top</div>
+        <p>Meça o subwoofer sozinho (mute o top) — vira <em>Sub</em>. Meça o top sozinho (mute o sub) — vira <em>Top</em>. Crie um Vector Sum de Sub + Top — você vê <strong>como vai ficar a soma na frequência de crossover</strong>. Se houver um vale profundo em 80 Hz na curva somada, o sub e o top estão fora de fase ali. Aí você ajusta delay e polaridade no processador até a soma ficar plana.</p>
+      </div>
+
+      <h2>Remote Control: medir com tablet ou laptop separado</h2>
+
+      <p>Imagine: o computador com o OSM está conectado no rack, com a interface e os cabos. Mas você precisa andar pela igreja, levar o microfone até o fundo, até o mezanino, até embaixo do balcão — e ver as medições onde está. A solução é o <strong>Remote Control</strong>.</p>
+
+      <p>O recurso transforma um OSM em <strong>servidor</strong> (no rack) e outro OSM em <strong>cliente</strong> (no tablet ou laptop secundário). Os dois se conectam pela rede Wi-Fi da igreja, e tudo que você muda no cliente é refletido no servidor — e vice-versa.</p>
+
+      <figure class="fig">
+        <img src="img/remote-server-three.png" alt="OSM em modo Three mostrando 4 SPL meters no topo (SPL A Slow com valores 89.6, 88.8, 89.6, 88.7), uma curva de Level no meio, e RTA embaixo. Painel direito mostra três medições ativas: Measurement, Measure @ 09:23 (com texto @Pavel-Smokotnin.local), Measurement, Measure @ 09:23. Embaixo do painel há botão ABOUT e um WiFi icon. Rodapé tem botões SERVER (selecionado) e CLIENT, mensagem 'Last connected client: Open Sound Meter', e botão ABOUT REMOTE CONTROL">
+        <figcaption><strong>OSM em modo servidor de Remote Control.</strong> Note os botões <span class="ui-text">SERVER</span> e <span class="ui-text">CLIENT</span> no rodapé. <span class="ui-text">Last connected client: Open Sound Meter</span> mostra que tem um cliente conectado. As medições marcadas com <span class="ui-text">@Pavel-Smokotnin.local</span> são as que vêm do cliente — note o nome da máquina remota.</figcaption>
+      </figure>
+
+      <h3>Como configurar</h3>
+
+      <ol class="ctrl-list">
+        <li>
+          <strong>No computador principal</strong> (rack): clica em <span class="ui-term">SERVER</span> no rodapé do remote control panel. Ele começa a anunciar na rede.
+        </li>
+        <li>
+          <strong>No tablet ou laptop secundário</strong>: abre o OSM (versão Android para tablet, ou OSM normal para laptop) e clica em <span class="ui-term">CLIENT</span>. Ele descobre o servidor automaticamente pela rede.
+        </li>
+        <li>
+          Conexão estabelecida — você pode <strong>andar pela igreja</strong> com o tablet, mover o microfone, ver as curvas se atualizando em tempo real, dar STORE quando quiser. Tudo é refletido no rack.
+        </li>
+      </ol>
+
+      <div class="warn-box">
+        <div class="title">Wi-Fi da igreja precisa ser decente</div>
+        <p>Remote Control depende de Wi-Fi estável entre o rack e o ponto onde você está. Em igrejas com Wi-Fi fraco no fundo do templo, a conexão cai e a sincronização trava. Solução: ligar um repetidor Wi-Fi temporário na hora da medição, ou levar um roteador próprio. Mas vale o esforço — o ganho de produtividade na visita é enorme.</p>
+      </div>
+
+      <h2>Menus File, View e Help</h2>
+
+      <p>A barra de menus do sistema operacional tem três entradas para o OSM. Cada uma com atalhos no macOS (<span class="ui-term">⌘</span>) e Windows/Linux (<span class="ui-term">Ctrl</span>).</p>
+
+      <h3>Menu File</h3>
+
+      <figure class="fig">
+        <img src="img/menu-file-mac.png" alt="Menu File do OSM no macOS aberto, mostrando: New ⌘N, Save ⌘S, Open ⌘O, Recent projects ▶, Import ⌘I, Add measurement ⌘A, Add math source ⌘M, Add standard line ⌘L, Add filter ⌘F, Add equalizer ⌘E, Add windowing ⌘W, Add Group ⌘O, Show target ⌘T">
+        <figcaption><strong>Menu File completo no macOS.</strong> Todos os atalhos de comando aparecem ao lado de cada item. Memorize pelo menos <span class="ui-text">⌘N</span>, <span class="ui-text">⌘S</span>, <span class="ui-text">⌘O</span>, <span class="ui-text">⌘A</span> (Add measurement).</figcaption>
+      </figure>
+
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Comando</th>
+            <th>macOS</th>
+            <th>Windows/Linux</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>New (novo projeto)</td>
+            <td class="label">⌘ N</td>
+            <td class="label">Ctrl+N</td>
+          </tr>
+          <tr>
+            <td>Save</td>
+            <td class="label">⌘ S</td>
+            <td class="label">Ctrl+S</td>
+          </tr>
+          <tr>
+            <td>Open</td>
+            <td class="label">⌘ O</td>
+            <td class="label">Ctrl+O</td>
+          </tr>
+          <tr>
+            <td>Import (csv)</td>
+            <td class="label">⌘ I</td>
+            <td class="label">Ctrl+I</td>
+          </tr>
+          <tr>
+            <td>Add measurement</td>
+            <td class="label">⌘ A</td>
+            <td class="label">Ctrl+A</td>
+          </tr>
+          <tr>
+            <td>Add math source</td>
+            <td class="label">⌘ M</td>
+            <td class="label">Ctrl+M</td>
+          </tr>
+          <tr>
+            <td>Add standard line</td>
+            <td class="label">⌘ L</td>
+            <td class="label">Ctrl+L</td>
+          </tr>
+          <tr>
+            <td>Add filter</td>
+            <td class="label">⌘ F</td>
+            <td class="label">Ctrl+F</td>
+          </tr>
+          <tr>
+            <td>Add equalizer</td>
+            <td class="label">⌘ E</td>
+            <td class="label">Ctrl+E</td>
+          </tr>
+          <tr>
+            <td>Show target</td>
+            <td class="label">⌘ T</td>
+            <td class="label">Ctrl+T</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Menu View</h3>
+
+      <figure class="fig">
+        <img src="img/menu-view-mac.png" alt="Menu View do OSM aberto mostrando: Dark Mode ⌘D, Calculator ⌘W, ✓ Experiment functions, Enter Full Screen">
+        <figcaption><strong>Menu View.</strong> O Dark Mode (<span class="ui-text">⌘D</span>) é o mais importante — gráficos com fundo escuro são menos cansativos durante medição longa, e os traços coloridos contrastam melhor. <span class="ui-text">Experiment functions</span> habilita recursos beta.</figcaption>
+      </figure>
+
+      <figure class="fig">
+        <img src="img/three-dark-mode-with-menu.png" alt="OSM em modo Three com Dark Mode ativado, mostrando Coherence, Magnitude e Phase com fundo preto. Múltiplas curvas coloridas (verde, vermelho) sobrepostas. Painel direito lista Measurement vazio, Measurement vazio, Stored #1, Stored #2, Stored #4, Stored #5. Menu View aberto no topo">
+        <figcaption><strong>OSM em Dark Mode com modo Three e múltiplos stored sobrepostos.</strong> Os traços verdes (Stored #1) e vermelhos (Stored #2) ficam muito mais legíveis no fundo escuro. <strong>Para medição em ambiente escuro (igreja com luz baixa, palco com ribalta), o Dark Mode é quase obrigatório.</strong></figcaption>
+      </figure>
+
+      <h3>Menu Help</h3>
+
+      <figure class="fig">
+        <img src="img/menu-help-mac.png" alt="Menu Help do OSM mostrando um campo Search vazio e a opção Check for update destacada em azul">
+        <figcaption><strong>Menu Help.</strong> O Search permite buscar comandos por nome (útil para descobrir atalhos rapidamente). <span class="ui-text">Check for update</span> verifica se há versão mais nova do OSM no servidor.</figcaption>
+      </figure>
+
+      <h2>Resumo: workflow recomendado de uma medição</h2>
+
+      <p>Juntando o que vimos nas 8 páginas do manual, a sequência prática:</p>
+
+      <ol style="counter-reset: step; list-style: none; padding-left: 0;">
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">1</span>
+          <strong>File → New</strong>. Configura interface, canais M e R, FFT, smoothing (<a href="06-barra-inferior.html" style="color: var(--terra);">Página 6</a>).
+        </li>
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">2</span>
+          <strong>Liga o Generator</strong> em pink noise, sobe nível baixo (<a href="04-generator-measurements.html" style="color: var(--terra);">Página 4</a>).
+        </li>
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">3</span>
+          <strong>Modo Double, Magnitude + Phase</strong>, com Coherence de olho (<a href="03-tipos-de-grafico.html" style="color: var(--terra);">Página 3</a>).
+        </li>
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">4</span>
+          <strong>Faz a medição</strong>, dá STORE para "antes" (<a href="05-groups-stores.html" style="color: var(--terra);">Página 5</a>).
+        </li>
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">5</span>
+          <strong>Ajusta o sistema</strong> (EQ na mesa, delay no processador, polaridade), mede de novo, STORE para "depois".
+        </li>
+        <li style="position: relative; padding-left: 36px; margin-bottom: 14px; counter-increment: step;">
+          <span style="position: absolute; left: 0; top: 0; width: 26px; height: 26px; background: var(--terra); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">6</span>
+          <strong>File → Save</strong> com nome da igreja e data. Da próxima visita, abre o projeto e vê o histórico.
+        </li>
+      </ol>
+
+      <h2>Chegou ao fim do manual</h2>
+
+      <p>Você passou pelas 8 páginas. Não precisa ter decorado nada — agora você sabe onde estão as coisas. Quando bater dúvida na hora de medir, abre aqui e procura.</p>
+
+      <p>O OSM tem mais recursos avançados não cobertos aqui (Calculator, Polar plots, integração com processadores específicos). À medida que você for usando, vai descobrindo. Mas o que está nas 8 páginas é mais do que suficiente para fazer o trabalho profissional de alinhamento na sua igreja.</p>
+
+      <div class="tip-box">
+        <div class="title">Próximo passo: praticar</div>
+        <p>Medição é uma habilidade que se aprende fazendo. Instale o OSM hoje, ligue no sistema que você já tem (mesmo que seja só o microfone embutido do notebook e a caixa Bluetooth), e brinque com os controles. Cometa erros, mude parâmetros, veja o que acontece. Em uma semana de experimentação, você fica fluente.</p>
+        <p>E quando tiver dúvida específica sobre um conceito de medição (não da ferramenta, mas do <em>significado</em> do que você vê), volta para os <a href="../index.html" style="color: var(--terra);">Infográficos OSM</a> que cobrem fase, coerência, atraso, função de transferência e FFT em profundidade.</p>
+      </div>
+
+      <p style="margin-top: 36px; text-align: center;">
+        <a href="../index.html" style="display: inline-block; background: var(--navy); color: white; padding: 12px 22px; border-radius: 6px; text-decoration: none; font-weight: 600;">← Voltar para o OSM Guia visual</a>
+      </p>
+
+      <p style="margin-top: 24px;">
+        <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">← Voltar para o índice do manual</a>
+      </p>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="07-equalizer-spl.html">← Página 7</a>
+    <div class="center">Página 8 / 8 · Math, Remote e menus</div>
+    <a href="../index.html">OSM Guia visual →</a>
+  </nav>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equalizer, SPL e Numeric · Manual do OSM v1.5</title>
+  <meta name="description" content="Como usar o desenhador de filtros (Equalizer), os medidores de pressão sonora (SPL Meters) e os modos numéricos (LAeq, THD+N) do Open Sound Meter.">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="../index.html">OSM</a>
+      <span class="sep">/</span>
+      <a href="index.html">Manual</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Página 7 / 8</div>
+        <h1>Equalizer, SPL e Numeric</h1>
+      </div>
+      <div class="subtitle">desenhador de filtros, medidor<br>de pressão sonora e leituras numéricas</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>Além das views de gráfico que cobrimos na Página 3, o OSM tem três modos especiais: <strong>Equalizer</strong> para desenhar curvas de filtro virtualmente, <strong>SPL Meters</strong> para medir pressão sonora como um decibelímetro profissional, e <strong>Numeric</strong> para ver uma métrica em destaque (LAeq, THD+N).</p>
+
+      <h2>O Equalizer: desenhar filtros virtualmente</h2>
+
+      <p>O Equalizer não é o EQ que você usa para mudar o som da mesa — ele é um <strong>"simulador" de filtros</strong> dentro do OSM. Você desenha uma curva de equalização virtual com os tipos clássicos de filtro, e o OSM mostra como essa curva ficaria sobre a medição.</p>
+
+      <figure class="fig">
+        <img src="img/equalizer-filters.png" alt="Modo Equalizer do OSM mostrando uma curva rosa com 5 pontos numerados (1 a 5). Painel direito lista 5 filtros: Bessel HPF 1, Peak 286Hz, Notch 1, HighShelf 1, Notch 1 (este último desabilitado). Embaixo: Power:14, 48000, e botão Export to">
+        <figcaption><strong>Equalizer com 5 filtros aplicados.</strong> Cada ponto numerado na curva é um filtro: <span class="ui-text">(1)</span> Bessel HPF abrindo nos graves, <span class="ui-text">(2)</span> Peak puxando em 286Hz, <span class="ui-text">(3)</span> Notch profundo em ~1kHz, <span class="ui-text">(4)</span> HighShelf reforçando os agudos, <span class="ui-text">(5)</span> Notch desativado. À direita, lista dos filtros — checkbox liga/desliga cada um.</figcaption>
+      </figure>
+
+      <h3>Tipos de filtro disponíveis</h3>
+
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Filtro</th>
+            <th>Para que serve</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="label">HPF<br><span style="font-weight: 400; color: var(--text-muted); font-size: 12px;">(Bessel, Butterworth, Linkwitz)</span></td>
+            <td>Filtro passa-alta — corta tudo abaixo de uma frequência. Usado para sub/top crossover, ou para "limpar" graves indesejados.</td>
+          </tr>
+          <tr>
+            <td class="label">LPF</td>
+            <td>Filtro passa-baixa — corta tudo acima de uma frequência. Usado no canal do subwoofer.</td>
+          </tr>
+          <tr>
+            <td class="label">Peak</td>
+            <td>Reforça ou corta uma faixa estreita em torno de uma frequência. É o EQ paramétrico clássico.</td>
+          </tr>
+          <tr>
+            <td class="label">Notch</td>
+            <td>Corta uma frequência muito específica com Q muito alto. É o filtro anti-microfonia.</td>
+          </tr>
+          <tr>
+            <td class="label">LowShelf</td>
+            <td>Reforça ou corta tudo abaixo de uma frequência (não corta — reforça em platô).</td>
+          </tr>
+          <tr>
+            <td class="label">HighShelf</td>
+            <td>Reforça ou corta tudo acima de uma frequência. Usado para "abrir" agudos.</td>
+          </tr>
+          <tr>
+            <td class="label">AllPass</td>
+            <td>Não muda magnitude, só muda fase. Usado em alinhamento de fase entre caixas.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Por que isso é útil em igreja</h3>
+
+      <p>Você desenha o EQ no OSM <em>antes</em> de aplicar no equalizador gráfico real ou no processador DSP — vê na curva de Magnitude se a correção vai ter o efeito esperado, sem mexer no sistema. Quando estiver satisfeito, você transcreve as frequências e ganhos para o equipamento real.</p>
+
+      <p>O botão <span class="ui-term">Export to</span> no canto inferior esquerdo exporta a configuração para alguns processadores compatíveis (Symetrix, dbx, etc).</p>
+
+      <h2>SPL Meters: o decibelímetro do OSM</h2>
+
+      <p>O modo SPL Meters transforma a tela do OSM num <strong>medidor profissional de pressão sonora</strong>. Você escolhe quantos campos quer ver na tela e configura cada um independentemente.</p>
+
+      <figure class="fig">
+        <img src="img/spl-meters-grid.png" alt="Quatro grandes campos numéricos lado a lado: RMS SPL A Slow em vermelho 103.9 dB com label 'green (2)', Peak dBfs A Slow em verde -17.1, Crest Z Fast em verde 21.4, e SPL Time em verde 15:22 com label System. Abaixo: dropdowns green(2), RMS, SPL, A, Slow, 99,00dB com botões + e -. Última linha: dropdowns 1 e 4">
+        <figcaption><strong>Quatro medidores SPL configurados lado a lado.</strong> Cada um mostra uma métrica diferente: RMS SPL com ponderação A e integração Slow (103.9 dB — em vermelho porque ultrapassou o limite configurado), pico em dBfs, Crest factor, e hora. Os dropdowns embaixo configuram cada campo.</figcaption>
+      </figure>
+
+      <h3>As métricas disponíveis</h3>
+
+      <p>Para cada campo você escolhe:</p>
+
+      <ol class="ctrl-list">
+        <li>
+          <strong>Fonte</strong> — qual medição usar (microfone ativo, stored, etc).
+        </li>
+        <li>
+          <strong>Tipo</strong> — <span class="ui-term">RMS</span> (energia média), <span class="ui-term">Peak</span> (pico instantâneo), <span class="ui-term">Crest</span> (relação pico/RMS, indica dinâmica), <span class="ui-term">Leq</span> (nível equivalente integrado), <span class="ui-term">Time</span> (relógio).
+        </li>
+        <li>
+          <strong>Unidade</strong> — <span class="ui-term">SPL</span> (dB acústico calibrado), <span class="ui-term">dBfs</span> (em relação ao full scale digital).
+        </li>
+        <li>
+          <strong>Ponderação</strong> — <span class="ui-term">A</span> (curva A — peso para como o ouvido percebe), <span class="ui-term">C</span> (curva C — mais plana, comum em medições de evento), <span class="ui-term">Z</span> (sem ponderação).
+        </li>
+        <li>
+          <strong>Integração</strong> — <span class="ui-term">Fast</span> (125 ms), <span class="ui-term">Slow</span> (1000 ms), <span class="ui-term">Impulse</span>. Slow é o padrão para medição de evento.
+        </li>
+        <li>
+          <strong>Limites de cor</strong> — define em que valor o campo fica verde, amarelo, vermelho. Útil para olhar de longe e saber se está abaixo do limite legal.
+        </li>
+      </ol>
+
+      <div class="tip-box">
+        <div class="title">Para que serve em igreja</div>
+        <p>Templos têm limites legais de pressão sonora (geralmente 85 dB(A) RMS Slow, dependendo do município). Use o SPL Meter em modo <strong>RMS SPL A Slow</strong> com limite vermelho em 85 dB. Durante eventos especiais (vigílias, congressos com banda completa), você vê na tela se está passando do limite — antes do vizinho ligar a denúncia.</p>
+      </div>
+
+      <h2>Numeric mode: uma métrica em destaque</h2>
+
+      <p>Numeric mode é parecido com SPL Meter mas mostra <strong>um número só ocupando a tela toda</strong>. Útil em laptop pequeno enquanto você está fazendo outra coisa — você vê o número de longe sem precisar focar.</p>
+
+      <figure class="fig">
+        <img src="img/numeric-laeq.png" alt="Tela inteira mostrando 'LAeq 15 min' em texto pequeno em cima, o número 82.4 enorme em verde no centro, e 'Measurement' embaixo. Painel direito mostra dropdown Single e Generator desligado. Barra inferior: Measurement, Leq, SPL, A, 15 min, com 99,00dB de limite">
+        <figcaption><strong>Numeric mode com LAeq 15 minutos.</strong> Leq = nível equivalente integrado ao longo do tempo. 15 min = janela de integração. O 82.4 é a média ponderada A do nível durante os últimos 15 minutos. Verde porque está abaixo do limite configurado (99 dB).</figcaption>
+      </figure>
+
+      <figure class="fig">
+        <img src="img/numeric-thd.png" alt="Tela inteira mostrando 'THD+N' em texto pequeno em cima, o número '2‰' (2 por mille) enorme em verde no centro. Barra inferior tem Notch selecionado">
+        <figcaption><strong>Numeric mode mostrando THD+N (distorção harmônica total + ruído).</strong> Aqui em "por mil" (‰). Útil para diagnóstico de distorção quando alguém reclama "o som está ruim" e você quer um número objetivo.</figcaption>
+      </figure>
+
+      <h2>Setup recomendado para uma visita</h2>
+
+      <p>Durante uma visita técnica, vale ter dois OSM abertos ao mesmo tempo (ou alternar entre eles):</p>
+
+      <ul>
+        <li><strong>OSM principal</strong> em modo Double com Magnitude + Phase — para alinhamento.</li>
+        <li><strong>OSM secundário</strong> em SPL Meter mostrando RMS SPL A Slow — para monitoramento de nível durante o culto.</li>
+      </ul>
+
+      <p>Se for evento grande, o terceiro campo pode ser LAeq 15 min para você reportar ao responsável da igreja o nível médio do evento.</p>
+
+      <h2>O essencial pra reter desta página</h2>
+
+      <ul>
+        <li><strong>Equalizer</strong> desenha filtros virtuais sobre a medição — você testa a EQ no OSM antes de aplicar no equipamento real.</li>
+        <li>Tipos clássicos de filtro estão todos disponíveis: HPF, LPF, Peak, Notch, Shelves, AllPass.</li>
+        <li><strong>SPL Meters</strong> transforma o OSM em decibelímetro profissional. RMS SPL A Slow é o setup padrão para evento.</li>
+        <li><strong>Numeric</strong> mostra uma métrica só em destaque — bom para monitorar de longe.</li>
+        <li>Use limites de cor (verde/amarelo/vermelho) para saber "estou dentro do limite legal?" sem precisar ler o número.</li>
+      </ul>
+
+      <p style="margin-top: 36px; text-align: center;">
+        <a href="08-math-remote-menus.html" style="display: inline-block; background: var(--terra); color: white; padding: 12px 22px; border-radius: 6px; text-decoration: none; font-weight: 600;">Próximo: Math, Remote e menus →</a>
+      </p>
+
+      <p style="margin-top: 24px;">
+        <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">← Voltar para o índice do manual</a>
+      </p>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="06-barra-inferior.html">← Página 6</a>
+    <div class="center">Página 7 / 8 · Equalizer, SPL e Numeric</div>
+    <a href="08-math-remote-menus.html">Página 8 →</a>
+  </nav>
+</body>
+</html>

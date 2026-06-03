@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Groups e Stores · Manual do OSM v1.5</title>
+  <meta name="description" content="Como organizar medições em pastas (Mics, Math, Stores) no Open Sound Meter, e como salvar trace para comparar antes e depois de uma mudança no sistema.">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="../index.html">OSM</a>
+      <span class="sep">/</span>
+      <a href="index.html">Manual</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Página 5 / 8</div>
+        <h1>Groups e Stores</h1>
+      </div>
+      <div class="subtitle">organizar medições em pastas<br>e congelar curvas para comparar</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>Quando você passa do "uma medição só" para "várias medições por culto" — porque está medindo 3 pontos diferentes do templo, ou comparando antes e depois de equalizar — o painel direito vira uma confusão. Groups e Stores são as ferramentas do OSM para organizar isso.</p>
+
+      <h2>Os três tipos de Group</h2>
+
+      <p>Quando você muda do modo Single para Double ou Three, o painel direito ganha três pastas pré-definidas, identificadas por cor:</p>
+
+      <figure class="fig">
+        <img src="img/sidebar-double-groups.png" alt="Painel direito em modo Double mostrando Target Trace verde, três pastas coloridas: Mics (vermelho) com 9 sub-medições coloridas, Math (marrom) com 4 sub-medições, Stores (vermelho) com 3 sub-medições, seguidos de uma lista de medições stored com timestamps">
+        <figcaption><strong>O painel com as três pastas Mics, Math e Stores expandidas.</strong> Cada pasta tem checkboxes coloridos que representam as sub-medições dela. Abaixo, lista de stored individuais com horário de captura (<span class="ui-text">TM1 @ 14:43</span>, <span class="ui-text">TM1 @ 14:53</span>...).</figcaption>
+      </figure>
+
+      <h3>Mics (microfones)</h3>
+
+      <p>A pasta <strong>Mics</strong> agrupa <strong>microfones de medição ativos</strong> — medições que estão recebendo sinal em tempo real do canal M. Se você tem uma interface multicanal e ligou 3 mics em pontos diferentes da igreja, cada um vira uma entrada dentro de Mics.</p>
+
+      <p>O checkbox da pasta liga/desliga todos os mics de uma vez. Cada mic individual também tem seu próprio checkbox e cor. Use cores diferentes para identificar visualmente — por exemplo: amarelo para o mic na mesa, verde para o mic no fundo, vermelho para o mic embaixo do mezanino.</p>
+
+      <h3>Math (medições calculadas)</h3>
+
+      <p>A pasta <strong>Math</strong> guarda medições que não vêm direto de um microfone, mas são <strong>resultado de cálculo</strong> entre outras medições. O exemplo mais comum: a soma vetorial entre duas caixas, para você ver "como vai ficar" o som total quando elas tocarem juntas.</p>
+
+      <p>Páginas 8 do manual cobre como criar uma Math source (Vector Sum) em detalhe. Por enquanto, basta saber que essas medições aparecem aqui na pasta Math, com cor própria, e podem ser ligadas/desligadas como qualquer outra.</p>
+
+      <h3>Stores (medições congeladas)</h3>
+
+      <p>A pasta <strong>Stores</strong> guarda <strong>medições "fotografadas no tempo"</strong> — você congela a medição atual com o botão <span class="ui-term">STORE</span> da barra inferior, ela vira uma stored, e fica eternamente como está, mesmo que a medição ativa mude.</p>
+
+      <p>Use stores para:</p>
+
+      <ul>
+        <li><strong>Antes/depois:</strong> meça a caixa principal, STORE, equalize, e compare a curva ativa com a stored.</li>
+        <li><strong>Pontos diferentes:</strong> meça na mesa, STORE; meça no fundo, STORE; meça no mezanino, STORE. Ative os 3 stores ao mesmo tempo para ver como o som muda pela igreja.</li>
+        <li><strong>Sessões anteriores:</strong> abra um arquivo de projeto e os stores vêm junto, com o nome e horário original.</li>
+      </ul>
+
+      <figure class="fig">
+        <img src="img/stored-metadata.png" alt="Caixa de informação de uma medição stored mostrando FT log time window, delay 5.40ms, gain 0.00dB, Scarlett 18i6 USB, canais R 3 e M 1, janela Hann, average LPF 0.25Hz, data Sun Feb 13 23:11:43 2022. Botões FLIP, +/-, 100% e dropdown Save data as">
+        <figcaption><strong>Os metadados de uma medição stored.</strong> Quando uma stored fica selecionada, você vê os botões <span class="ui-text">FLIP</span> (inverte fase), <span class="ui-text">+/-</span> (inverte polaridade), <span class="ui-text">100%</span> (reseta ganho aplicado), e <span class="ui-text">Save data as</span> (exporta a curva). À direita, as condições em que a medição foi feita: dispositivo, canais, janela FFT, data.</figcaption>
+      </figure>
+
+      <div class="tip-box">
+        <div class="title">Os botões FLIP e +/-</div>
+        <p><span class="ui-term">FLIP</span> inverte a fase da curva stored em 180° — útil quando você quer simular polaridade invertida para ver como ficaria a soma. <span class="ui-term">+/-</span> inverte polaridade. <span class="ui-term">100%</span> volta o ganho aplicado ao original. Esses só aparecem em medições stored, nunca em medições ativas (porque ativa muda em tempo real).</p>
+      </div>
+
+      <h2>O Target Trace</h2>
+
+      <p>Acima das pastas, em modo Double e Three, aparece a entrada <strong>Target Trace</strong> com checkbox verde. Target Trace é uma <strong>curva-alvo de referência</strong> que você quer alcançar — por exemplo, a curva ideal de um sistema de PA para igreja, ou a curva "Immersive studio" para sala de gravação.</p>
+
+      <figure class="fig">
+        <img src="img/target-trace-spectrum-magnitude.png" alt="OSM em modo Double mostrando Spectrum em cima e Magnitude embaixo, ambos com uma área sombreada em verde representando o Target Trace 'Immersive studio'. Embaixo dos gráficos há uma série de pontos de frequência com valores em dB (20Hz, 40Hz, 125Hz, 160Hz, 1600Hz, 10000Hz, 20000Hz)">
+        <figcaption><strong>Target Trace ativo: a faixa verde mostra "o que se espera".</strong> A medição ao vivo aparece sobreposta, e você vê instantaneamente onde está acima ou abaixo do alvo. No rodapé, os pontos da curva-alvo são editáveis — 20Hz a 20000Hz, com valores em dB para cada um.</figcaption>
+      </figure>
+
+      <p>Você pode importar Target Traces de arquivos ou desenhar o seu próprio editando os pontos no rodapé. Para igreja, o target prático seria uma curva parecida com uma X-curve adaptada (ligeiramente decrescente nos agudos), mas isso vai depender de cada templo e gosto.</p>
+
+      <h2>Salvar e abrir projeto</h2>
+
+      <p>Toda a configuração — medições ativas, stored, groups, target trace, posição do gerador — é salvável como um <strong>projeto OSM</strong>:</p>
+
+      <ul>
+        <li><strong>File → Save</strong> (atalho <span class="ui-term">⌘ S</span>) salva o estado atual em <span class="ui-term">.osm</span>.</li>
+        <li><strong>File → Open</strong> (<span class="ui-term">⌘ O</span>) abre projeto salvo. Stores e Target Traces vêm junto.</li>
+        <li><strong>File → Recent projects</strong> mostra os últimos arquivos abertos.</li>
+      </ul>
+
+      <div class="tip-box">
+        <div class="title">Workflow de visita técnica</div>
+        <p>Crie um arquivo <span class="ui-term">igreja-NOME-2026-03.osm</span> para cada visita. Antes de qualquer ajuste, faça uma medição limpa em 2-3 pontos e dê STORE com nome descritivo (<em>"Antes - mesa", "Antes - fundo"</em>). Faça os ajustes, mede de novo, STORE com <em>"Depois - mesa", "Depois - fundo"</em>. No fim do culto seguinte, abre o arquivo: você vê o antes e o depois, sem ter de adivinhar pela memória.</p>
+      </div>
+
+      <h2>O essencial pra reter desta página</h2>
+
+      <ul>
+        <li><strong>Mics, Math e Stores</strong> são as 3 pastas que aparecem em modo Double e Three.</li>
+        <li><strong>Mics</strong> = medições ao vivo dos microfones. <strong>Math</strong> = cálculos (Vector Sum). <strong>Stores</strong> = curvas congeladas para comparação.</li>
+        <li>O botão <span class="ui-term">STORE</span> da barra inferior congela a medição atual e a coloca na pasta Stores.</li>
+        <li><strong>Target Trace</strong> é a curva-alvo verde que você sobrepõe na medição para ver "estou perto do ideal?".</li>
+        <li><strong>File → Save</strong> guarda tudo num projeto <span class="ui-term">.osm</span>. Crie um arquivo por visita técnica.</li>
+      </ul>
+
+      <p style="margin-top: 36px; text-align: center;">
+        <a href="06-barra-inferior.html" style="display: inline-block; background: var(--terra); color: white; padding: 12px 22px; border-radius: 6px; text-decoration: none; font-weight: 600;">Próximo: Barra inferior de controles →</a>
+      </p>
+
+      <p style="margin-top: 24px;">
+        <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">← Voltar para o índice do manual</a>
+      </p>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="04-generator-measurements.html">← Página 4</a>
+    <div class="center">Página 5 / 8 · Groups e Stores</div>
+    <a href="06-barra-inferior.html">Página 6 →</a>
+  </nav>
+</body>
+</html>

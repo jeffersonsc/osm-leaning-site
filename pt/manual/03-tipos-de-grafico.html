@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Os 9 tipos de gráfico · Manual do OSM v1.5</title>
+  <meta name="description" content="Os 9 tipos de visualização do Open Sound Meter: RTA, Spectrum, Magnitude, Phase, Coherence, Impulse, Step, Group Delay e Spectrogram. Quando usar cada um.">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="../index.html">OSM</a>
+      <span class="sep">/</span>
+      <a href="index.html">Manual</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Página 3 / 8</div>
+        <h1>Os 9 tipos de gráfico</h1>
+      </div>
+      <div class="subtitle">o que cada visualização mostra<br>e quando usar cada uma</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>O OSM tem 9 tipos diferentes de gráfico, escolhidos no dropdown que fica no canto superior direito de cada gráfico. Cada um responde a uma pergunta diferente sobre o sistema de som — e em alinhamento você vai usar uma combinação deles, não um só.</p>
+
+      <figure class="fig">
+        <img src="img/magnitude-phase-views-dropdown.png" alt="Dropdown do canto superior direito de um gráfico mostrando todos os tipos: RTA, Magnitude (selecionado), Phase, Impulse, Step, Coherence, Group Delay, Spectrogram">
+        <figcaption><strong>O dropdown de tipo de gráfico.</strong> Aqui em modo Double, o gráfico de cima está em <span class="ui-text">Magnitude</span> e o de baixo em <span class="ui-text">Phase</span>. Você pode trocar cada um independentemente. <strong>Falta um na lista:</strong> <span class="ui-text">Spectrum</span> aparece como padrão quando você abre o OSM e tem o seu próprio dropdown.</figcaption>
+      </figure>
+
+      <p>Vou agrupar os 9 em três famílias, porque eles respondem a perguntas relacionadas:</p>
+
+      <ul>
+        <li><strong>Frequência sem referência</strong> (1 fonte): <span class="ui-term">RTA</span>, <span class="ui-term">Spectrum</span></li>
+        <li><strong>Função de transferência</strong> (2 fontes — entrada e saída do sistema): <span class="ui-term">Magnitude</span>, <span class="ui-term">Phase</span>, <span class="ui-term">Coherence</span>, <span class="ui-term">Group Delay</span></li>
+        <li><strong>Domínio do tempo</strong> (resposta a impulso): <span class="ui-term">Impulse</span>, <span class="ui-term">Step</span></li>
+      </ul>
+
+      <p>Mais <span class="ui-term">Spectrogram</span>, que é "tempo + frequência ao mesmo tempo" — não cabe nas três famílias acima.</p>
+
+      <h2>Família 1: Frequência sem referência</h2>
+
+      <p>Esses dois mostram <strong>quanto de cada frequência existe no sinal que está chegando no microfone</strong>, sem comparar com nada. Servem para medir ruído ambiente, equalizar uma sala, ou ver o que sai naturalmente da caixa.</p>
+
+      <h3>RTA — Real-Time Analyzer</h3>
+
+      <figure class="fig">
+        <img src="img/rta-single.png" alt="Gráfico RTA em modo Single mostrando barras verticais da pressão sonora em cada banda de oitava, de 31.5 Hz até 16 kHz">
+        <figcaption><strong>RTA mostrando pressão sonora por banda de oitava.</strong> Cada barra é uma faixa de frequência. Eixo vertical em dB (0 no topo, -90 embaixo). Eixo horizontal em Hz (31.5 a 16K).</figcaption>
+      </figure>
+
+      <p>RTA divide o espectro em <strong>bandas de oitava</strong> (ou 1/3 de oitava) e mostra quanta energia tem em cada banda como uma barra. É a forma mais antiga e direta de ver "onde está o som". Use para:</p>
+
+      <ul>
+        <li>Medir ruído ambiente (ar condicionado, gerador, multidão).</li>
+        <li>Equalizar uma sala com ruído rosa — gera ruído rosa pela caixa, mede com RTA, e corta as bandas que sobem demais.</li>
+        <li>Ver instantaneamente se o sistema tem grave/médio/agudo equilibrado.</li>
+      </ul>
+
+      <h3>Spectrum</h3>
+
+      <figure class="fig">
+        <img src="img/spectrum-single.png" alt="Gráfico Spectrum mostrando linha contínua de amplitude em função da frequência, de 31.5 Hz a 16 kHz">
+        <figcaption><strong>Spectrum: mesma informação do RTA, mas com resolução muito maior.</strong> Linha contínua em vez de barras, mostrando cada frequência individualmente (limitado pela resolução da FFT — veja <a href="../05-fft.html" style="color: var(--terra);">Infográfico 05</a>).</figcaption>
+      </figure>
+
+      <p>Spectrum mostra <strong>cada frequência individual</strong>, em vez de agrupar em bandas. É o que aparece quando você abre o OSM pela primeira vez. Use para:</p>
+
+      <ul>
+        <li>Identificar uma frequência específica que está microfonizando (você vê o pico exato).</li>
+        <li>Análise mais detalhada do que o RTA permite.</li>
+        <li>Ver harmônicos de instrumentos.</li>
+      </ul>
+
+      <h2>Família 2: Função de transferência</h2>
+
+      <p>Aqui o OSM compara <strong>dois sinais ao mesmo tempo</strong>: o que entrou no sistema (referência, canal <span class="ui-term">R:</span>) e o que saiu no microfone (medição, canal <span class="ui-term">M:</span>). Essa comparação é a base de medição séria de áudio. Veja o <a href="../04-transfer.html" style="color: var(--terra);">Infográfico 04 sobre função de transferência</a>.</p>
+
+      <h3>Magnitude</h3>
+
+      <p>Mostra <strong>o quanto cada frequência foi reforçada ou cortada</strong> pelo sistema, de 0 dB para frequências que passaram inalteradas, positivo para frequências reforçadas, negativo para frequências cortadas. É o que você "espera" que seja "plano" numa caixa boa.</p>
+
+      <h3>Phase</h3>
+
+      <p>Mostra <strong>o atraso de cada frequência</strong> em graus (de -180° a +180°). Quando duas caixas tocam a mesma frequência e estão em fases diferentes, elas cancelam. Phase é como você vê isso antes que aconteça.</p>
+
+      <p>Magnitude e Phase quase sempre aparecem juntos, em modo Double:</p>
+
+      <figure class="fig">
+        <img src="img/three-mode-magnitude-phase.png" alt="OSM em modo Three mostrando Impulse no topo, Magnitude no meio e Phase embaixo, todos com curva roxa de uma medição importada de arquivo .csv chamada Melodie">
+        <figcaption><strong>Três gráficos da mesma medição: Impulse, Magnitude e Phase.</strong> O painel direito mostra que esta medição veio de um arquivo (<span class="ui-text">Melodie.csv</span> com FFT 14 e janela Hann). Note no rodapé direito a opção <span class="ui-text">Time</span> e os parâmetros de tempo (1000 ms).</figcaption>
+      </figure>
+
+      <h3>Coherence</h3>
+
+      <p>Vai de 0 a 1. Indica <strong>quão confiável é a medição naquele ponto</strong>. 1 = sinal e referência estão correlacionados, medição é confiável. 0 = só ruído, ignore o que a Magnitude e Phase mostram ali. Veja o <a href="../02-coerencia.html" style="color: var(--terra);">Infográfico 02 sobre coerência</a>.</p>
+
+      <p>Regra prática: em qualquer frequência onde a Coherence está abaixo de ~0.8, o gráfico de Magnitude e Phase ali pode estar mentindo. Você precisa promediar mais, aumentar nível do sinal, ou aceitar que aquela parte da medição não vale.</p>
+
+      <h3>Group Delay</h3>
+
+      <p>Mostra <strong>o atraso de cada frequência em milissegundos</strong> (em vez de graus). É outra forma de olhar para a mesma informação que a Phase mostra, mas mais intuitiva para alinhamento prático — você vê "essa frequência chegou 3 ms depois daquela".</p>
+
+      <p>Em alinhamento de sub + top, Group Delay é uma das ferramentas para ajustar delay de uma caixa em relação à outra na frequência de crossover.</p>
+
+      <h2>Família 3: Domínio do tempo</h2>
+
+      <p>Esses dois respondem à pergunta: <strong>"o que acontece quando eu mando um pulso curto pelo sistema?"</strong> Não estamos olhando para frequências — estamos olhando para o tempo, milissegundo por milissegundo.</p>
+
+      <h3>Impulse</h3>
+
+      <p>Resposta a impulso. O OSM manda um sinal de banda larga (sweep, MLS, pink noise) pelo sistema e calcula matematicamente qual seria a resposta a um pulso ideal. O resultado: um pico na hora em que o som chega no microfone, mais ecos depois.</p>
+
+      <p>O Impulse é a base de <strong>delay finder</strong> (medir o atraso entre fonte e microfone) — veja o <a href="../03-atraso.html" style="color: var(--terra);">Infográfico 03</a>. O pico maior do gráfico aparece no tempo de chegada, e a partir dali se aplica delay para "trazer o pico para zero".</p>
+
+      <h3>Step</h3>
+
+      <p>Resposta ao degrau — a integral matemática da resposta a impulso. Em vez de mostrar "o pulso chegou agora", mostra "como o sistema responde quando o sinal sobe e fica em cima". Útil para análise mais avançada de sistemas de subwoofer e cancelamento.</p>
+
+      <p>Em igreja, Step quase não vai ser usado no dia a dia — é mais ferramenta de quem desenha sistemas de PA.</p>
+
+      <h2>Bônus: Spectrogram</h2>
+
+      <p>Spectrogram mostra <strong>tempo, frequência e amplitude ao mesmo tempo</strong>, como um mapa térmico (waterfall). Tempo no eixo horizontal, frequência no eixo vertical, cor indicando energia.</p>
+
+      <p>Em igreja serve para:</p>
+
+      <ul>
+        <li>Ver decay de frequências graves no templo (quanto tempo o sub continua "ressoando" depois que parou).</li>
+        <li>Identificar visualmente padrões de feedback que vão crescendo.</li>
+        <li>Diagnosticar problemas que aparecem só em momentos específicos do culto.</li>
+      </ul>
+
+      <h2>Resumo: que gráfico usar quando</h2>
+
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Você quer…</th>
+            <th>Use</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Equalizar uma sala rapidamente</td>
+            <td class="label">RTA</td>
+          </tr>
+          <tr>
+            <td>Identificar uma frequência problemática específica</td>
+            <td class="label">Spectrum</td>
+          </tr>
+          <tr>
+            <td>Medir a resposta de frequência de uma caixa</td>
+            <td class="label">Magnitude + Phase + Coherence</td>
+          </tr>
+          <tr>
+            <td>Alinhar sub + top</td>
+            <td class="label">Phase + Group Delay + Impulse</td>
+          </tr>
+          <tr>
+            <td>Descobrir o atraso entre a mesa e o microfone</td>
+            <td class="label">Impulse (delay finder)</td>
+          </tr>
+          <tr>
+            <td>Ver reverberação ao longo do tempo</td>
+            <td class="label">Spectrogram</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="tip-box">
+        <div class="title">Setup do dia a dia</div>
+        <p>Para alinhamento de igreja, deixe o OSM em <strong>modo Double</strong> com <strong>Magnitude em cima e Phase embaixo</strong>. Use a Coherence como "luzinha" no fundo da sua atenção — quando ela cair, você sabe que precisa promediar mais antes de tomar decisão. Reserve RTA e Spectrogram para casos específicos.</p>
+      </div>
+
+      <h2>O essencial pra reter desta página</h2>
+
+      <ul>
+        <li>Há <strong>9 tipos de gráfico</strong>, agrupados em 3 famílias: frequência sem referência, função de transferência, e tempo.</li>
+        <li><strong>RTA e Spectrum</strong> precisam só do microfone — bons para EQ de sala e identificar ruído.</li>
+        <li><strong>Magnitude, Phase, Coherence, Group Delay</strong> precisam de microfone + referência da mesa — base de alinhamento de caixas.</li>
+        <li><strong>Impulse e Step</strong> trabalham no tempo, não na frequência. Impulse é o que mede atraso.</li>
+        <li><strong>Spectrogram</strong> é o waterfall — tempo, frequência e energia juntos.</li>
+      </ul>
+
+      <p style="margin-top: 36px; text-align: center;">
+        <a href="04-generator-measurements.html" style="display: inline-block; background: var(--terra); color: white; padding: 12px 22px; border-radius: 6px; text-decoration: none; font-weight: 600;">Próximo: Generator e Measurements →</a>
+      </p>
+
+      <p style="margin-top: 24px;">
+        <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">← Voltar para o índice do manual</a>
+      </p>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="02-tela-principal.html">← Página 2</a>
+    <div class="center">Página 3 / 8 · Os 9 tipos de gráfico</div>
+    <a href="04-generator-measurements.html">Página 4 →</a>
+  </nav>
+</body>
+</html>
