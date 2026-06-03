@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Impedância e potência · Curso de áudio para operadores de igreja</title>
+  <meta name="description" content="Bloco 4 do curso: impedância (Ω), série e paralelo, casamento amplificador/caixa, e como resolver microfonia (o piiii do culto).">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="index.html">Curso</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Bloco 4 / 6</div>
+        <h1>Impedância e potência</h1>
+      </div>
+      <div class="subtitle">mais da metade dos motivos<br>que fazem amplificador queimar</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>Aqui está, em uma seção só, mais da metade dos motivos que fazem amplificador queimar e caixa de som virar peso de porta em igreja. Não é difícil, é só explicar direito — coisa que quase ninguém faz.</p>
+
+      <h2>Impedância: a "resistência" do equipamento</h2>
+
+      <p>Impedância é uma propriedade elétrica que mede <strong>o quanto um equipamento "empurra de volta" no sinal que recebe</strong>. A unidade é o ohm (símbolo Ω). Você não precisa entender a física — só precisa saber onde aparece e por quê.</p>
+
+      <p>Cada tipo de equipamento tem uma impedância típica:</p>
+
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Equipamento</th>
+            <th>Impedância típica</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="label">Microfone dinâmico (ex: Shure SM58)</td>
+            <td>150 Ω – 600 Ω</td>
+          </tr>
+          <tr>
+            <td class="label">Entrada de microfone da mesa</td>
+            <td>1.500 Ω – 3.000 Ω (alta para receber bem o mic)</td>
+          </tr>
+          <tr>
+            <td class="label">Saída de linha (mesa para amplificador)</td>
+            <td>100 Ω – 600 Ω</td>
+          </tr>
+          <tr>
+            <td class="label">Entrada de linha (do amplificador)</td>
+            <td>10.000 Ω ou mais</td>
+          </tr>
+          <tr>
+            <td class="label">Caixa passiva de palco</td>
+            <td>8 Ω (mais comum) ou 4 Ω</td>
+          </tr>
+          <tr>
+            <td class="label">Saída de amplificador</td>
+            <td>4 Ω, 8 Ω, ou 4–16 Ω (dependendo do modelo)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>A regra prática para microfones e linha</h2>
+
+      <p>Para microfone e linha, você quase nunca vai precisar pensar em impedância: os equipamentos modernos já se casam automaticamente. Só lembre destes pontos:</p>
+
+      <ul>
+        <li>Microfone vai na entrada de microfone. Pronto, está casado.</li>
+        <li>Saída de mesa vai na entrada de linha do amplificador ou da caixa ativa. Pronto.</li>
+        <li>Se você ligou um microfone numa entrada de linha (impedâncias muito diferentes), o som vai sair fraco e "sem corpo". Isso é descasamento, mas a solução é simples: ligue no lugar certo.</li>
+      </ul>
+
+      <h2>O perigo de verdade: a impedância da caixa passiva</h2>
+
+      <p>Aqui é onde mora a queima de amplificador. Toda caixa passiva tem uma impedância nominal (geralmente 8 Ω ou 4 Ω, escrito atrás dela). Todo amplificador tem uma impedância mínima que ele aguenta (também escrito no painel traseiro).</p>
+
+      <div class="warn-box">
+        <div class="title">A regra que salva amplificador</div>
+        <p>Nunca ligue numa saída de amplificador uma carga total com impedância <strong>MENOR</strong> do que o mínimo que ele aguenta. Se o amplificador diz "4 Ω mínimo", você pode ligar nele uma caixa de 4 Ω, ou uma de 8 Ω, ou duas de 8 Ω em paralelo (que dão 4 Ω). Mas <strong>NÃO duas de 4 Ω em paralelo (que dariam 2 Ω) — isso queima.</strong></p>
+      </div>
+
+      <h3>Série e paralelo (quando você vai precisar)</h3>
+
+      <p>Quando você liga duas caixas no mesmo canal de amplificador, existem duas formas:</p>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="key">Paralelo</div>
+          <div class="val">Impedância <em>menor</em></div>
+          <div class="desc">As duas caixas são ligadas "lado a lado", cada uma direto na saída do amplificador. Duas de 8 Ω em paralelo = 4 Ω. É o caso mais comum, e o que pode queimar amplificador se você passar do limite.</div>
+        </div>
+        <div class="stat">
+          <div class="key">Série</div>
+          <div class="val">Impedância <em>maior</em></div>
+          <div class="desc">As caixas são ligadas "uma depois da outra". Duas de 8 Ω em série = 16 Ω. É mais seguro para o amplificador, mas a potência se divide e perde rendimento. Pouca gente usa em igreja.</div>
+        </div>
+      </div>
+
+      <h2>Potência: o casamento amplificador / caixa</h2>
+
+      <p>Toda caixa passiva tem uma potência máxima (RMS) que ela aguenta. Todo amplificador tem uma potência máxima que ele entrega numa dada impedância. O casamento é mais simples do que parece, mas tem uma armadilha.</p>
+
+      <div class="tip-box">
+        <div class="title">A regra que salva caixa</div>
+        <p><strong>Amplificador um pouco MAIS forte que a caixa é melhor do que amplificador FRACO demais.</strong> Parece contraintuitivo, mas é assim: amplificador fraco, quando você abre tudo, distorce — e distorção queima cone e tweeter da caixa muito mais rápido do que potência limpa.</p>
+        <p>A regra prática: o amplificador pode ter de <strong>1,5 a 2 vezes</strong> a potência RMS da caixa, desde que o operador não abuse do volume.</p>
+      </div>
+
+      <p><strong>Exemplo:</strong> caixa de 200 W RMS, 8 Ω. Amplificador adequado: 300 a 400 W RMS em 8 Ω. Não é "comprar amplificador grande para a caixa pequena" — é dar margem para o amplificador trabalhar sem esforço.</p>
+
+      <h2>Microfonia: o "piiii" do culto</h2>
+
+      <p>Microfonia acontece quando o som que sai da caixa volta para o microfone, é amplificado de novo, volta para a caixa, e fica nessa volta crescendo até estourar. É uma realimentação.</p>
+
+      <p>Não é "defeito do microfone". É posicionamento. As três causas principais em igreja:</p>
+
+      <ul>
+        <li>Microfone apontado para uma caixa, ou perto demais da caixa de retorno.</li>
+        <li>Ganho ou fader aberto demais no canal — o sistema fica "no fio da microfonia".</li>
+        <li>Equalização com agudos exagerados (mais de +6 dB nos agudos), que reforça as frequências que microfonizam primeiro.</li>
+      </ul>
+
+      <div class="warn-box">
+        <div class="title">Como resolver microfonia rápido no culto</div>
+        <p>1) Abaixe o fader do canal que está microfonizando (geralmente é fácil identificar pelo LED do canal pulsando).<br>
+        2) Se não souber qual canal, mute os canais um a um até parar.<br>
+        3) Depois do culto, refaça o ajuste de ganho daquele canal, e se for caso, abaixe os agudos no equalizador.</p>
+      </div>
+
+      <h2>O que vem a seguir</h2>
+
+      <p>Você já entende sinal, cabo, e potência. Próximo bloco: a mesa de som por dentro — a ordem dos botões e o passo a passo prático para começar um culto.</p>
+
+      <p style="margin-top: 24px;">
+        <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">← Voltar para o índice do curso</a>
+      </p>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="03-cabos-e-conectores.html">← Bloco 3</a>
+    <div class="center">Bloco 4 / 6 · Impedância e potência</div>
+    <a href="05-mesa-de-som.html">Bloco 5 →</a>
+  </nav>
+</body>
+</html>

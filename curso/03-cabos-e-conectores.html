@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cabos e conectores · Curso de áudio para operadores de igreja</title>
+  <meta name="description" content="Bloco 3 do curso: os conectores que você vai encontrar (XLR, P10, P2, RCA, Speakon), balanceado vs desbalanceado, e regras práticas pra escolher cabo na igreja.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="index.html">Curso</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Bloco 3 / 6</div>
+        <h1>Cabos e conectores</h1>
+      </div>
+      <div class="subtitle">o vocabulário básico pra você<br>ir na loja e pedir o cabo certo</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>Cabo de som é uma das partes mais simples do sistema, e ao mesmo tempo onde mais se gasta dinheiro mal gasto. Esta seção te dá o vocabulário básico para você ir numa loja, pedir o cabo certo, e não levar para casa o que não serve.</p>
+
+      <h2>Os conectores que você vai encontrar</h2>
+
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Conector</th>
+            <th>Como reconhecer</th>
+            <th>Para que serve</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="label">XLR<br><span style="font-weight: 400; color: var(--text-muted); font-size: 12px;">(Canon)</span></td>
+            <td>3 pinos, formato cilíndrico, conector "profissional"</td>
+            <td>Microfones, sinais balanceados, cabos longos</td>
+          </tr>
+          <tr>
+            <td class="label">P10 mono<br><span style="font-weight: 400; color: var(--text-muted); font-size: 12px;">(TS)</span></td>
+            <td>Plug de 6,3 mm, 1 anel no eixo</td>
+            <td>Instrumentos (guitarra, contrabaixo), linha desbalanceada</td>
+          </tr>
+          <tr>
+            <td class="label">P10 estéreo<br><span style="font-weight: 400; color: var(--text-muted); font-size: 12px;">(TRS)</span></td>
+            <td>Plug de 6,3 mm, 2 anéis no eixo</td>
+            <td>Fone de ouvido, sinal estéreo, ou linha balanceada</td>
+          </tr>
+          <tr>
+            <td class="label">P2<br><span style="font-weight: 400; color: var(--text-muted); font-size: 12px;">(mini-jack)</span></td>
+            <td>Plug pequeno de 3,5 mm</td>
+            <td>Saída de notebook, celular, fone de ouvido pequeno</td>
+          </tr>
+          <tr>
+            <td class="label">RCA</td>
+            <td>Plug com pino central + anel externo, geralmente colorido</td>
+            <td>Saída de DVD, mesa antiga, equipamento doméstico</td>
+          </tr>
+          <tr>
+            <td class="label">Speakon</td>
+            <td>Conector preto, encaixe com giro/trava</td>
+            <td>Caixa passiva ligada a amplificador (alta potência)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Balanceado vs desbalanceado: por que importa</h2>
+
+      <p>Este é o conceito mais importante deste bloco e o que mais resolve problema de "chiado" em cabo longo.</p>
+
+      <p>Cabo <strong>desbalanceado</strong> (P10 mono, RCA) tem 2 condutores: um leva o sinal, o outro é o terra. Funciona, mas é vulnerável: qualquer fio elétrico ou luminária por perto induz ruído no cabo, e esse ruído chega na sua mesa como chiado/zumbido. Quanto mais longo o cabo, pior fica.</p>
+
+      <p>Cabo <strong>balanceado</strong> (XLR, e P10 estéreo/TRS quando usado como balanceado) tem 3 condutores: terra, sinal positivo e sinal negativo. A mesa compara os dois sinais e <strong>cancela automaticamente</strong> qualquer ruído que tenha sido induzido no caminho. Resultado: você pode passar um cabo balanceado de 30 metros pelo templo e ele chega limpo na mesa.</p>
+
+      <div class="chart-wrap" style="margin: 28px 0;">
+        <div class="chart-title">Por que cabo balanceado cancela ruído</div>
+        <svg class="chart" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" id="balanced-svg" role="img" aria-label="Diagrama comparando cabo desbalanceado e balanceado mostrando o cancelamento de ruído"></svg>
+      </div>
+
+      <div class="tip-box">
+        <div class="title">Regra para a igreja</div>
+        <p>Microfone <strong>sempre</strong> em cabo XLR balanceado. Saída da mesa para a caixa ativa do fundo do templo: cabo balanceado (XLR ou P10 TRS), <strong>nunca P10 mono</strong>. Guitarra do palco até a mesa: pode ser P10 mono se o cabo for curto (até 5 m), ou usar uma <strong>DI (caixa direta)</strong> que converte o sinal para balanceado XLR — é o jeito profissional.</p>
+      </div>
+
+      <h2>Sobre comprar cabo</h2>
+
+      <p>Não precisa comprar cabo caríssimo. O que importa, pela ordem:</p>
+
+      <ul>
+        <li><strong>Tipo certo de conector</strong> para o que vai ser usado (XLR para mic, Speakon para caixa, P10 para instrumento).</li>
+        <li><strong>Comprimento adequado</strong> — cabo enrolado em rolo embaixo da mesa não é elegante, mas funciona. Cabo curto demais é problema todo culto.</li>
+        <li><strong>Conector decente</strong> — Neutrik e Amphenol são marcas profissionais e duram décadas. Conector chinês genérico costuma falhar em meses, especialmente em microfone que é pisado, dobrado, enrolado.</li>
+        <li><strong>Cabo blindado</strong> — qualquer cabo de som decente já vem blindado. Evite cabo de "caixa de papelão" sem marca alguma; eles chiam.</li>
+      </ul>
+
+      <div class="warn-box">
+        <div class="title">Cabos para caixa passiva NÃO são cabos de microfone</div>
+        <p>Erro clássico: pegar um cabo XLR longo e usar para ligar caixa passiva. <strong>NÃO FAÇA ISSO.</strong></p>
+        <p>Cabo de mic tem fio fino (não aguenta a corrente do amplificador), e o conector XLR não tem trava mecânica adequada. Caixa passiva pede cabo <strong>Speakon</strong> (ou TS para sistemas mais antigos), com fio grosso (de 1,5 mm² para cima, dependendo da potência).</p>
+      </div>
+
+      <h2>O que vem a seguir</h2>
+
+      <p>Cabo certo, conector certo. Agora falta entender o que está rodando por dentro desses cabos do ponto de vista elétrico — e por que ligar a coisa errada faz amplificador queimar. Próximo bloco: impedância e potência.</p>
+
+      <p style="margin-top: 24px;">
+        <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">← Voltar para o índice do curso</a>
+      </p>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="02-niveis-de-sinal.html">← Bloco 2</a>
+    <div class="center">Bloco 3 / 6 · Cabos e conectores</div>
+    <a href="04-impedancia-e-potencia.html">Bloco 4 →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const svg = document.getElementById('balanced-svg');
+    if (!svg) return;
+    const ns = 'http://www.w3.org/2000/svg';
+
+    // Two rows: desbalanceado on top (vulnerable), balanceado on bottom (cancels)
+
+    function makeText(x, y, text, cls, anchor) {
+      const t = document.createElementNS(ns, 'text');
+      t.setAttribute('x', x); t.setAttribute('y', y);
+      if (anchor) t.setAttribute('text-anchor', anchor);
+      if (cls) t.setAttribute('class', cls);
+      t.textContent = text;
+      return t;
+    }
+    function makeLine(x1,y1,x2,y2,stroke,width,dash) {
+      const l = document.createElementNS(ns, 'line');
+      l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+      l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+      l.setAttribute('stroke', stroke);
+      l.setAttribute('stroke-width', width || 1.5);
+      if (dash) l.setAttribute('stroke-dasharray', dash);
+      return l;
+    }
+
+    // Labels
+    svg.appendChild(makeText(8, 36, 'Desbalanceado (P10 mono, RCA)', 'label-bold', null));
+    Object.assign(svg.lastChild.style, { fill: '#F87171' });
+    svg.lastChild.setAttribute('fill', '#F87171');
+
+    svg.appendChild(makeText(8, 138, 'Balanceado (XLR)', 'label-bold', null));
+    svg.lastChild.setAttribute('fill', '#34D399');
+
+    // === Top: desbalanceado ===
+    // sinal (1 condutor) com ruído absorvido
+    svg.appendChild(makeLine(8, 60, 480, 60, '#5B7BD8', 2));
+    svg.appendChild(makeText(20, 56, 'sinal', 'label-small', null));
+    // raio de interferência
+    for (let i = 0; i < 4; i++) {
+      const x = 130 + i * 80;
+      svg.appendChild(makeText(x, 50, '⚡', null, 'middle'));
+      svg.lastChild.setAttribute('font-size', '12');
+      svg.lastChild.setAttribute('fill', '#F5B947');
+    }
+    // chega na mesa com ruído
+    svg.appendChild(makeText(500, 64, '→ chiado', null, null));
+    svg.lastChild.setAttribute('fill', '#F87171');
+    svg.lastChild.setAttribute('font-size', '12');
+    svg.lastChild.setAttribute('font-weight', '700');
+
+    // === Bottom: balanceado ===
+    // sinal positivo
+    svg.appendChild(makeLine(8, 162, 480, 162, '#5B7BD8', 2));
+    svg.appendChild(makeText(20, 158, 'sinal +', 'label-small', null));
+    // sinal negativo
+    svg.appendChild(makeLine(8, 188, 480, 188, '#E47766', 2));
+    svg.appendChild(makeText(20, 200, 'sinal −', 'label-small', null));
+    // raios de interferência (igual nos dois fios)
+    for (let i = 0; i < 4; i++) {
+      const x = 130 + i * 80;
+      svg.appendChild(makeText(x, 152, '⚡', null, 'middle'));
+      svg.lastChild.setAttribute('font-size', '12');
+      svg.lastChild.setAttribute('fill', '#F5B947');
+      svg.appendChild(makeText(x, 178, '⚡', null, 'middle'));
+      svg.lastChild.setAttribute('font-size', '12');
+      svg.lastChild.setAttribute('fill', '#F5B947');
+    }
+    // mesa subtrai → ruído some
+    svg.appendChild(makeText(500, 178, '→ limpo', null, null));
+    svg.lastChild.setAttribute('fill', '#34D399');
+    svg.lastChild.setAttribute('font-size', '12');
+    svg.lastChild.setAttribute('font-weight', '700');
+
+    // Legenda do raio
+    svg.appendChild(makeText(8, 110, '⚡ = ruído elétrico induzido no caminho (luminárias, motores)', 'label-small', null));
+
+  })();
+  </script>
+</body>
+</html>

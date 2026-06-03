@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A mesa de som por dentro · Curso de áudio para operadores de igreja</title>
+  <meta name="description" content="Bloco 5 do curso: a ordem dos controles em cada canal da mesa (entrada, ganho, low cut, EQ, AUX, PAN, fader, master), e a sequência prática pra começar um culto.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="index.html">Curso</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Bloco 5 / 6</div>
+        <h1>A mesa de som por dentro</h1>
+      </div>
+      <div class="subtitle">a ordem dos botões em cada canal,<br>e a sequência prática do culto</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>Agora que você já entende sinal, cabo e potência, vamos para a mesa de som. Vou usar como referência a Arcano (ou similar), que é o tipo de mesa que está na maioria das nossas igrejas — uma analógica compacta com interface USB.</p>
+
+      <h2>O canal: a unidade básica</h2>
+
+      <p>Toda mesa, do brinquedo ao equipamento de estádio, tem CANAIS. Cada canal recebe uma fonte de som (um microfone, um teclado, um notebook), e tem uma sequência de controles que processam essa fonte antes de mandar para a saída.</p>
+
+      <p>A ordem em que o sinal passa por dentro do canal é <strong>sempre a mesma</strong>, em todas as mesas:</p>
+
+      <p style="text-align: center; font-weight: 700; color: var(--terra); font-size: 18px; margin: 24px 0;">
+        entrada → ganho → low cut → EQ → AUX → PAN → fader → master
+      </p>
+
+      <p>Decorar essa ordem é o ponto mais importante desta seção. Cada controle faz uma coisa, na sua hora certa.</p>
+
+      <h2>Passo a passo de cada controle</h2>
+
+      <h3>1. Entrada (XLR ou P10)</h3>
+      <p>É onde o cabo se conecta. Combo (XLR + P10 no mesmo soquete) aceita os dois — mas o circuito interno é diferente: XLR vai para o circuito de microfone (alta sensibilidade), P10 vai para o circuito de linha (sensibilidade menor). <strong>Plugue no conector certo para o tipo de sinal.</strong></p>
+
+      <h3>2. Ganho (GAIN / TRIM)</h3>
+      <p>Já falamos no Bloco 2 — o ganho ajusta a sensibilidade do canal para o sinal que está entrando, antes de qualquer outra coisa. Ajuste com o fader em zero, peça a pessoa para falar ou tocar, e suba o ganho até o LED verde acender constante. Vermelho só pode piscar em picos máximos.</p>
+
+      <h3>3. Low Cut (filtro corta-graves)</h3>
+      <p>Botão geralmente perto do ganho, com símbolo de uma rampa, ou "LC", ou "80 Hz". Quando você aciona, ele corta os graves muito profundos (abaixo de uns 80 Hz) daquele canal. Use sempre que:</p>
+      <ul>
+        <li>O canal é de voz (pregador, cantor) — não tem informação musical útil abaixo de 80 Hz, só ruído de manuseio do microfone.</li>
+        <li>O microfone está perto de uma fonte de pisada ou vibração.</li>
+        <li>O canal é de violão, guitarra, teclado tocando agudos — não vai ter grave útil ali.</li>
+      </ul>
+      <p><strong>Não use</strong> em bumbo, contrabaixo, ou teclado que toca acordes graves — você cortaria o que tem de melhor.</p>
+
+      <h3>4. Equalização (EQ): grave, médio, agudo</h3>
+      <p>Quase toda mesa analógica de igreja tem 3 botões de EQ por canal: HIGH (agudo), MID (médio), LOW (grave). Cada botão fica no centro (sem alterar nada), gira para a direita para reforçar aquela faixa, ou para a esquerda para cortar.</p>
+
+      <div class="tip-box">
+        <div class="title">Filosofia de EQ que funciona</div>
+        <p>Cortar é melhor do que reforçar. Se a voz está "abafada", a tentação é dar boost no agudo, mas geralmente o problema é excesso de médio-grave — corte o LOW um pouco e a voz "abre" sem precisar mexer no agudo. Em igreja, EQ exagerado é uma das maiores causas de microfonia. <strong>Deixe a maioria dos botões perto do centro.</strong></p>
+      </div>
+
+      <p>Algumas regras simples:</p>
+      <ul>
+        <li><strong>Voz de pregador grave e "barulhenta":</strong> corte o LOW (−2 a −4 dB).</li>
+        <li><strong>Voz sem brilho, "abafada":</strong> tente primeiro cortar o MID; se não bastar, dê um leve boost no HIGH (+2 dB).</li>
+        <li><strong>Microfone com "sssssss" (sibilância):</strong> corte o HIGH (−2 a −3 dB).</li>
+        <li><strong>Bumbo da bateria "sem peso":</strong> reforce o LOW (+2 a +4 dB) e corte o MID (−2 dB).</li>
+      </ul>
+
+      <h3>5. Auxiliares (AUX) — para monitor e efeito</h3>
+      <p>Cada canal geralmente tem um ou dois botões AUX (Aux 1, Aux 2). O que eles fazem: criar uma saída paralela ao caminho principal. Existem dois usos típicos em igreja:</p>
+
+      <p><strong>AUX para monitor de palco:</strong> o pastor e a banda precisam se ouvir, mas não dá para apenas "dividir" o som da congregação para eles, porque o que cada um quer ouvir mais (a própria voz, o teclado, a base) é diferente do que a igreja ouve. O AUX manda uma mistura <em>separada</em> para a caixa de retorno. Para o pastor: vira o AUX do canal de mic dele para a posição 2-3 horas (ele se ouve). Vira menos a banda toda. Para o tecladista: vira o AUX do canal de teclado dele bem alto, e abaixa o que ele não precisa ouvir.</p>
+
+      <p><strong>AUX para efeito (reverb / delay):</strong> muitas mesas têm efeito interno (reverb, delay). Você vira o AUX do canal de vocal para a posição 1-2 horas, o efeito chega no microfone, e dá um pouquinho de ambiente no som. Não exagere — efeito demais em igreja "engole" a palavra.</p>
+
+      <h3>6. PAN (panorâmica)</h3>
+      <p>Em mesa estéreo, o PAN decide se o som vai mais para a caixa da esquerda ou para a da direita. Em igreja, raramente vale a pena fazer panorâmica de canal (são poucas caixas e a maioria das pessoas só ouve uma). <strong>Deixe quase tudo no centro.</strong></p>
+
+      <h3>7. Fader (volume do canal)</h3>
+      <p>É o controle deslizante (ou botão giratório, em mesas menores) que define o volume final daquele canal no som que vai para a igreja. Ajuste após o ganho estar certo. Posição neutra é "zero dB" (geralmente o risco do meio do curso do fader).</p>
+
+      <h3>8. Master (saída principal)</h3>
+      <p>Soma todos os canais e manda para a saída principal da mesa, que vai para o amplificador ou caixa ativa do templo. Geralmente também fica em zero. <strong>Não use o master para "abaixar o som geral"</strong> — use o fader dos canais.</p>
+
+      <div class="chart-wrap" style="margin: 32px 0;">
+        <div class="chart-title">A ordem do sinal dentro do canal</div>
+        <svg class="chart" viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" id="canal-svg" role="img" aria-label="Diagrama vertical mostrando a ordem dos controles no canal: entrada, ganho, low cut, EQ, AUX, PAN, fader, master"></svg>
+      </div>
+
+      <h2>Sequência prática para começar um culto</h2>
+
+      <p><strong>Antes da congregação chegar:</strong></p>
+      <ul>
+        <li>Verifique que todos os faders estão em zero e os ganhos no mínimo.</li>
+        <li>Verifique que o master está em zero.</li>
+        <li>Ligue a mesa, depois ligue o amplificador / caixa ativa (sempre nessa ordem — proteja seus equipamentos).</li>
+      </ul>
+
+      <p><strong>Para cada canal que vai usar:</strong></p>
+      <ul>
+        <li>Plugue o cabo no canal certo (XLR para microfone, P10 para teclado).</li>
+        <li>Peça para a pessoa falar/tocar no volume normal.</li>
+        <li>Ajuste o GAIN — LED verde aceso constante, vermelho piscando só nos picos máximos.</li>
+        <li>EQ inicial: tudo no centro. Só mexe se tiver problema audível.</li>
+        <li>Ligue o AUX de monitor para mandar a pessoa se ouvir.</li>
+        <li>Abra o fader em zero e ajuste fino a partir daí, comparando com os outros canais.</li>
+      </ul>
+
+      <div class="tip-box">
+        <div class="title">No fim do culto</div>
+        <p>Inverta a ordem do liga: desligue o amplificador / caixa ativa primeiro, depois a mesa. Isso evita o "pum" feio no alto-falante quando a mesa é desligada com sinal residual. Hábito profissional, dura zero segundos a mais.</p>
+      </div>
+
+      <h2>O que vem a seguir</h2>
+
+      <p>Você já sabe operar a mesa analógica do dia a dia. Próximo (e último) bloco: o que existe além dela — mesa digital, equalizador gráfico, crossover e processador. Para você reconhecer o que tem por aí e saber se faz sentido para a sua igreja.</p>
+
+      <p style="margin-top: 24px;">
+        <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">← Voltar para o índice do curso</a>
+      </p>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="04-impedancia-e-potencia.html">← Bloco 4</a>
+    <div class="center">Bloco 5 / 6 · A mesa de som por dentro</div>
+    <a href="06-alem-da-mesa.html">Bloco 6 →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const svg = document.getElementById('canal-svg');
+    if (!svg) return;
+    const ns = 'http://www.w3.org/2000/svg';
+
+    const steps = [
+      { name: 'Entrada',  detail: 'XLR ou P10' },
+      { name: 'Ganho',    detail: 'casa o nível do sinal' },
+      { name: 'Low Cut',  detail: 'corta graves indesejados' },
+      { name: 'EQ',       detail: 'grave / médio / agudo' },
+      { name: 'AUX',      detail: 'monitor e efeito (saída paralela)' },
+      { name: 'PAN',      detail: 'esquerda / direita' },
+      { name: 'Fader',    detail: 'volume do canal' },
+      { name: 'Master',   detail: 'soma de todos os canais → saída' },
+    ];
+
+    const startY = 16;
+    const stepH  = 36;
+    const boxX   = 110;
+    const boxW   = 380;
+
+    // marker arrow
+    const defs = document.createElementNS(ns, 'defs');
+    defs.innerHTML = '<marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5B7BD8"/></marker>';
+    svg.appendChild(defs);
+
+    steps.forEach((s, i) => {
+      const y = startY + i * stepH;
+      // box
+      const rect = document.createElementNS(ns, 'rect');
+      rect.setAttribute('x', boxX); rect.setAttribute('y', y);
+      rect.setAttribute('width', boxW); rect.setAttribute('height', 28);
+      rect.setAttribute('rx', 4);
+      rect.setAttribute('fill', '#1E2937');
+      rect.setAttribute('stroke', '#2D3B4D');
+      svg.appendChild(rect);
+      // step number
+      const num = document.createElementNS(ns, 'text');
+      num.setAttribute('x', boxX - 30); num.setAttribute('y', y + 19);
+      num.setAttribute('text-anchor', 'middle');
+      num.setAttribute('fill', '#E47766');
+      num.setAttribute('font-weight', '700');
+      num.setAttribute('font-size', '14');
+      num.textContent = String(i + 1);
+      svg.appendChild(num);
+      // name
+      const name = document.createElementNS(ns, 'text');
+      name.setAttribute('x', boxX + 14); name.setAttribute('y', y + 19);
+      name.setAttribute('fill', '#E5E9F0');
+      name.setAttribute('font-weight', '700');
+      name.setAttribute('font-size', '13');
+      name.textContent = s.name;
+      svg.appendChild(name);
+      // detail
+      const detail = document.createElementNS(ns, 'text');
+      detail.setAttribute('x', boxX + 110); detail.setAttribute('y', y + 19);
+      detail.setAttribute('fill', '#8B97A8');
+      detail.setAttribute('font-size', '12');
+      detail.textContent = s.detail;
+      svg.appendChild(detail);
+
+      // arrow to next
+      if (i < steps.length - 1) {
+        const arrow = document.createElementNS(ns, 'line');
+        arrow.setAttribute('x1', boxX + boxW / 2);
+        arrow.setAttribute('x2', boxX + boxW / 2);
+        arrow.setAttribute('y1', y + 28);
+        arrow.setAttribute('y2', y + 32);
+        arrow.setAttribute('stroke', '#5B7BD8');
+        arrow.setAttribute('stroke-width', '1.5');
+        arrow.setAttribute('marker-end', 'url(#arrow2)');
+        svg.appendChild(arrow);
+      }
+    });
+
+  })();
+  </script>
+</body>
+</html>

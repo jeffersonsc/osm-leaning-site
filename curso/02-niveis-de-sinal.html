@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Níveis de sinal · Curso de áudio para operadores de igreja</title>
+  <meta name="description" content="Bloco 2 do curso: os três níveis de sinal (microfone, linha, alto-falante), o que acontece quando se mistura, e o botão GAIN explicado de verdade.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="index.html">Curso</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Bloco 2 / 6</div>
+        <h1>Níveis de sinal</h1>
+      </div>
+      <div class="subtitle">o conceito que mais resolve<br>problemas de som em igreja</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>Este é provavelmente o conceito que mais resolve problemas em igreja. Quase todo "som ruim" que não tem nada queimado vem de nível errado. Vamos por partes.</p>
+
+      <h2>Existem três níveis de sinal</h2>
+
+      <p>O sinal elétrico que carrega o som muda de força ao longo do caminho. Não é tudo "som" do mesmo jeito — depende de onde está. Os três níveis principais são:</p>
+
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Nível</th>
+            <th>Força aproximada</th>
+            <th>De onde vem</th>
+            <th>Para onde vai</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="label">Microfone<br><span style="font-weight: 400; color: var(--text-muted); font-size: 12px;">(mic level)</span></td>
+            <td>Muito fraco<br>(milivolts)</td>
+            <td>Microfone dinâmico, condensador</td>
+            <td>Entrada XLR ou combo da mesa, no canal de mic</td>
+          </tr>
+          <tr>
+            <td class="label">Linha<br><span style="font-weight: 400; color: var(--text-muted); font-size: 12px;">(line level)</span></td>
+            <td>Médio<br>(1–2 volts)</td>
+            <td>Teclado, notebook, saída de mesa, pedaleira, MP3</td>
+            <td>Entrada P10 ou RCA de linha</td>
+          </tr>
+          <tr>
+            <td class="label">Alto-falante<br><span style="font-weight: 400; color: var(--text-muted); font-size: 12px;">(speaker level)</span></td>
+            <td>Forte<br>(10–100 volts)</td>
+            <td>Saída do amplificador de potência</td>
+            <td>Entrada de caixa passiva (Speakon, terminais)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="warn-box">
+        <div class="title">Regra de ouro</div>
+        <p>Cada nível vai no seu lugar. Microfone só entra em entrada de microfone. Saída de amplificador só vai em caixa passiva. Saída de mesa entra em amplificador, em caixa ATIVA, ou em outra entrada de linha — <strong>nunca em entrada de microfone, nunca direto em caixa passiva.</strong></p>
+      </div>
+
+      <h2>O que acontece se misturar</h2>
+
+      <h3>Microfone numa entrada de linha</h3>
+      <p>O sinal do microfone é fraco demais para a entrada de linha. Você abre o canal todo, vira o ganho no máximo, e mesmo assim a voz fica baixa e cheia de ruído. <strong>Solução:</strong> ligar o microfone na entrada de mic (XLR ou combo) e usar o ganho corretamente.</p>
+
+      <h3>Sinal de linha numa entrada de microfone</h3>
+      <p>Aqui é o contrário: o sinal de linha (teclado, notebook) é forte demais para a entrada de mic. O canal distorce com o menor toque no fader. <strong>Solução:</strong> usar a entrada de linha (P10) do canal, ou abaixar o ganho até o mínimo se a mesa não tiver entrada de linha separada.</p>
+
+      <h3>Saída de amplificador em caixa ativa</h3>
+      <p>Esse é grave. Caixa ativa já tem amplificador interno. Se você ligar nela uma saída que já está amplificada, você vai sobrecarregar o sistema interno dela. <strong>Pode queimar o amplificador da caixa.</strong> Caixa ativa recebe sinal de linha (da mesa), não saída de amplificador.</p>
+
+      <h3>Saída de mesa direto na caixa passiva</h3>
+      <p>A mesa não tem força para mover o cone da caixa. Som sai praticamente inaudível, e você abre tudo tentando compensar, distorcendo o sinal. <strong>Caixa passiva exige amplificador no meio do caminho.</strong></p>
+
+      <h2>O ganho: por que ele existe</h2>
+
+      <p>Olha o canal da sua mesa. Antes do fader, antes da equalização, antes de tudo, tem um botãozinho chamado <strong>GAIN</strong> (ou TRIM, ou GAIN/PAD). Ele existe justamente porque os sinais que entram na mesa têm forças diferentes.</p>
+
+      <p>O ganho serve para colocar todos os sinais num "patamar comum" antes de você começar a misturar. É a primeira coisa que se ajusta num canal, e o que mais a gente vê mal feito em igreja: ou ganho aberto demais (distorce, microfoniza) ou ganho fechado demais (canal fraco, ruidoso).</p>
+
+      <div class="tip-box">
+        <div class="title">Regra simples para começar</div>
+        <p><strong>Abra o fader do canal em zero (no risco do meio)</strong>, peça para a pessoa falar ou tocar no volume normal, e ajuste o ganho até o LED verde do canal acender constante e o vermelho (CLIP) só piscar <em>raramente, nos picos mais altos</em>. Se o vermelho ficar aceso, abaixa o ganho.</p>
+        <p>Esse processo se chama <strong>ajuste de gain stage</strong>, e a gente vai praticar nas visitas.</p>
+      </div>
+
+      <div class="warn-box">
+        <div class="title">O que é "clipar"</div>
+        <p>Quando o LED vermelho (CLIP ou PEAK) acende, o sinal está mais forte do que o canal aguenta — o pico da onda é cortado em cima e em baixo, e o som vira uma distorção chiada e desagradável.</p>
+        <p>Em igreja isso aparece muito em microfone de pregador que grita, ou em bumbo de bateria quando o ganho está alto demais. <strong>Solução:</strong> abaixar o ganho daquele canal específico, não o fader.</p>
+      </div>
+
+      <h2>O que vem a seguir</h2>
+
+      <p>Agora que você sabe identificar o nível certo, o próximo bloco é sobre o que <em>carrega</em> esse sinal: os cabos e conectores. Por que cabo longo às vezes chia, e qual cabo usar em cada caso.</p>
+
+      <p style="margin-top: 24px;">
+        <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">← Voltar para o índice do curso</a>
+      </p>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="01-como-som-funciona.html">← Bloco 1</a>
+    <div class="center">Bloco 2 / 6 · Níveis de sinal</div>
+    <a href="03-cabos-e-conectores.html">Bloco 3 →</a>
+  </nav>
+</body>
+</html>
