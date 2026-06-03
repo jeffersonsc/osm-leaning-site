@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recomendações de equipamento · Manual do OSM v1.5</title>
+  <meta name="description" content="Recomendações de microfones de medição, interfaces de áudio USB, cabos balanceados e calibrador para usar com o Open Sound Meter em alinhamento de igreja.">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="../index.html">OSM</a>
+      <span class="sep">/</span>
+      <a href="index.html">Manual</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Referência</div>
+        <h1>Recomendações de equipamento</h1>
+      </div>
+      <div class="subtitle">o que comprar para medir<br>antes de instalar o OSM</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>O Open Sound Meter é um excelente software gratuito, mas ele depende de hardware decente para entregar medições confiáveis. Esta página lista o que funciona bem na prática para alinhamento de igreja, em três faixas de preço, com observações de quem usa.</p>
+
+      <div class="tip-box">
+        <div class="title">Sobre os preços</div>
+        <p>Valores em reais (BRL), aproximados, mercado nacional novo em 2026. Podem variar bastante por causa de câmbio e disponibilidade. Mercado usado tem ofertas boas para quem está começando — fóruns como AudioLista e grupos de WhatsApp de áudio profissional ajudam.</p>
+      </div>
+
+      <h2>Microfone de medição</h2>
+
+      <p>O microfone é a peça mais importante do kit. Use sempre um microfone <strong>omnidirecional</strong> com resposta de frequência <strong>plana</strong> (medida e calibrada de fábrica). Microfone vocal SM58 ou de instrumento <em>não serve</em> — eles têm curva moldada que vai mentir na medição.</p>
+
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Modelo</th>
+            <th>Preço aprox.</th>
+            <th>Observações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="label">Behringer ECM8000</td>
+            <td>R$ 400 – 600</td>
+            <td>Clássico de entrada. Resposta razoavelmente plana, funciona para igreja. Cuidado com unidades muito antigas — qualidade oscila por lote.</td>
+          </tr>
+          <tr>
+            <td class="label">dBx RTA-M</td>
+            <td>R$ 500 – 700</td>
+            <td>Equivalente direto do ECM8000, sai um pouco mais caro mas com controle de qualidade melhor. Boa primeira compra.</td>
+          </tr>
+          <tr class="highlight">
+            <td class="label">miniDSP UMIK-1</td>
+            <td>R$ 1.000 – 1.500</td>
+            <td><strong>USB direto</strong>, dispensa interface de áudio. Vem com arquivo de calibração individual no site. Excelente custo-benefício se você quer começar leve sem comprar interface. Limita você a 1 microfone só.</td>
+          </tr>
+          <tr>
+            <td class="label">Audix TM1</td>
+            <td>R$ 2.500 – 3.500</td>
+            <td>Padrão profissional. Curva plana de verdade, calibração individual, construção robusta. Para quem faz muitas visitas técnicas.</td>
+          </tr>
+          <tr>
+            <td class="label">Earthworks M30 / M50</td>
+            <td>R$ 5.000 – 8.000</td>
+            <td>Referência de mercado em medição. Resposta plana até 30/50 kHz. Vale para estúdio e medição crítica de sistemas grandes. Overkill para igreja média.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="warn-box">
+        <div class="title">Phantom power obrigatório</div>
+        <p>Todos os microfones de medição (exceto UMIK-1 que é USB) precisam de <strong>+48V phantom power</strong> da interface. Não esqueça de ligar no painel da interface antes de medir — sem phantom, sinal sai quase mudo e você vai achar que o mic está com defeito.</p>
+      </div>
+
+      <h2>Interface de áudio USB</h2>
+
+      <p>A interface conecta o microfone de medição (canal M) e a referência da mesa (canal R) ao computador. Para OSM, o requisito mínimo é <strong>2 entradas e 2 saídas</strong> — uma entrada para o mic (precisa de phantom), uma para line in da mesa, uma saída para mandar o sinal de teste de volta para a mesa.</p>
+
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Modelo</th>
+            <th>Preço aprox.</th>
+            <th>Observações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="label">Behringer UMC22</td>
+            <td>R$ 500 – 700</td>
+            <td>2 in / 2 out, phantom, preamp Midas. Funciona para começar. Conversores básicos mas suficientes para medição.</td>
+          </tr>
+          <tr class="highlight">
+            <td class="label">Behringer UMC202HD</td>
+            <td>R$ 700 – 1.000</td>
+            <td>Versão melhor do UMC22, conversores 24-bit/192kHz. <strong>Excelente custo-benefício para começar</strong>.</td>
+          </tr>
+          <tr>
+            <td class="label">PreSonus AudioBox iTwo</td>
+            <td>R$ 1.500 – 2.000</td>
+            <td>2 in / 2 out, MIDI, drivers estáveis em macOS e Windows. Construção sólida.</td>
+          </tr>
+          <tr class="highlight">
+            <td class="label">Focusrite Scarlett 2i2 (4ª gen)</td>
+            <td>R$ 1.800 – 2.400</td>
+            <td><strong>Padrão de fato no mercado</strong>. Drivers confiáveis, conversores limpos, suporte oficial. Recomendação segura para quem faz visitas regularmente.</td>
+          </tr>
+          <tr>
+            <td class="label">Focusrite Scarlett 4i4 (4ª gen)</td>
+            <td>R$ 2.800 – 3.500</td>
+            <td>Igual ao 2i2 mas com 4 entradas — útil se você quer medir 2-3 microfones simultaneamente em pontos diferentes da igreja.</td>
+          </tr>
+          <tr>
+            <td class="label">Focusrite Scarlett 18i6 (3ª gen)</td>
+            <td>R$ 4.500 – 6.000</td>
+            <td>O que aparece nos screenshots do manual do OSM. 8 entradas, ideal para sistema grande com múltiplos pontos de medição simultâneos. Para profissional de PA.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="tip-box">
+        <div class="title">A combinação de entrada</div>
+        <p>Para a maioria das igrejas, <strong>UMC202HD + ECM8000</strong> resolve por menos de R$ 1.200 e mede tão bem quanto setup de R$ 5.000. Suba para Scarlett 2i2 + dBx RTA-M ou UMIK-1 quando estiver fazendo visitas regulares e quiser drivers/qualidade mais consistente.</p>
+      </div>
+
+      <h2>Cabos</h2>
+
+      <p>Cabo de medição não precisa ser caríssimo, mas precisa ser <strong>balanceado</strong> e <strong>blindado decente</strong>. Cabo ruim chia, vibra com luminária próxima, e arruína a coerência da medição.</p>
+
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Cabo</th>
+            <th>Para que serve</th>
+            <th>Comprimento e dica</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="label">XLR balanceado</td>
+            <td>Microfone de medição → interface (canal M)</td>
+            <td>3m no rack; 10m para andar pela igreja com mic. Marcas: Neutrik (conector) + Mogami / Sommer / Tasker (cabo).</td>
+          </tr>
+          <tr>
+            <td class="label">P10 TRS para XLR</td>
+            <td>Saída da interface → entrada da mesa (envio do generator)</td>
+            <td>1-3m. Confira se sua mesa tem entrada XLR ou P10 TRS para line — em muitas Behringer/Yamaha é P10.</td>
+          </tr>
+          <tr class="highlight">
+            <td class="label">P10 TRS direct out / insert</td>
+            <td>Saída direta da mesa → entrada da interface (canal R / referência)</td>
+            <td>1-3m. <strong>Esse é o cabo mais esquecido.</strong> Sem ele, sem Magnitude e Phase. Use o insert do canal master ou um direct out.</td>
+          </tr>
+          <tr>
+            <td class="label">USB blindado</td>
+            <td>Interface → computador</td>
+            <td>1-2m. Cabo USB de mercado dá problema. Compre <strong>USB com ferrite</strong> (anel preto no fim) ou cabo "para áudio profissional".</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="warn-box">
+        <div class="title">Loop de terra (ground loop)</div>
+        <p>Computador no plug de uma fase, interface na outra, mesa na terceira — receita para zumbido de 60 Hz constante. <strong>Plugue o computador, a interface e a mesa no mesmo filtro de linha</strong> (ou na mesma fase) para evitar loop de terra. Se o zumbido aparecer mesmo assim, um isolador USB (Tendak USB isolator, ~R$ 200) resolve em 95% dos casos.</p>
+      </div>
+
+      <h2>Calibrador SPL (opcional)</h2>
+
+      <p>Para medições absolutas de pressão sonora (SPL em dB), você precisa <strong>calibrar o sistema</strong> com uma fonte de nível conhecido. Sem calibrador, os números do SPL Meter no OSM são relativos — você vê variação, mas não o valor absoluto que vai reportar para a igreja.</p>
+
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Modelo</th>
+            <th>Preço aprox.</th>
+            <th>Observações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="label">Behringer MIC100</td>
+            <td>R$ 400 – 600</td>
+            <td>Saída em 94 dB e 114 dB. Funciona para casos básicos. Não é certificado por laboratório.</td>
+          </tr>
+          <tr>
+            <td class="label">Galaxy Audio CM-130</td>
+            <td>R$ 1.500 – 2.500</td>
+            <td>Padrão Classe 2. Calibração rastreável. Para quem reporta SPL oficial em eventos.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Acessórios úteis</h2>
+
+      <ul>
+        <li><strong>Suporte de microfone</strong> com tripé pesado — você vai colocar o mic em pé, no meio da igreja, longe de você. Tripé leve cai com qualquer encostada.</li>
+        <li><strong>Windscreen de espuma</strong> — para evento ao ar livre, reduz o efeito do vento na medição em frequências graves.</li>
+        <li><strong>Estojo rígido</strong> — você vai carregar interface, mic e cabos em todas as visitas. Mala pequena de ferramenta resolve.</li>
+        <li><strong>Notebook com USB-C ou USB-A</strong> — confira a porta antes. MacBook recente só tem USB-C; pode precisar de adaptador para interface USB-A.</li>
+        <li><strong>Hub USB alimentado</strong> — se você usa muitos dispositivos USB no notebook, hub <em>com fonte própria</em> evita queda de tensão na interface.</li>
+      </ul>
+
+      <h2>Kit recomendado para começar</h2>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="key">Iniciante</div>
+          <div class="val">~R$ 1.300</div>
+          <div class="desc">Behringer UMC202HD + Behringer ECM8000 + 2 cabos XLR + 1 P10 TRS. Mede igreja média com qualidade suficiente.</div>
+        </div>
+        <div class="stat">
+          <div class="key">Intermediário</div>
+          <div class="val">~R$ 3.500</div>
+          <div class="desc">Focusrite Scarlett 2i2 (4ª) + dBx RTA-M + cabos Sommer + suporte de mic decente. Padrão para quem faz consultoria regular.</div>
+        </div>
+        <div class="stat">
+          <div class="key">Profissional</div>
+          <div class="val">~R$ 8.000+</div>
+          <div class="desc">Focusrite Scarlett 4i4 + Audix TM1 + calibrador Galaxy + kit completo de cabos. Para empresa de áudio com várias igrejas como cliente.</div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <div class="title">Antes de comprar tudo</div>
+        <p>Comece pelo mais barato. Você vai aprender o que falta no kit conforme usar. Os mesmos R$ 1.300 do tier iniciante medem 90% do que você precisa em igreja. Se descobrir, depois de 6 meses usando, que o ECM8000 falha em algum cenário específico, aí faz sentido subir. Comprar profissional sem nunca ter medido é desperdício.</p>
+      </div>
+
+      <h2>Onde comprar no Brasil</h2>
+
+      <ul>
+        <li><strong>Lojas físicas:</strong> Made in Brazil (SP), Habro Music, Animato, Som Maior — pedido com nota fiscal e garantia.</li>
+        <li><strong>Marketplace:</strong> Mercado Livre, Amazon, Magazine Luiza. Confira sempre se o vendedor é <em>autorizado da marca</em>, não importador paralelo. Importador paralelo pode dar problema de garantia.</li>
+        <li><strong>Importação direta:</strong> Sweetwater (EUA) e Thomann (Alemanha) entregam no Brasil. Pode valer para itens caros (Earthworks, Audix), mas confira impostos antes — costuma duplicar o preço final.</li>
+        <li><strong>Mercado usado:</strong> AudioLista (fórum) e grupos de Facebook/WhatsApp de áudio profissional. Boas ofertas, especialmente em interface usada com cabo + caixa.</li>
+      </ul>
+
+      <p style="margin-top: 36px; text-align: center;">
+        <a href="01-instalacao.html" style="display: inline-block; background: var(--terra); color: white; padding: 12px 22px; border-radius: 6px; text-decoration: none; font-weight: 600;">Com o equipamento em mãos: Instalar o OSM →</a>
+      </p>
+
+      <p style="margin-top: 24px;">
+        <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">← Voltar para o índice do manual</a>
+      </p>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="index.html">← Índice do manual</a>
+    <div class="center">Referência · Recomendações de equipamento</div>
+    <a href="01-instalacao.html">Instalação →</a>
+  </nav>
+</body>
+</html>
