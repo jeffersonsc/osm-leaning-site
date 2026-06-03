@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eventos · medição rápida · OSM Guia visual</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/13-eventos.html" class="active">PT</a>
+        <a href="../en/index.html">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infográfico 13 / 15</div>
+        <h1>Eventos · medição rápida</h1>
+      </div>
+      <div class="subtitle">setup curto, sistema pronto:<br>quando não dá pra calibrar tudo</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">15 minutos pra ficar funcional.</h2>
+        <p>Em evento ao vivo (vigília, congresso, casamento) o sistema chega de caminhão, é montado em horas, e o som tem que rolar. Não tem 4 horas pra calibrar. O workflow muda — você prioriza segurança e proteção, não perfeição.</p>
+
+        <p>Os 4 checks que <strong>sempre cabem em 15 minutos</strong>, antes da primeira pessoa entrar:</p>
+
+        <ol style="margin-left: 18px; margin-top: 12px;">
+          <li><strong>Polaridade de todas as caixas</strong> — duas caixas com polaridade trocada arruínam o som da plateia inteira.</li>
+          <li><strong>SPL meter ligado em RMS A Slow</strong> — limite vermelho em 100 dB (ou o que for permitido no local).</li>
+          <li><strong>Delay zones com cálculo rápido</strong> — distância × 2,9 ms, sem alinhamento fino de fase.</li>
+          <li><strong>Sub + top em fase</strong> — basta verificar que não há buraco profundo em 80 Hz; ajuste fino só se sobrar tempo.</li>
+        </ol>
+      </div>
+
+      <div class="callout terra">
+        <div class="head">SPL como medidor de "rolha"</div>
+        <p style="margin-bottom: 10px;">Em evento ao vivo, o SPL Meter do OSM serve menos para calibrar e mais para <strong>proteger</strong>:</p>
+        <p style="margin-bottom: 10px;">• Da multidão (segurança auditiva).</p>
+        <p style="margin-bottom: 10px;">• Do vizinho (limite legal).</p>
+        <p style="margin-bottom: 10px;">• Do amplificador (distorção sustentada queima caixa).</p>
+        <p style="margin: 0;">Deixe num dispositivo com tela grande, num canto da mesa. Limite verde / amarelo / vermelho configurado, e fim. Você opera o evento olhando 80% pra mesa, 20% pra esse indicador.</p>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom">
+      <table class="viz">
+        <thead>
+          <tr>
+            <th>Cenário</th>
+            <th>Setup OSM</th>
+            <th>Métrica de olho</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Vigília indoor</strong></td><td>Single — RMS SPL A Slow</td><td>&lt; 95 dB</td></tr>
+          <tr class="highlight"><td><strong>Congresso ginásio</strong></td><td>Double — SPL + Magnitude</td><td>&lt; 100 dB · sem comb visível</td></tr>
+          <tr><td><strong>Open air com banda</strong></td><td>SPL + LAeq 15 min</td><td>&lt; 95 dB médio</td></tr>
+          <tr><td><strong>Casamento outdoor</strong></td><td>SPL Single</td><td>&lt; 85 dB médio</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout amber">
+        <div class="head">⚠ Vento e ruído ambiente</div>
+        <p style="margin-bottom: 10px;"><strong>Vento direto no microfone de medição:</strong> a coerência cai a zero abaixo de 200 Hz, e a medição lá vira ruído. Solução: <strong>windscreen de espuma</strong> sobre o mic, virado oposto ao vento.</p>
+        <p style="margin-bottom: 10px;"><strong>Multidão em voz alta:</strong> sons de fala humana têm a mesma faixa do pink noise. Coherence cai. Solução: <strong>FFT power maior (16-18)</strong> + smoothing 1/12 para integrar mais e suavizar o ruído.</p>
+        <p style="margin: 0;"><strong>Ar condicionado / gerador:</strong> ruído rosa-contínuo em 100-500 Hz. Visível como pico no Spectrum mesmo sem tocar nada. Mude o mic de posição se possível.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="12-workflow-igreja.html">← Anterior: Workflow igreja</a>
+    <div class="center">13 / 15 — Eventos · medição rápida</div>
+    <a href="14-estudio-sala.html">Próximo: Estúdio →</a>
+  </nav>
+</body>
+</html>

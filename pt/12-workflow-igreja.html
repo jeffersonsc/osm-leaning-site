@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Igreja · workflow completo · OSM Guia visual</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/12-workflow-igreja.html" class="active">PT</a>
+        <a href="../en/index.html">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infográfico 12 / 15</div>
+        <h1>Igreja · workflow completo</h1>
+      </div>
+      <div class="subtitle">do checklist preenchido<br>ao culto alinhado</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">Calibração não é improviso.</h2>
+        <p>Uma visita técnica de alinhamento de igreja tem três fases bem definidas: <strong>pré-visita</strong> (em casa, com o checklist), <strong>visita</strong> (na igreja, com o sistema), e <strong>pós-visita</strong> (documentação para o próximo culto).</p>
+
+        <p>Cada fase reduz o trabalho da seguinte. Pular o pré quase sempre custa tempo na visita. Pular o pós significa começar do zero da próxima vez. O workflow abaixo é o que dá resultado consistente em umas 3-4 horas de visita.</p>
+
+        <div class="callout terra highlight-box" style="margin-top: 24px;">
+          <div class="head">A regra dos 3 pontos de medição</div>
+          <p style="margin: 0;"><strong>Sempre meça em 3 pontos da igreja</strong>: na mesa, no meio do templo, e no fundo (ou debaixo do mezanino, se houver). Um ponto só mente.</p>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <div>
+            <div class="name">Pré-visita</div>
+            <div class="desc">Operador preenche o checklist da apostila. Você revisa: marca da mesa, amplificadores, caixas, processador.</div>
+          </div>
+          <div></div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <div>
+            <div class="name">Setup OSM</div>
+            <div class="desc">Interface USB no notebook, mic de medição na entrada 1, referência da mesa (insert) na entrada 2. Generator pink, nível baixo.</div>
+          </div>
+          <div></div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <div>
+            <div class="name">Baseline</div>
+            <div class="desc">Meça nos 3 pontos. STORE com nomes "Antes - Mesa", "Antes - Meio", "Antes - Fundo".</div>
+          </div>
+          <div></div>
+        </div>
+        <div class="step">
+          <div class="num">4</div>
+          <div>
+            <div class="name">Sub + top</div>
+            <div class="desc">Alinhe fase no crossover (Infográfico 07). Polaridade test (Infográfico 10). Delay zones se houver (Infográfico 08).</div>
+          </div>
+          <div></div>
+        </div>
+        <div class="step">
+          <div class="num">5</div>
+          <div>
+            <div class="name">EQ da sala</div>
+            <div class="desc">No EQ gráfico ou processador, corte só o que aparece de pico claro na medição. Não reforce mais que +3 dB.</div>
+          </div>
+          <div></div>
+        </div>
+        <div class="step">
+          <div class="num">6</div>
+          <div>
+            <div class="name">Comparação</div>
+            <div class="desc">Meça novamente os 3 pontos. STORE como "Depois - X". Compare lado a lado. Documente as mudanças.</div>
+          </div>
+          <div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom">
+      <div class="callout navy">
+        <div class="head">Cronograma típico</div>
+        <p style="margin-bottom: 8px;"><strong>0:00 – 0:30</strong> · setup do OSM e interface, configura canal M e R, ganho.</p>
+        <p style="margin-bottom: 8px;"><strong>0:30 – 1:00</strong> · baseline nos 3 pontos. STORE de cada um.</p>
+        <p style="margin-bottom: 8px;"><strong>1:00 – 2:00</strong> · alinhamento de sub+top, polaridade, delays.</p>
+        <p style="margin-bottom: 8px;"><strong>2:00 – 2:45</strong> · EQ da sala nos 3 pontos.</p>
+        <p style="margin-bottom: 8px;"><strong>2:45 – 3:15</strong> · medição depois, STORE, comparação.</p>
+        <p style="margin: 0;"><strong>3:15 – 3:30</strong> · save do arquivo OSM, documentação para o operador.</p>
+      </div>
+
+      <div class="callout amber">
+        <div class="head">⚠ Erros que travam a visita</div>
+        <p style="margin-bottom: 10px;"><strong>Canal R não conectado:</strong> sem referência da mesa, Magnitude e Phase não funcionam. Reserve 10 minutos só pra essa conexão na chegada.</p>
+        <p style="margin-bottom: 10px;"><strong>Phantom desligado no mic de medição:</strong> sinal baixíssimo, coerência ruim. Sempre confira +48V na interface antes de medir.</p>
+        <p style="margin: 0;"><strong>Igreja sem energia estável durante a visita:</strong> reset do amplificador no meio de uma medição arruína a comparação antes/depois. Faça um pré-check de tomadas.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="11-coupling-comb.html">← Anterior: Coupling vs comb</a>
+    <div class="center">12 / 15 — Workflow igreja</div>
+    <a href="13-eventos.html">Próximo: Eventos →</a>
+  </nav>
+</body>
+</html>

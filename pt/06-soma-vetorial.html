@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soma vetorial · OSM Guia visual</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/06-soma-vetorial.html" class="active">PT</a>
+        <a href="../en/index.html">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infográfico 06 / 15</div>
+        <h1>Soma vetorial</h1>
+      </div>
+      <div class="subtitle">por que duas caixas<br>somam ou cancelam</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">Som não soma como número.</h2>
+        <p>Quando duas caixas tocam a mesma frequência ao mesmo tempo, o som no ar não soma como dB + dB. Soma como <strong>vetor</strong> — depende não só da amplitude, mas da <strong>diferença de fase</strong> entre as duas ondas naquele ponto do espaço.</p>
+
+        <p>Pense em duas setas no plano. Cada caixa contribui com uma seta: o tamanho é a amplitude, a direção é a fase. A soma das duas setas (cabeça com cauda) é o resultado que o microfone capta.</p>
+
+        <div class="callout terra highlight-box" style="margin-top: 28px;">
+          <div class="head">A fórmula</div>
+          <p style="font-weight: 600; color: var(--text); margin: 0;">A<sub>total</sub> = √(A₁² + A₂² + 2·A₁·A₂·cos(Δφ))</p>
+          <p style="margin: 8px 0 0;">A₁ e A₂ = amplitudes individuais. Δφ = diferença de fase em graus. Você não precisa calcular — basta entender o que acontece em 3 casos.</p>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Soma vetorial em 3 diferenças de fase</div>
+        <svg class="chart" viewBox="0 0 500 380" xmlns="http://www.w3.org/2000/svg" id="vetor-svg"></svg>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom">
+      <div class="chart-wrap">
+        <div class="chart-title" style="text-align: left;">Como a soma muda com a fase (em dB)</div>
+        <svg class="chart" viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg" id="curva-svg"></svg>
+      </div>
+
+      <div class="callout navy">
+        <div class="head">✓ Os 3 casos para decorar</div>
+        <p style="margin-bottom: 12px;"><strong style="color: var(--green);">0° (em fase):</strong> soma de +6 dB. Duas caixas iguais soam como uma com o dobro do potência.</p>
+        <p style="margin-bottom: 12px;"><strong style="color: var(--amber);">90° (defasadas):</strong> soma de +3 dB. Existe uma resultante, mas pequena.</p>
+        <p style="margin: 0;"><strong style="color: var(--red);">180° (opostas):</strong> cancelamento total. Silêncio onde duas iguais deveriam ser o dobro.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="05-fft.html">← Anterior: FFT</a>
+    <div class="center">06 / 15 — Soma vetorial</div>
+    <a href="07-alinhando-sub-top.html">Próximo: Sub + top →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+
+    // ===== DIAGRAMA DE VETORES =====
+    const svg = document.getElementById('vetor-svg');
+    const casos = [
+      { yC: 75,  angle: 0,        color: "var(--green)", label: "Em fase (0°)",     result: "+6 dB · 2× amplitude" },
+      { yC: 195, angle: 90,       color: "var(--amber)", label: "Defasadas 90°",   result: "+3 dB · ~1,41×" },
+      { yC: 315, angle: 180,      color: "var(--red)",   label: "Em fase oposta (180°)", result: "Cancelamento · 0" },
+    ];
+
+    function marker(id, color) {
+      const defs = svg.querySelector('defs') || svg.appendChild(document.createElementNS(ns, 'defs'));
+      const m = document.createElementNS(ns, 'marker');
+      m.setAttribute('id', id);
+      m.setAttribute('viewBox', '0 0 10 10');
+      m.setAttribute('refX', 8); m.setAttribute('refY', 5);
+      m.setAttribute('markerWidth', 6); m.setAttribute('markerHeight', 6);
+      m.setAttribute('orient', 'auto');
+      const p = document.createElementNS(ns, 'path');
+      p.setAttribute('d', 'M0,0 L10,5 L0,10 z');
+      p.setAttribute('fill', color);
+      m.appendChild(p);
+      defs.appendChild(m);
+    }
+    marker('navy', '#5B7BD8');
+    marker('terra', '#E47766');
+    marker('green', '#34D399');
+    marker('amber', '#F5B947');
+    marker('red', '#F87171');
+    marker('white', '#E5E9F0');
+
+    function arrow(x1, y1, x2, y2, color, markerId, width) {
+      const l = document.createElementNS(ns, 'line');
+      l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+      l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+      l.setAttribute('stroke', color);
+      l.setAttribute('stroke-width', width || 2);
+      l.setAttribute('marker-end', `url(#${markerId})`);
+      svg.appendChild(l);
+    }
+    function text(x, y, t, opts) {
+      const e = document.createElementNS(ns, 'text');
+      e.setAttribute('x', x); e.setAttribute('y', y);
+      if (opts && opts.anchor) e.setAttribute('text-anchor', opts.anchor);
+      if (opts && opts.size) e.setAttribute('font-size', opts.size);
+      if (opts && opts.weight) e.setAttribute('font-weight', opts.weight);
+      e.setAttribute('fill', (opts && opts.fill) || '#E5E9F0');
+      e.setAttribute('font-family', 'sans-serif');
+      e.textContent = t;
+      svg.appendChild(e);
+    }
+
+    casos.forEach(c => {
+      text(10, c.yC - 35, c.label, { size: 12, weight: 700 });
+      text(10, c.yC - 20, c.result, { size: 11, fill: c.color, weight: 600 });
+
+      const cx = 130, len = 65;
+      // vetor A (sempre horizontal, azul navy)
+      arrow(cx, c.yC, cx + len, c.yC, '#5B7BD8', 'navy', 2.5);
+      text(cx + len + 8, c.yC + 4, 'A', { size: 11, fill: '#5B7BD8', weight: 700 });
+
+      // vetor B no ângulo (terra), partindo da ponta de A
+      const rad = c.angle * Math.PI / 180;
+      const bx = cx + len + Math.cos(rad) * len;
+      const by = c.yC - Math.sin(rad) * len;
+      arrow(cx + len, c.yC, bx, by, '#E47766', 'terra', 2.5);
+      text(bx + 8, by + 4, 'B', { size: 11, fill: '#E47766', weight: 700 });
+
+      // resultante (do início de A até ponta de B)
+      const rx = bx, ry = by;
+      if (c.angle === 180) {
+        text(cx + len/2 - 6, c.yC + 28, 'A + B = 0', { size: 13, weight: 700, fill: c.color });
+      } else {
+        const dash = document.createElementNS(ns, 'line');
+        dash.setAttribute('x1', cx); dash.setAttribute('y1', c.yC);
+        dash.setAttribute('x2', rx); dash.setAttribute('y2', ry);
+        dash.setAttribute('stroke', '#E5E9F0');
+        dash.setAttribute('stroke-width', 2.5);
+        dash.setAttribute('stroke-dasharray', '5 3');
+        dash.setAttribute('marker-end', 'url(#white)');
+        svg.appendChild(dash);
+        const mx = (cx + rx) / 2, my = (c.yC + ry) / 2;
+        text(mx + 8, my - 8, 'R (resultante)', { size: 11, fill: '#E5E9F0', weight: 600 });
+      }
+    });
+
+    // ===== CURVA DA SOMA EM dB =====
+    const svgC = document.getElementById('curva-svg');
+    const cxStart = 50, cxEnd = 580, cyTop = 30, cyBot = 200;
+    const cyZero = cyTop + (cyBot - cyTop) * (6/12); // +6 dB no topo, -6 (na verdade -infinito) embaixo
+
+    // axis
+    function cline(x1,y1,x2,y2,cls) {
+      const l = document.createElementNS(ns,'line');
+      l.setAttribute('x1',x1); l.setAttribute('y1',y1);
+      l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+      l.setAttribute('class', cls);
+      svgC.appendChild(l);
+    }
+    function ctext(x,y,t,opts) {
+      const e = document.createElementNS(ns,'text');
+      e.setAttribute('x',x); e.setAttribute('y',y);
+      if (opts && opts.anchor) e.setAttribute('text-anchor', opts.anchor);
+      e.setAttribute('class', (opts && opts.cls) || 'axis-text');
+      e.textContent = t;
+      svgC.appendChild(e);
+    }
+    cline(cxStart, cyTop, cxStart, cyBot, 'axis');
+    cline(cxStart, cyBot, cxEnd, cyBot, 'axis');
+    // dB labels
+    [+6, +3, 0, -6, -12].forEach((db, i) => {
+      const y = cyTop + (cyBot - cyTop) * ((6 - db) / 18);
+      ctext(cxStart - 6, y + 3, (db > 0 ? '+' : '') + db + ' dB', { anchor: 'end' });
+      cline(cxStart, y, cxEnd, y, 'grid-line');
+    });
+    // x labels (graus)
+    [0, 45, 90, 135, 180].forEach(deg => {
+      const x = cxStart + (cxEnd - cxStart) * (deg / 180);
+      ctext(x, cyBot + 16, deg + '°', { anchor: 'middle' });
+    });
+    ctext((cxStart + cxEnd) / 2, cyBot + 32, 'Diferença de fase (Δφ)', { anchor: 'middle' });
+
+    // curva: dB = 20 * log10(2 * |cos(Δφ/2)|), de 0 a 180
+    const ptos = [];
+    const N = 180;
+    for (let i = 0; i <= N; i++) {
+      const deg = (i / N) * 180;
+      const rad = deg * Math.PI / 180;
+      const factor = 2 * Math.abs(Math.cos(rad / 2));
+      let db = factor > 0.0001 ? 20 * Math.log10(factor) : -30;
+      if (db < -18) db = -18; // clamp
+      const x = cxStart + (cxEnd - cxStart) * (deg / 180);
+      const y = cyTop + (cyBot - cyTop) * ((6 - db) / 18);
+      ptos.push([x.toFixed(1), y.toFixed(1)]);
+    }
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', 'M ' + ptos.map(p => p.join(',')).join(' L '));
+    path.setAttribute('class', 'curve terra');
+    svgC.appendChild(path);
+
+    // pontos-chave: 0°→+6, 90°→+3, 180°→cancela
+    [[0, 6, '+6', '#34D399'], [90, 3, '+3', '#F5B947'], [180, -18, '−∞', '#F87171']].forEach(p => {
+      const x = cxStart + (cxEnd - cxStart) * (p[0] / 180);
+      const y = cyTop + (cyBot - cyTop) * ((6 - p[1]) / 18);
+      const c = document.createElementNS(ns, 'circle');
+      c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 5);
+      c.setAttribute('fill', p[3]);
+      svgC.appendChild(c);
+      ctext(x, y - 10, p[2] + ' dB', { anchor: 'middle' });
+      svgC.lastChild.setAttribute('fill', p[3]);
+      svgC.lastChild.setAttribute('font-weight', '700');
+    });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coupling vs comb filtering · OSM Guia visual</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/11-coupling-comb.html" class="active">PT</a>
+        <a href="../en/index.html">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infográfico 11 / 15</div>
+        <h1>Coupling vs comb filtering</h1>
+      </div>
+      <div class="subtitle">os dois resultados possíveis<br>quando duas caixas tocam juntas</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">Mesma fonte, dois caminhos.</h2>
+        <p>Quando duas caixas tocam o mesmo conteúdo e o som chega no microfone <strong>por caminhos de comprimentos diferentes</strong>, dois cenários acontecem:</p>
+
+        <p><strong style="color: var(--green);">Coupling (acoplamento):</strong> as duas caixas estão bem próximas e bem alinhadas. O som chega praticamente junto. Resultado: soma constructiva, ganho de até +6 dB, faixa de frequência uniforme.</p>
+
+        <p><strong style="color: var(--red);">Comb filtering (filtro pente):</strong> as caixas estão separadas por uma distância considerável, ou um ouvinte está fora do eixo central. O som chega em tempos diferentes. Em algumas frequências, soma. Em outras, cancela. O resultado tem a forma de um "pente" — picos e vales alternados ao longo do espectro.</p>
+
+        <div class="callout terra highlight-box" style="margin-top: 24px;">
+          <div class="head">A fórmula dos cancelamentos</div>
+          <p style="font-weight: 600; color: var(--text); margin: 0;">Cancelamento na frequência <strong>f = c / (2·Δd)</strong></p>
+          <p style="margin: 8px 0 0;">c = 343 m/s. Δd = diferença entre os dois caminhos em metros. Depois disso, cancelamentos repetem em <strong>3f, 5f, 7f...</strong> — o "pente".</p>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Comb filtering: padrão característico</div>
+        <svg class="chart" viewBox="0 0 500 380" xmlns="http://www.w3.org/2000/svg" id="comb-svg"></svg>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom">
+      <table class="viz">
+        <thead>
+          <tr>
+            <th>Diferença de caminho</th>
+            <th>1º cancelamento em</th>
+            <th>Cenário típico</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>0,5 m</td><td class="strong">343 Hz</td><td>Duas caixas no palco, ouvinte de lado</td></tr>
+          <tr class="highlight"><td>1 m</td><td class="strong">172 Hz</td><td>Stereo L+R, ouvinte fora do centro</td></tr>
+          <tr><td>2 m</td><td class="strong">86 Hz</td><td>Sub + top sem alinhamento (crítico!)</td></tr>
+          <tr><td>5 m</td><td class="strong">34 Hz</td><td>PA + reforço sem delay</td></tr>
+          <tr><td>10 m</td><td class="strong">17 Hz</td><td>Templo grande, cancelamento inaudível mas presente</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout navy">
+        <div class="head">Como evitar comb filtering em igreja</div>
+        <p style="margin-bottom: 10px;"><strong>Ponha as caixas próximas</strong> — caixas adjacentes (line array, ou caixas em par bem juntas) raramente combam.</p>
+        <p style="margin-bottom: 10px;"><strong>Use delay nos reforços</strong> — alinha o tempo de chegada do som de cada zona (Infográfico 08).</p>
+        <p style="margin-bottom: 10px;"><strong>Polaridade certa</strong> — polaridade errada cria comb mesmo com caixas alinhadas (Infográfico 10).</p>
+        <p style="margin: 0;"><strong>Faça mono o que pode</strong> — em igreja, panorâmica estéreo causa mais comb do que ajuda. Mantenha o som mono ou quase-mono.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="10-inversao-polaridade.html">← Anterior: Polaridade</a>
+    <div class="center">11 / 15 — Coupling vs comb filtering</div>
+    <a href="12-workflow-igreja.html">Próximo: Workflow igreja →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.getElementById('comb-svg');
+    const xS = 50, xE = 470, yT = 30, yB = 320;
+
+    function L(x1,y1,x2,y2,cls) {
+      const e = document.createElementNS(ns,'line');
+      e.setAttribute('x1',x1); e.setAttribute('y1',y1);
+      e.setAttribute('x2',x2); e.setAttribute('y2',y2);
+      e.setAttribute('class', cls);
+      svg.appendChild(e);
+    }
+    function T(x,y,t,opts) {
+      const e = document.createElementNS(ns,'text');
+      e.setAttribute('x',x); e.setAttribute('y',y);
+      if (opts && opts.anchor) e.setAttribute('text-anchor', opts.anchor);
+      e.setAttribute('class', (opts && opts.cls) || 'axis-text');
+      if (opts && opts.fill) e.setAttribute('fill', opts.fill);
+      if (opts && opts.weight) e.setAttribute('font-weight', opts.weight);
+      e.textContent = t;
+      svg.appendChild(e);
+    }
+
+    L(xS, yT, xS, yB, 'axis');
+    L(xS, yB, xE, yB, 'axis');
+    // 0 dB line
+    const y0 = yT + (yB - yT) * 0.35;
+    L(xS, y0, xE, y0, 'zero-line');
+    // grid horizontal
+    [+6, 0, -6, -12, -18].forEach(db => {
+      const y = yT + (yB - yT) * ((6 - db) / 24);
+      L(xS, y, xE, y, 'grid-line');
+      T(xS - 6, y + 3, (db > 0 ? '+' : '') + db + ' dB', { anchor: 'end' });
+    });
+    // x: frequency (log scale visual approximation)
+    [{f:'50',pos:0.05},{f:'100',pos:0.18},{f:'200',pos:0.31},{f:'500',pos:0.48},{f:'1k',pos:0.6},{f:'2k',pos:0.72},{f:'5k',pos:0.85},{f:'10k',pos:0.93}].forEach(fp => {
+      const x = xS + (xE - xS) * fp.pos;
+      T(x, yB + 16, fp.f + ' Hz', { anchor: 'middle' });
+    });
+
+    // Comb pattern: |1 + cos(2πfΔt)| in dB, but mapped to log freq
+    // We use Δt = 1 ms (= 343 mm path diff): nulls at 500, 1500, 2500, 3500 Hz...
+    const N = 400;
+    const pts = [];
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      // log freq from 20 to 20000
+      const f = 20 * Math.pow(1000, t);
+      // map f to x using simplified log
+      const x = xS + (xE - xS) * (Math.log10(f / 50) / Math.log10(10000 / 50));
+      if (x < xS || x > xE) continue;
+      const dt = 0.001; // 1ms = ~34cm path
+      const factor = 2 * Math.abs(Math.cos(Math.PI * f * dt));
+      let db = factor > 0.001 ? 20 * Math.log10(factor) : -25;
+      if (db < -18) db = -18;
+      const y = yT + (yB - yT) * ((6 - db) / 24);
+      pts.push([x.toFixed(1), y.toFixed(1)]);
+    }
+    const p = document.createElementNS(ns, 'path');
+    p.setAttribute('d', 'M ' + pts.map(p => p.join(',')).join(' L '));
+    p.setAttribute('class', 'curve terra');
+    svg.appendChild(p);
+
+    // Label
+    T(xE - 8, yT + 14, '— Comb (Δd = 34 cm)', { anchor: 'end', fill: '#E47766', weight: 700, cls: 'label-bold' });
+    T(xS + 20, yT + 22, 'cada vale = cancelamento', { fill: '#8B97A8', cls: 'label-small' });
+    T(xS + 20, yT + 34, 'cada pico = soma', { fill: '#8B97A8', cls: 'label-small' });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Erros mais comuns · OSM Guia visual</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/15-erros-comuns.html" class="active">PT</a>
+        <a href="../en/index.html">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infográfico 15 / 15</div>
+        <h1>Erros mais comuns</h1>
+      </div>
+      <div class="subtitle">como detectar pela própria medição<br>e o que fazer</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">Quase todo erro tem assinatura visual.</h2>
+        <p>Depois de algumas dezenas de visitas, você começa a reconhecer um problema pela "cara" da medição. Esta página é um catálogo dos 8 erros mais frequentes em igreja brasileira, com como aparecem no OSM e como resolver.</p>
+
+        <p>Use como checklist quando algo está "estranho" e você não consegue nomear.</p>
+
+        <div class="callout green highlight-box" style="margin-top: 24px;">
+          <div class="head">✓ Última lembrança antes de fechar o manual</div>
+          <p style="margin: 0;">Medição não substitui ouvido. É <strong>complemento</strong>. Use o OSM para descobrir o que ouvido não pega (fase, polaridade, comb), e use ouvido para validar o que medição não pega (musicalidade, sensação espacial, conforto auditivo). As duas coisas andam juntas.</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="callout terra">
+          <div class="head">🔴 1. Coherence cai em uma região</div>
+          <p style="margin: 0; font-size: 13px;"><strong>Sintoma:</strong> coherence &lt; 0.7 numa faixa de frequência.<br><strong>Causa típica:</strong> ruído ambiente nessa faixa OU referência (R) com nível baixo.<br><strong>Solução:</strong> aumentar nível do generator, ou eliminar fonte de ruído.</p>
+        </div>
+
+        <div class="callout terra" style="margin-top: 14px;">
+          <div class="head">🔴 2. Phase trace pula 180° aleatório</div>
+          <p style="margin: 0; font-size: 13px;"><strong>Sintoma:</strong> trace inconsistente entre refreshs.<br><strong>Causa típica:</strong> cabo intermitente, conector solto, ou phantom power vacilando.<br><strong>Solução:</strong> reaperte conectores, troque cabo XLR do mic.</p>
+        </div>
+
+        <div class="callout terra" style="margin-top: 14px;">
+          <div class="head">🔴 3. Magnitude vazia ou em −90 dB</div>
+          <p style="margin: 0; font-size: 13px;"><strong>Sintoma:</strong> nenhuma curva em Magnitude, ou linha reta no fundo.<br><strong>Causa típica:</strong> canal R não configurado, ou generator desligado.<br><strong>Solução:</strong> confira o canal R na barra inferior + verifique que o generator está ligado.</p>
+        </div>
+
+        <div class="callout terra" style="margin-top: 14px;">
+          <div class="head">🔴 4. Buraco profundo em 80 Hz</div>
+          <p style="margin: 0; font-size: 13px;"><strong>Sintoma:</strong> vale de &gt;15 dB em 80 Hz no Magnitude.<br><strong>Causa típica:</strong> sub e top com fase oposta no crossover.<br><strong>Solução:</strong> alinhamento de sub+top (Infográfico 07) ou inverter polaridade de uma caixa (Infográfico 10).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom">
+      <div>
+        <div class="callout amber">
+          <div class="head">⚠ 5. Pente regular em médios</div>
+          <p style="margin: 0; font-size: 13px;"><strong>Sintoma:</strong> picos e vales alternados, regulares.<br><strong>Causa típica:</strong> duas caixas tocando o mesmo conteúdo com diferença de caminho.<br><strong>Solução:</strong> Vector Sum identifica o Δd; ajuste delay ou posicione o ouvinte central (Infográfico 11).</p>
+        </div>
+
+        <div class="callout amber" style="margin-top: 14px;">
+          <div class="head">⚠ 6. Tudo sobe quando inverte polaridade</div>
+          <p style="margin: 0; font-size: 13px;"><strong>Sintoma:</strong> ao inverter +/- de uma caixa, soma fica mais forte.<br><strong>Causa típica:</strong> caixa estava com cabo Speakon invertido ou polaridade de fábrica trocada.<br><strong>Solução:</strong> deixe invertida no processador (ou refaça o cabo).</p>
+        </div>
+
+        <div class="callout amber" style="margin-top: 14px;">
+          <div class="head">⚠ 7. Resposta muda muito entre 2 pontos</div>
+          <p style="margin: 0; font-size: 13px;"><strong>Sintoma:</strong> medição no fundo é diferente da mesa em +/- 6 dB.<br><strong>Causa típica:</strong> modos da sala, posicionamento de caixas, ou cobertura inadequada.<br><strong>Solução:</strong> tratamento acústico (Infográfico 14), reposicionar caixas, ou adicionar delays.</p>
+        </div>
+      </div>
+
+      <div class="callout navy">
+        <div class="head">🔵 8. Caixa "boa" soa mal de ouvido</div>
+        <p style="margin-bottom: 10px;"><strong>Sintoma:</strong> medição mostra Magnitude plana e fase boa, mas operador relata "som ruim".</p>
+        <p style="margin-bottom: 10px;"><strong>Causa típica:</strong></p>
+        <ul style="margin: 0 0 0 18px; font-size: 13px;">
+          <li>EQ exagerada no canal (vozes ásperas).</li>
+          <li>Compressão pesada (som "espremido").</li>
+          <li>Reverb interno da mesa em excesso.</li>
+          <li>Microfonia sub-audível constante (mesa "no fio").</li>
+        </ul>
+        <p style="margin: 10px 0 0;"><strong>Solução:</strong> medição cobre acústica e elétrica do sistema, não o tratamento do canal. Reset os EQs e compressores dos canais para neutro, e suba ajustes de novo escutando.</p>
+
+        <p style="margin-top: 16px; font-style: italic; color: var(--text-muted); font-size: 13px;">— Fim do guia visual de Open Sound Meter.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="14-estudio-sala.html">← Anterior: Estúdio</a>
+    <div class="center">15 / 15 — Erros mais comuns · Fim</div>
+    <a href="index.html">Voltar ao índice →</a>
+  </nav>
+</body>
+</html>

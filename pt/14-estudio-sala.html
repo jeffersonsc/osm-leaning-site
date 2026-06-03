@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estúdio · resposta de sala · OSM Guia visual</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/14-estudio-sala.html" class="active">PT</a>
+        <a href="../en/index.html">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infográfico 14 / 15</div>
+        <h1>Estúdio · resposta de sala</h1>
+      </div>
+      <div class="subtitle">medir o ambiente, não o PA<br>e por que não dá pra equalizar tudo</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">A sala é instrumento.</h2>
+        <p>Em estúdio (ou em sala de transmissão online da igreja, ou em sala de ensaio), a missão não é medir uma caixa boa — é medir <strong>como a sala impacta</strong> o som da caixa.</p>
+
+        <p>Três fenômenos dominam a resposta de uma sala fechada:</p>
+
+        <ul style="margin-left: 18px; margin-top: 12px;">
+          <li><strong>Modos (room modes)</strong> — ressonâncias nas baixas frequências que dependem das dimensões da sala. Picos e vales em frequências específicas.</li>
+          <li><strong>Reflexões iniciais (early reflections)</strong> — som batendo na parede mais próxima do mic e voltando, criando comb filtering em médios.</li>
+          <li><strong>RT60</strong> — quanto tempo leva para o som decair 60 dB depois que cessa. Indica "vivacidade" do ambiente.</li>
+        </ul>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Resposta típica de sala não tratada</div>
+        <svg class="chart" viewBox="0 0 500 380" xmlns="http://www.w3.org/2000/svg" id="sala-svg"></svg>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom">
+      <div class="callout terra">
+        <div class="head">✓ Tratamento &gt; EQ</div>
+        <p style="margin-bottom: 10px;"><strong>Modos não se resolvem com EQ.</strong> Você até consegue reduzir o pico médio, mas o pico continua acontecendo fisicamente no ar — só piora em outras posições da sala.</p>
+        <p style="margin-bottom: 10px;"><strong>Reflexões iniciais não se resolvem com EQ.</strong> O ouvido humano integra o som direto + reflexão como duas chegadas separadas — equalizar não muda isso.</p>
+        <p style="margin: 0;"><strong>A solução é tratamento acústico:</strong> bass traps (modos), painéis de absorção (reflexões), difusores (RT60). EQ entra <em>depois</em> do tratamento, para ajustar finos.</p>
+      </div>
+
+      <div class="callout navy">
+        <div class="head">Como medir uma sala no OSM</div>
+        <p style="margin-bottom: 10px;"><strong>Mic na posição da pessoa</strong> — onde ela vai ouvir. Para estúdio, posição de mixagem. Para transmissão online, posição do pregador olhando câmera.</p>
+        <p style="margin-bottom: 10px;"><strong>FFT power alto (16-18)</strong> — para enxergar nos graves onde estão os modos.</p>
+        <p style="margin-bottom: 10px;"><strong>Smoothing 1/24 ou 1/48</strong> — para os modos não serem suavizados demais.</p>
+        <p style="margin-bottom: 10px;"><strong>Use Sweep (MLS+) e o gráfico Impulse</strong> — para identificar reflexões: cada pico depois do principal é uma reflexão de uma superfície da sala.</p>
+        <p style="margin: 0;"><strong>RT60 não é medido direto no OSM</strong> — precisa de software complementar (REW é o padrão para sala). OSM serve para a parte de Magnitude/Phase.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="13-eventos.html">← Anterior: Eventos</a>
+    <div class="center">14 / 15 — Estúdio · resposta de sala</div>
+    <a href="15-erros-comuns.html">Próximo: Erros mais comuns →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.getElementById('sala-svg');
+    const xS = 50, xE = 470, yT = 30, yB = 320;
+
+    function L(x1,y1,x2,y2,cls) {
+      const e = document.createElementNS(ns,'line');
+      e.setAttribute('x1',x1); e.setAttribute('y1',y1);
+      e.setAttribute('x2',x2); e.setAttribute('y2',y2);
+      e.setAttribute('class', cls);
+      svg.appendChild(e);
+    }
+    function T(x,y,t,opts) {
+      const e = document.createElementNS(ns,'text');
+      e.setAttribute('x',x); e.setAttribute('y',y);
+      if (opts && opts.anchor) e.setAttribute('text-anchor', opts.anchor);
+      e.setAttribute('class', (opts && opts.cls) || 'axis-text');
+      if (opts && opts.fill) e.setAttribute('fill', opts.fill);
+      if (opts && opts.weight) e.setAttribute('font-weight', opts.weight);
+      e.textContent = t;
+      svg.appendChild(e);
+    }
+
+    L(xS, yT, xS, yB, 'axis');
+    L(xS, yB, xE, yB, 'axis');
+    const y0 = yT + (yB - yT) * 0.4;
+    L(xS, y0, xE, y0, 'zero-line');
+    [+9, 0, -9, -18].forEach(db => {
+      const y = yT + (yB - yT) * ((9 - db) / 28);
+      L(xS, y, xE, y, 'grid-line');
+      T(xS - 6, y + 3, (db > 0 ? '+' : '') + db + ' dB', { anchor: 'end' });
+    });
+    [{f:'30',pos:0.0},{f:'60',pos:0.13},{f:'120',pos:0.27},{f:'250',pos:0.4},{f:'500',pos:0.53},{f:'1k',pos:0.66},{f:'2k',pos:0.78},{f:'8k',pos:0.95}].forEach(fp => {
+      const x = xS + (xE - xS) * fp.pos;
+      T(x, yB + 16, fp.f + (fp.f === '30' ? ' Hz' : fp.f === '8k' ? ' Hz' : ''), { anchor: 'middle' });
+    });
+
+    // Resposta de sala: modos (picos nos graves), comb filtering nos médios, decay nos agudos
+    const N = 300;
+    const pts = [];
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      const x = xS + (xE - xS) * t;
+      const fLog = 30 * Math.pow(1000, t);
+      let db = 0;
+      // modos: picos em ~50Hz, 100Hz, 150Hz
+      if (fLog < 200) {
+        db += 8 * Math.exp(-((fLog - 50) / 8) ** 2);
+        db += 6 * Math.exp(-((fLog - 100) / 12) ** 2);
+        db -= 4 * Math.exp(-((fLog - 75) / 8) ** 2);
+      }
+      // comb em médios (200-1000Hz)
+      if (fLog >= 200 && fLog < 1500) {
+        db += 4 * Math.cos(Math.PI * fLog / 250);
+      }
+      // attenuation nos agudos (efeito de absorção do ar + tapete)
+      if (fLog > 3000) {
+        db -= (fLog - 3000) / 1000;
+      }
+      // small noise
+      db += (Math.random() - 0.5) * 1.5;
+      const y = yT + (yB - yT) * ((9 - db) / 28);
+      pts.push([x.toFixed(1), y.toFixed(1)]);
+    }
+    const p = document.createElementNS(ns, 'path');
+    p.setAttribute('d', 'M ' + pts.map(p => p.join(',')).join(' L '));
+    p.setAttribute('class', 'curve terra');
+    svg.appendChild(p);
+
+    // Annotations
+    T(xS + 30, yT + 60, 'Modos da sala', { fill: '#F87171', weight: 700, cls: 'label-bold' });
+    T(xS + (xE - xS) * 0.5, yT + 40, 'Reflexões iniciais (comb)', { fill: '#F5B947', weight: 700, anchor: 'middle', cls: 'label-bold' });
+    T(xS + (xE - xS) * 0.88, yT + (yB - yT) * 0.7, 'absorção do ar', { fill: '#8B97A8', anchor: 'middle', cls: 'label-small' });
+  })();
+  </script>
+</body>
+</html>

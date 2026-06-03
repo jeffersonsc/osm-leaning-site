@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inversão de polaridade · OSM Guia visual</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/10-inversao-polaridade.html" class="active">PT</a>
+        <a href="../en/index.html">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infográfico 10 / 15</div>
+        <h1>Inversão de polaridade</h1>
+      </div>
+      <div class="subtitle">quando inverter resolve<br>e quando só piora</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">Polaridade ≠ fase.</h2>
+        <p><strong>Polaridade</strong> é a direção da corrente que chega na bobina do alto-falante. Inverter polaridade = trocar o positivo com o negativo no cabo. Resulta em uma onda que vai "para baixo" quando deveria ir "para cima".</p>
+
+        <p><strong>Fase</strong> é o atraso temporal de cada frequência. Pode ser ajustada com delay, posicionamento, ou filtros.</p>
+
+        <p>Polaridade invertida é um caso particular de fase: <strong>introduz 180° de defasagem em TODAS as frequências de uma vez</strong>. É um botão "flip" simples — não muda só uma faixa, muda tudo.</p>
+
+        <div class="callout amber highlight-box" style="margin-top: 24px;">
+          <div class="head">⚠ Causas comuns em igreja</div>
+          <p style="margin-bottom: 8px;"><strong>Cabo Speakon mal montado</strong> — pinos +/- trocados na soldagem.</p>
+          <p style="margin-bottom: 8px;"><strong>Caixas de marcas/lotes diferentes</strong> — algumas têm polaridade de fábrica invertida.</p>
+          <p style="margin: 0;"><strong>Processador com canal invertido por engano</strong> — alguém marcou "polarity invert" e esqueceu.</p>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Efeito da inversão na curva de fase</div>
+        <svg class="chart" viewBox="0 0 500 380" xmlns="http://www.w3.org/2000/svg" id="pol-svg"></svg>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom">
+      <div class="callout green">
+        <div class="head">✓ O teste que sempre funciona</div>
+        <p style="margin-bottom: 10px;"><strong>1.</strong> Com as duas caixas tocando o mesmo conteúdo (pink noise pela mesa, pan no centro), meça <strong>a soma</strong> com microfone equidistante.</p>
+        <p style="margin-bottom: 10px;"><strong>2.</strong> Faça <strong>STORE</strong> da medição.</p>
+        <p style="margin-bottom: 10px;"><strong>3.</strong> No processador (ou na barra inferior do OSM, botão <span style="font-family: monospace; background: rgba(0,0,0,0.3); padding: 1px 5px; border-radius: 3px;">+/−</span>), <strong>inverta a polaridade de uma das caixas</strong>. Meça de novo.</p>
+        <p style="margin: 0;"><strong>4.</strong> Se a nova medição estiver <strong>MAIS forte</strong> que a stored, a polaridade <em>estava errada</em> antes — deixe invertida. Se ficou mais fraca, estava certa — volte ao normal.</p>
+      </div>
+
+      <div class="callout terra">
+        <div class="head">Quando NÃO inverter</div>
+        <p style="margin-bottom: 10px;"><strong>Para alinhar sub + top:</strong> em alguns crossovers (especialmente Linkwitz-Riley 4ª ordem), o top precisa ter polaridade invertida pra somar corretamente com o sub no crossover. Isso já é definido no processador — não inverta "de novo" o que o processador já inverteu.</p>
+        <p style="margin: 0;"><strong>Quando o problema é delay, não polaridade:</strong> se a fase está desalinhada por causa de distância entre caixas, a solução é delay, não inversão. Inverter polaridade aqui só vai trocar onde está o buraco — não resolver.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="09-phase-trace.html">← Anterior: Phase trace</a>
+    <div class="center">10 / 15 — Inversão de polaridade</div>
+    <a href="11-coupling-comb.html">Próximo: Coupling vs comb →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.getElementById('pol-svg');
+    const xS = 50, xE = 470, yT = 30, yB = 320;
+    const yMid = (yT + yB) / 2;
+    const yRange = (yB - yT) / 2;
+
+    function L(x1,y1,x2,y2,cls) {
+      const e = document.createElementNS(ns,'line');
+      e.setAttribute('x1',x1); e.setAttribute('y1',y1);
+      e.setAttribute('x2',x2); e.setAttribute('y2',y2);
+      e.setAttribute('class', cls);
+      svg.appendChild(e);
+    }
+    function T(x,y,t,opts) {
+      const e = document.createElementNS(ns,'text');
+      e.setAttribute('x',x); e.setAttribute('y',y);
+      if (opts && opts.anchor) e.setAttribute('text-anchor', opts.anchor);
+      e.setAttribute('class', (opts && opts.cls) || 'axis-text');
+      if (opts && opts.fill) e.setAttribute('fill', opts.fill);
+      if (opts && opts.weight) e.setAttribute('font-weight', opts.weight);
+      e.textContent = t;
+      svg.appendChild(e);
+    }
+
+    L(xS, yT, xS, yB, 'axis');
+    L(xS, yMid, xE, yMid, 'zero-line');
+    [yT, yT + yRange / 2, yMid + yRange / 2, yB].forEach(y => L(xS, y, xE, y, 'grid-line'));
+    T(xS - 6, yT + 4, '+180°', { anchor: 'end' });
+    T(xS - 6, yMid + 4, '0°', { anchor: 'end' });
+    T(xS - 6, yB + 4, '−180°', { anchor: 'end' });
+    [{f:'20 Hz', pos:0.05},{f:'200 Hz', pos:0.3},{f:'2 kHz', pos:0.65},{f:'20 kHz', pos:0.95}].forEach(fp => {
+      const x = xS + (xE - xS) * fp.pos;
+      T(x, yB + 16, fp.f, { anchor: 'middle' });
+    });
+
+    function drawCurve(fn, colorClass) {
+      const N = 250;
+      const segs = [];
+      let cur = [];
+      let lastW = null;
+      for (let i = 0; i <= N; i++) {
+        const t = i / N;
+        const x = xS + (xE - xS) * t;
+        const raw = fn(t);
+        let wr = raw;
+        while (wr > 180) wr -= 360;
+        while (wr < -180) wr += 360;
+        const y = yMid - (wr / 180) * yRange;
+        if (lastW !== null && Math.abs(wr - lastW) > 200) {
+          if (cur.length > 1) segs.push(cur);
+          cur = [];
+        }
+        cur.push([x.toFixed(1), y.toFixed(1)]);
+        lastW = wr;
+      }
+      if (cur.length > 1) segs.push(cur);
+      segs.forEach(seg => {
+        const p = document.createElementNS(ns, 'path');
+        p.setAttribute('d', 'M ' + seg.map(pt => pt.join(',')).join(' L '));
+        p.setAttribute('class', 'curve ' + colorClass);
+        svg.appendChild(p);
+      });
+    }
+
+    // Normal: phase declining smoothly
+    drawCurve(t => -t * 540, 'navy');
+    // Inverted polarity: 180° shifted up (same shape, but 180 added)
+    drawCurve(t => -t * 540 + 180, 'red');
+
+    T(xE - 8, yT + 14, '— Normal', { anchor: 'end', fill: '#5B7BD8', weight: 700, cls: 'label-bold' });
+    T(xE - 8, yT + 30, '— Polaridade invertida', { anchor: 'end', fill: '#F87171', weight: 700, cls: 'label-bold' });
+    T((xS+xE)/2, yMid - 5, '↕ 180° de diferença, em TODAS as frequências', { anchor: 'middle', fill: '#F5B947', weight: 700, cls: 'label-small' });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alinhando sub + top · OSM Guia visual</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/07-alinhando-sub-top.html" class="active">PT</a>
+        <a href="../en/index.html">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infográfico 07 / 15</div>
+        <h1>Alinhando sub + top</h1>
+      </div>
+      <div class="subtitle">casando fase na frequência<br>de crossover</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">No crossover, fase decide o som.</h2>
+        <p>O subwoofer e a caixa principal compartilham uma região de frequências (geralmente em torno de <strong>80 Hz</strong>). Nessa região, os dois tocam ao mesmo tempo, e a soma deles depende totalmente da fase.</p>
+
+        <p>Se as fases batem em 80 Hz: soma de <strong>+6 dB</strong>, peso firme na transição. Se estão a 180°: <strong>buraco profundo</strong> exatamente onde a transição deveria ser perfeita. Esse é o problema mais comum em sistema de igreja com sub+top mal alinhado.</p>
+
+        <div class="callout terra highlight-box" style="margin-top: 28px;">
+          <div class="head">A meta do alinhamento</div>
+          <p style="margin: 0;">Na frequência de crossover, as duas curvas de fase (sub e top) devem <strong>cruzar no mesmo valor</strong> — ou seja, estar em fase. Aí a soma é constructiva e o som passa do sub para o top sem buraco.</p>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Fase de sub e top antes do ajuste</div>
+        <svg class="chart" viewBox="0 0 500 380" xmlns="http://www.w3.org/2000/svg" id="antes-svg"></svg>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom">
+      <div class="chart-wrap">
+        <div class="chart-title" style="text-align: left;">Fase depois de delay no top (alinhado)</div>
+        <svg class="chart" viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg" id="depois-svg"></svg>
+      </div>
+
+      <div class="callout navy">
+        <div class="head">Passo a passo no OSM</div>
+        <p style="margin-bottom: 10px;"><strong>1.</strong> Meça o <strong>sub sozinho</strong> (mute o top). STORE.</p>
+        <p style="margin-bottom: 10px;"><strong>2.</strong> Meça o <strong>top sozinho</strong>. STORE.</p>
+        <p style="margin-bottom: 10px;"><strong>3.</strong> Olhe a fase no crossover. Se há diferença, calcule delay (~ 2,9 ms/m de diferença).</p>
+        <p style="margin-bottom: 10px;"><strong>4.</strong> Aplique delay <em>na caixa que chegou primeiro</em> (geralmente o top, que está mais perto).</p>
+        <p style="margin: 0;"><strong>5.</strong> Meça <strong>sub + top juntos</strong>. Vector Sum mostra a previsão; medição real confirma.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="06-soma-vetorial.html">← Anterior: Soma vetorial</a>
+    <div class="center">07 / 15 — Alinhando sub + top</div>
+    <a href="08-delay-zones.html">Próximo: Delay zones →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+
+    function chart(svgId, hasMisalignment) {
+      const svg = document.getElementById(svgId);
+      const w = svg.viewBox.baseVal.width, h = svg.viewBox.baseVal.height;
+      const xS = 50, xE = w - 30, yT = 30, yB = h - 50;
+      const yMid = (yT + yB) / 2;
+      const yRange = (yB - yT) / 2;
+
+      function L(x1,y1,x2,y2,cls,extra) {
+        const e = document.createElementNS(ns,'line');
+        e.setAttribute('x1',x1); e.setAttribute('y1',y1);
+        e.setAttribute('x2',x2); e.setAttribute('y2',y2);
+        e.setAttribute('class', cls);
+        if (extra) Object.entries(extra).forEach(([k,v]) => e.setAttribute(k,v));
+        svg.appendChild(e);
+      }
+      function T(x,y,t,opts) {
+        const e = document.createElementNS(ns,'text');
+        e.setAttribute('x',x); e.setAttribute('y',y);
+        if (opts && opts.anchor) e.setAttribute('text-anchor', opts.anchor);
+        e.setAttribute('class', (opts && opts.cls) || 'axis-text');
+        if (opts && opts.fill) e.setAttribute('fill', opts.fill);
+        if (opts && opts.weight) e.setAttribute('font-weight', opts.weight);
+        e.textContent = t;
+        svg.appendChild(e);
+      }
+
+      // axes
+      L(xS, yT, xS, yB, 'axis');
+      L(xS, yMid, xE, yMid, 'zero-line');
+      // grid
+      [yT, yT + yRange / 2, yMid + yRange / 2, yB].forEach(y => L(xS, y, xE, y, 'grid-line'));
+
+      // labels
+      T(xS - 6, yT + 4, '+180°', { anchor: 'end' });
+      T(xS - 6, yMid + 4, '0°', { anchor: 'end' });
+      T(xS - 6, yB + 4, '−180°', { anchor: 'end' });
+
+      // x: 40 Hz, 80 Hz (crossover), 160 Hz
+      const freqs = [
+        { f: 40,  pos: 0.15 },
+        { f: 80,  pos: 0.5 },
+        { f: 160, pos: 0.85 },
+      ];
+      freqs.forEach(fp => {
+        const x = xS + (xE - xS) * fp.pos;
+        T(x, yB + 16, fp.f + ' Hz', { anchor: 'middle' });
+        L(x, yT, x, yB, 'grid-line');
+      });
+
+      // Highlight crossover region around 80Hz
+      const xC = xS + (xE - xS) * 0.5;
+      const rect = document.createElementNS(ns, 'rect');
+      rect.setAttribute('x', xC - 30); rect.setAttribute('y', yT);
+      rect.setAttribute('width', 60); rect.setAttribute('height', yB - yT);
+      rect.setAttribute('fill', 'rgba(228, 119, 102, 0.1)');
+      svg.appendChild(rect);
+      T(xC, yT - 6, 'Crossover', { anchor: 'middle', fill: '#E47766', weight: '700' });
+
+      // Phase curves with wrapping
+      function drawPhase(extraDelayDeg, color, cls) {
+        const N = 200;
+        const segs = [];
+        let cur = [];
+        let lastW = null;
+        for (let i = 0; i <= N; i++) {
+          const t = i / N;
+          const x = xS + (xE - xS) * t;
+          // Phase descends with frequency. Add HPF kink near low end + extra delay shift
+          const phaseRaw = -t * 540 + extraDelayDeg + 60 * Math.exp(-t * 5);
+          let wr = phaseRaw;
+          while (wr > 180) wr -= 360;
+          while (wr < -180) wr += 360;
+          const y = yMid - (wr / 180) * yRange;
+          if (lastW !== null && Math.abs(wr - lastW) > 200) {
+            if (cur.length > 1) segs.push(cur);
+            cur = [];
+          }
+          cur.push([x.toFixed(1), y.toFixed(1)]);
+          lastW = wr;
+        }
+        if (cur.length > 1) segs.push(cur);
+        segs.forEach(seg => {
+          const p = document.createElementNS(ns, 'path');
+          p.setAttribute('d', 'M ' + seg.map(pt => pt.join(',')).join(' L '));
+          p.setAttribute('class', 'curve ' + cls);
+          svg.appendChild(p);
+        });
+      }
+
+      // Sub: low-passed, finishes around 100Hz (drawn only to ~60% width)
+      function drawSub() {
+        const N = 120;
+        const pts = [];
+        for (let i = 0; i <= N; i++) {
+          const t = i / N * 0.62;
+          const x = xS + (xE - xS) * t;
+          const phase = -t * 420 + 30;
+          let wr = phase;
+          while (wr > 180) wr -= 360;
+          while (wr < -180) wr += 360;
+          const y = yMid - (wr / 180) * yRange;
+          pts.push([x.toFixed(1), y.toFixed(1)]);
+        }
+        const p = document.createElementNS(ns, 'path');
+        p.setAttribute('d', 'M ' + pts.map(pt => pt.join(',')).join(' L '));
+        p.setAttribute('class', 'curve navy');
+        svg.appendChild(p);
+      }
+      drawSub();
+
+      // Top: high-passed, starts from ~50Hz; with or without misalignment
+      function drawTop(extraDeg) {
+        const N = 180;
+        const pts = [];
+        const segs = [];
+        let cur = [];
+        let lastW = null;
+        for (let i = 0; i <= N; i++) {
+          const t = 0.3 + i / N * 0.7;
+          const x = xS + (xE - xS) * t;
+          const phase = -t * 520 + extraDeg + 40;
+          let wr = phase;
+          while (wr > 180) wr -= 360;
+          while (wr < -180) wr += 360;
+          const y = yMid - (wr / 180) * yRange;
+          if (lastW !== null && Math.abs(wr - lastW) > 200) {
+            if (cur.length > 1) segs.push(cur);
+            cur = [];
+          }
+          cur.push([x.toFixed(1), y.toFixed(1)]);
+          lastW = wr;
+        }
+        if (cur.length > 1) segs.push(cur);
+        segs.forEach(seg => {
+          const p = document.createElementNS(ns, 'path');
+          p.setAttribute('d', 'M ' + seg.map(pt => pt.join(',')).join(' L '));
+          p.setAttribute('class', 'curve terra');
+          svg.appendChild(p);
+        });
+      }
+      drawTop(hasMisalignment ? 180 : 30);
+
+      // Legend
+      T(xE - 8, yT + 14, '— Sub', { anchor: 'end', fill: '#5B7BD8', weight: 700, cls: 'label-bold' });
+      T(xE - 8, yT + 30, '— Top', { anchor: 'end', fill: '#E47766', weight: 700, cls: 'label-bold' });
+    }
+
+    chart('antes-svg', true);  // misaligned
+    chart('depois-svg', false); // aligned
+  })();
+  </script>
+</body>
+</html>

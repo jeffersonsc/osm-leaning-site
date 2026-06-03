@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase trace ideal vs real · OSM Guia visual</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/09-phase-trace.html" class="active">PT</a>
+        <a href="../en/index.html">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infográfico 09 / 15</div>
+        <h1>Phase trace ideal vs real</h1>
+      </div>
+      <div class="subtitle">como ler a curva de fase<br>de uma caixa de verdade</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">Caixa ideal não existe. Mas perto.</h2>
+        <p>Uma <strong>caixa perfeita</strong> teria fase de "tempo puro" — uma linha descendente sem dobras, sem dips, sem ondas. Significaria que todas as frequências chegam com o atraso consistente, sem distorção de fase.</p>
+
+        <p>Na vida real, toda caixa tem três marcas que aparecem na curva de fase:</p>
+
+        <ul style="margin-left: 18px; margin-top: 12px;">
+          <li><strong>HPF tilt nos graves</strong> — abaixo da frequência de corte da caixa, a fase "vira para cima" (adianta). É a marca do filtro passa-alta interno.</li>
+          <li><strong>Curva limpa no meio</strong> — entre ~200 Hz e ~5 kHz, fase descende monotônica. Aqui a caixa é mais "ideal".</li>
+          <li><strong>Comportamento variado nos agudos</strong> — dependendo do crossover entre falante e tweeter, pode aparecer um pequeno desvio em ~2 kHz (a frequência de crossover interno).</li>
+        </ul>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Phase trace: ideal e real comparadas</div>
+        <svg class="chart" viewBox="0 0 500 380" xmlns="http://www.w3.org/2000/svg" id="trace-svg"></svg>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom">
+      <div class="callout terra">
+        <div class="head">✓ O que importa em alinhamento</div>
+        <p style="margin-bottom: 10px;">Não tente "consertar" a fase de uma caixa boa com EQ. Pequenos desvios são normais e o ouvido humano é tolerante.</p>
+        <p style="margin-bottom: 10px;">Concentre-se em <strong>casar fases entre caixas</strong> — sub + top, ou caixas redundantes em zonas vizinhas — em vez de buscar uma curva "plana" de uma caixa só.</p>
+        <p style="margin: 0;">Phase trace serve para <strong>identificar problemas grandes</strong>: polaridade invertida (fase 180° fora de uma vez), buracos profundos (fase pula bruscamente), ou drivers descasados (degraus no meio do trace).</p>
+      </div>
+
+      <div class="callout navy">
+        <div class="head">Sinais de uma caixa com problema</div>
+        <p style="margin-bottom: 10px;"><strong>Tweeter fora de fase com o falante grande:</strong> degrau de ~180° em torno de 2-3 kHz no phase trace.</p>
+        <p style="margin-bottom: 10px;"><strong>Caixa com driver com defeito:</strong> fase desorganizada (ruído) em uma faixa estreita de frequência.</p>
+        <p style="margin: 0;"><strong>Cabo intermitente / mal conectado:</strong> phase trace pula aleatoriamente toda vez que você refresha — sinal de coerência baixa, instabilidade física.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="08-delay-zones.html">← Anterior: Delay zones</a>
+    <div class="center">09 / 15 — Phase trace ideal vs real</div>
+    <a href="10-inversao-polaridade.html">Próximo: Polaridade →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.getElementById('trace-svg');
+    const w = 500, h = 380;
+    const xS = 50, xE = 470, yT = 30, yB = 320;
+    const yMid = (yT + yB) / 2;
+    const yRange = (yB - yT) / 2;
+
+    function L(x1,y1,x2,y2,cls) {
+      const e = document.createElementNS(ns,'line');
+      e.setAttribute('x1',x1); e.setAttribute('y1',y1);
+      e.setAttribute('x2',x2); e.setAttribute('y2',y2);
+      e.setAttribute('class', cls);
+      svg.appendChild(e);
+    }
+    function T(x,y,t,opts) {
+      const e = document.createElementNS(ns,'text');
+      e.setAttribute('x',x); e.setAttribute('y',y);
+      if (opts && opts.anchor) e.setAttribute('text-anchor', opts.anchor);
+      e.setAttribute('class', (opts && opts.cls) || 'axis-text');
+      if (opts && opts.fill) e.setAttribute('fill', opts.fill);
+      if (opts && opts.weight) e.setAttribute('font-weight', opts.weight);
+      e.textContent = t;
+      svg.appendChild(e);
+    }
+
+    L(xS, yT, xS, yB, 'axis');
+    L(xS, yMid, xE, yMid, 'zero-line');
+    [yT, yT + yRange / 2, yMid + yRange / 2, yB].forEach(y => L(xS, y, xE, y, 'grid-line'));
+    T(xS - 6, yT + 4, '+180°', { anchor: 'end' });
+    T(xS - 6, yMid + 4, '0°', { anchor: 'end' });
+    T(xS - 6, yB + 4, '−180°', { anchor: 'end' });
+
+    [{f:'40 Hz', pos:0.05},{f:'100 Hz', pos:0.2},{f:'500 Hz', pos:0.45},{f:'2 kHz', pos:0.7},{f:'10 kHz', pos:0.92}].forEach(fp => {
+      const x = xS + (xE - xS) * fp.pos;
+      T(x, yB + 16, fp.f, { anchor: 'middle' });
+    });
+
+    // IDEAL: linha levemente descendente, sem dobras (gradient pure delay)
+    function drawCurve(fn, colorClass) {
+      const N = 250;
+      const segs = [];
+      let cur = [];
+      let lastW = null;
+      for (let i = 0; i <= N; i++) {
+        const t = i / N;
+        const x = xS + (xE - xS) * t;
+        const raw = fn(t);
+        let wr = raw;
+        while (wr > 180) wr -= 360;
+        while (wr < -180) wr += 360;
+        const y = yMid - (wr / 180) * yRange;
+        if (lastW !== null && Math.abs(wr - lastW) > 200) {
+          if (cur.length > 1) segs.push(cur);
+          cur = [];
+        }
+        cur.push([x.toFixed(1), y.toFixed(1)]);
+        lastW = wr;
+      }
+      if (cur.length > 1) segs.push(cur);
+      segs.forEach(seg => {
+        const p = document.createElementNS(ns, 'path');
+        p.setAttribute('d', 'M ' + seg.map(pt => pt.join(',')).join(' L '));
+        p.setAttribute('class', 'curve ' + colorClass);
+        svg.appendChild(p);
+      });
+    }
+
+    // Ideal: linha de tempo puro, sem dobra
+    drawCurve(t => -180 - t * 540, 'green');
+    // Real: ideal + HPF tilt nos graves + pequeno dip nos 2k
+    drawCurve(t => {
+      const ideal = -180 - t * 540;
+      const hpfTilt = 80 * Math.exp(-t * 12); // sobe nos graves
+      const xoverKink = -20 * Math.exp(-((t - 0.7) * 12) ** 2); // dip em 2kHz
+      return ideal + hpfTilt + xoverKink;
+    }, 'terra');
+
+    // Legend
+    T(xE - 8, yT + 14, '— Ideal (tempo puro)', { anchor: 'end', fill: '#34D399', weight: 700, cls: 'label-bold' });
+    T(xE - 8, yT + 30, '— Real (caixa boa)', { anchor: 'end', fill: '#E47766', weight: 700, cls: 'label-bold' });
+
+    // Annotation: HPF tilt
+    T(xS + 25, yMid - 30, 'HPF tilt', { fill: '#F5B947', weight: 700, cls: 'label-bold' });
+    T(xS + 25, yMid - 16, 'subindo nos graves', { fill: '#8B97A8', cls: 'label-small' });
+
+    // Annotation: crossover internal
+    T(xS + (xE - xS) * 0.7, yMid + 90, 'Crossover', { fill: '#F5B947', weight: 700, cls: 'label-bold', anchor: 'middle' });
+    T(xS + (xE - xS) * 0.7, yMid + 105, 'falante / tweeter', { fill: '#8B97A8', cls: 'label-small', anchor: 'middle' });
+  })();
+  </script>
+</body>
+</html>
