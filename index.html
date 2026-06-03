@@ -1,88 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Open Sound Meter · Visual Guide</title>
+  <title>Church Audio Tech · Áudio para igrejas</title>
+  <meta name="description" content="Curso de áudio para operadores de igreja e guia visual de medição com Open Sound Meter. Português, prático, do microfone à alinhamento de sistema.">
   <link rel="stylesheet" href="style.css">
-  <style>
-    .lang-picker {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    .lang-picker .wrap {
-      max-width: 600px;
-      text-align: center;
-    }
-    .lang-picker h1 {
-      font-size: 48px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-bottom: 12px;
-    }
-    .lang-picker h1 span {
-      color: var(--terra);
-    }
-    .lang-picker .tagline {
-      color: var(--text-muted);
-      font-size: 16px;
-      margin-bottom: 48px;
-    }
-    .lang-picker .langs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    .lang-picker .lang-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 32px 20px;
-      text-decoration: none;
-      color: var(--text);
-      transition: all 0.15s;
-      display: block;
-    }
-    .lang-picker .lang-card:hover {
-      border-color: var(--terra);
-      transform: translateY(-2px);
-    }
-    .lang-picker .lang-card .flag {
-      font-size: 36px;
-      margin-bottom: 12px;
-    }
-    .lang-picker .lang-card .name {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-    .lang-picker .lang-card .desc {
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-  </style>
 </head>
 <body>
-  <div class="lang-picker">
-    <div class="wrap">
-      <h1>Open Sound Meter<br><span>Visual Guide</span></h1>
-      <p class="tagline">Choose your language · Escolha seu idioma</p>
-      <div class="langs">
-        <a href="pt/index.html" class="lang-card">
-          <div class="flag">🇧🇷</div>
-          <div class="name">Português</div>
-          <div class="desc">Guia visual completo em português brasileiro</div>
-        </a>
-        <a href="en/index.html" class="lang-card">
-          <div class="flag">🇬🇧</div>
-          <div class="name">English</div>
-          <div class="desc">Complete visual guide in English</div>
-        </a>
-      </div>
+  <div class="page">
+
+    <header class="hub-hero">
+      <div class="tag">Church Audio Tech</div>
+      <h1>Áudio de igreja,<br><span>do microfone ao alinhamento.</span></h1>
+      <p>Dois caminhos no mesmo lugar: o curso para quem está começando a operar a mesa, e o guia visual de medição com Open Sound Meter para quem quer alinhar o sistema da igreja.</p>
+    </header>
+
+    <section class="tracks">
+      <a href="curso/index.html" class="track beginner">
+        <div class="level">Trilha 1 · Iniciante</div>
+        <h2>Curso para operadores de igreja</h2>
+        <p>Seis blocos práticos, do "som é ar se mexendo" até a mesa digital. Pensado para quem nunca teve alguém explicando direito o que cada botão faz.</p>
+        <div class="cta">Começar o curso →</div>
+      </a>
+
+      <a href="pt/index.html" class="track advanced">
+        <div class="level">Trilha 2 · Intermediário</div>
+        <h2>Medição com Open Sound Meter</h2>
+        <p>Quinze infográficos visuais sobre fase, coerência, atraso, função de transferência e alinhamento de sub + top. Para quem já opera e quer entrar na medição.</p>
+        <div class="cta">Ver os infográficos →</div>
+      </a>
+    </section>
+
+    <div class="hub-secondary">
+      <a href="materiais/index.html">📄 Materiais para download</a>
+      <a href="en/index.html">EN · Open Sound Meter visual guide</a>
     </div>
+
   </div>
 </body>
 </html>
