@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Janela FFT e resolução · OSM Guia visual</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/05-fft.html" class="active">PT</a>
+        <a href="../en/05-fft.html">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infográfico 05 / 15</div>
+        <h1>Janela FFT e resolução</h1>
+      </div>
+      <div class="subtitle">escolha o tamanho certo<br>pra cada tipo de medição</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">Velocidade ou detalhe.</h2>
+        <p>A FFT transforma o sinal no tempo em sinal por frequência. O <strong>tamanho</strong> da janela de tempo que ela usa define um trade-off:</p>
+
+        <div class="callout terra" style="margin-top: 16px;">
+          <div class="head">Janela curta (power baixo)</div>
+          <p style="margin: 0; font-size: 14px;">Responde <strong>rápido</strong> a mudanças, mas resolução de frequência é pobre — muitos hertz entre cada ponto. Bom pra ver microfonia ao vivo.</p>
+        </div>
+
+        <div class="callout" style="margin-top: 12px; border-left-color: var(--teal); background: rgba(79, 209, 199, 0.10);">
+          <div class="head" style="color: var(--teal);">Janela longa (power alto)</div>
+          <p style="margin: 0; font-size: 14px;">Resolução <strong>fina</strong> (frações de hertz), mas resposta lenta. Nos graves ainda pega reflexões da sala. Bom pra medir caixa em sala calma.</p>
+        </div>
+
+        <div class="callout navy" style="margin-top: 12px;">
+          <div class="head">Janela logarítmica</div>
+          <p style="margin: 0; font-size: 14px;">Usa 24 janelas diferentes — uma pra cada faixa. É a <strong>melhor</strong> de todas, mas usa mais CPU. Use quando puder.</p>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Tamanhos de janela (a 48 kHz)</div>
+        <table class="viz" style="margin-top: 12px;">
+          <thead>
+            <tr>
+              <th>Power</th>
+              <th>Amostras</th>
+              <th>Janela</th>
+              <th>Resolução</th>
+              <th>Uso</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="strong">10</td><td>1.024</td><td>21 ms</td><td>47 Hz</td><td class="muted">rápido</td></tr>
+            <tr><td class="strong">12</td><td>4.096</td><td>85 ms</td><td>12 Hz</td><td class="muted">rápido</td></tr>
+            <tr class="highlight"><td class="strong">14</td><td>16.384</td><td>341 ms</td><td>2,9 Hz</td><td><strong style="color: var(--terra);">★ padrão</strong></td></tr>
+            <tr><td class="strong">15</td><td>32.768</td><td>683 ms</td><td>1,5 Hz</td><td class="muted">detalhe</td></tr>
+            <tr><td class="strong">16</td><td>65.536</td><td>1,4 s</td><td>0,7 Hz</td><td class="muted">graves</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom">
+      <div class="chart-wrap" style="padding: 24px;">
+        <div class="chart-title" style="text-align: left;">Qual escolher por contexto</div>
+        <div class="context-list" style="margin-top: 20px;">
+          <div class="row">
+            <div class="key">Microfonia ao vivo</div>
+            <div class="val">Power 12 — precisa responder rápido</div>
+          </div>
+          <div class="row">
+            <div class="key">Resposta de caixa</div>
+            <div class="val">Power 14 — equilíbrio padrão</div>
+          </div>
+          <div class="row">
+            <div class="key">Análise de subwoofer</div>
+            <div class="val">Power 15 ou 16 — graves precisam de janela longa</div>
+          </div>
+          <div class="row">
+            <div class="key">Igreja vazia, sem pressa</div>
+            <div class="val">LOG — melhor curva possível</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout terra">
+        <div class="head">⚠ Armadilha comum</div>
+        <p style="font-weight: 700; color: var(--text); margin-bottom: 12px;">"Quanto mais janela, melhor a medição" — ERRADO.</p>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Janela longa pega o som direto + todas as reflexões da sala. Em ambientes reverberantes, isso bagunça a leitura nos graves em vez de melhorar.</p>
+        <p style="font-weight: 600; color: var(--terra); margin: 0; font-size: 13px;">Se a sala é reverberante, comece com power 14. Só suba se a coerência estiver boa nos graves.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="04-transfer.html">← Anterior: Transfer function</a>
+    <div class="center">05 / 15 — Janela FFT</div>
+    <a href="index.html">Voltar ao índice →</a>
+  </nav>
+</body>
+</html>

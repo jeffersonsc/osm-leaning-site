@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>O que é fase · OSM Guia visual</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/01-fase.html" class="active">PT</a>
+        <a href="../en/01-phase.html">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infográfico 01 / 15</div>
+        <h1>O que é fase</h1>
+      </div>
+      <div class="subtitle">atraso temporal medido em graus,<br>frequência por frequência</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">Não é nível, é tempo.</h2>
+        <p>Fase é o <strong>atraso temporal</strong> entre o sinal que saiu da mesa e o sinal que chegou no microfone — medido em <strong>graus</strong>, frequência por frequência.</p>
+
+        <p>Por que em graus? Porque tempo absoluto (ms) não diz muito: 1 ms atrasa completamente uma onda de 1000 Hz mas só meia onda em 500 Hz. Graus normalizam isso pela frequência: <strong>360° = uma onda inteira</strong>, qualquer que seja a frequência.</p>
+
+        <div class="callout terra highlight-box" style="margin-top: 28px;">
+          <div class="head">Regra de ouro</div>
+          <p style="font-weight: 600; color: var(--text); margin: 0;">360° de atraso = 1 ciclo inteiro daquela frequência.</p>
+          <p style="margin: 8px 0 0;">180° = meia onda — a caixa toca "para cima" enquanto a outra toca "para baixo".</p>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Duas ondas da mesma frequência</div>
+        <svg class="chart" viewBox="0 0 500 380" xmlns="http://www.w3.org/2000/svg" id="ondas-svg"></svg>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom">
+      <div class="chart-wrap">
+        <div class="chart-title" style="text-align: left;">Como aparece no OSM (gráfico de fase)</div>
+        <svg class="chart" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" id="fase-svg"></svg>
+      </div>
+
+      <div class="callout navy">
+        <div class="head">✓ Na prática, fase importa quando:</div>
+        <p style="margin-bottom: 12px;">Duas caixas tocam a mesma frequência — sub + top, principal + retorno do fundo, estéreo L + R num ponto central.</p>
+        <p style="margin-bottom: 12px;">Se as fases estão próximas, as caixas <strong style="color: var(--green);">somam</strong>. Se estão opostas, <strong style="color: var(--red);">cancelam</strong>.</p>
+        <p style="margin: 0; color: var(--text-muted); font-size: 13px;">Magnitude sozinha mente: a curva de uma caixa pode estar perfeita, mas no ponto onde duas se sobrepõem, a <strong>fase</strong> decide se vai funcionar ou não.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="index.html">← Índice</a>
+    <div class="center">01 / 15 — O que é fase</div>
+    <a href="02-coerencia.html">Próximo: Coerência →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+
+    // ===== ONDAS SENOIDAIS =====
+    const svgOndas = document.getElementById('ondas-svg');
+    const xStart = 150, xEnd = 490;
+    const cycles = 2.5, amp = 28;
+
+    const casos = [
+      { label: "Em fase (0°)", sub: "soma — 2× a amplitude", subColor: "var(--green)", defasagem: 0, yCenter: 55 },
+      { label: "Defasadas 90°", sub: "soma parcial — ~1,4×", subColor: "var(--amber)", defasagem: Math.PI / 2, yCenter: 175 },
+      { label: "Em fase oposta (180°)", sub: "CANCELAM — silêncio", subColor: "var(--red)", defasagem: Math.PI, yCenter: 295 },
+    ];
+
+    function gerarOnda(defasagem, yCenter) {
+      const pontos = [];
+      const N = 200;
+      for (let i = 0; i <= N; i++) {
+        const t = i / N;
+        const x = xStart + t * (xEnd - xStart);
+        const y = yCenter + amp * Math.sin(2 * Math.PI * cycles * t + defasagem);
+        pontos.push([x.toFixed(1), y.toFixed(1)]);
+      }
+      return "M " + pontos.map(p => p.join(",")).join(" L ");
+    }
+
+    casos.forEach(caso => {
+      const text = document.createElementNS(ns, "text");
+      text.setAttribute("x", "10");
+      text.setAttribute("y", caso.yCenter - 25);
+      text.setAttribute("class", "label-bold");
+      text.setAttribute("fill", "#E5E9F0");
+      text.textContent = caso.label;
+      svgOndas.appendChild(text);
+
+      const sub = document.createElementNS(ns, "text");
+      sub.setAttribute("x", "10");
+      sub.setAttribute("y", caso.yCenter - 10);
+      sub.setAttribute("class", "label-small");
+      sub.setAttribute("fill", caso.subColor);
+      sub.textContent = caso.sub;
+      svgOndas.appendChild(sub);
+
+      const zero = document.createElementNS(ns, "line");
+      zero.setAttribute("x1", xStart);
+      zero.setAttribute("y1", caso.yCenter);
+      zero.setAttribute("x2", xEnd);
+      zero.setAttribute("y2", caso.yCenter);
+      zero.setAttribute("class", "zero-line");
+      svgOndas.appendChild(zero);
+
+      const onda1 = document.createElementNS(ns, "path");
+      onda1.setAttribute("d", gerarOnda(0, caso.yCenter));
+      onda1.setAttribute("class", "curve navy");
+      svgOndas.appendChild(onda1);
+
+      const onda2 = document.createElementNS(ns, "path");
+      onda2.setAttribute("d", gerarOnda(caso.defasagem, caso.yCenter));
+      onda2.setAttribute("class", "curve terra");
+      svgOndas.appendChild(onda2);
+    });
+
+    // ===== GRÁFICO DE FASE =====
+    const svgFase = document.getElementById('fase-svg');
+    const fxStart = 60, fxEnd = 580, fyTop = 20, fyBot = 200;
+    const fyMid = (fyTop + fyBot) / 2;
+    const fyRange = (fyBot - fyTop) / 2;
+
+    // Grid
+    [190, 320, 450].forEach(x => {
+      const l = document.createElementNS(ns, "line");
+      l.setAttribute("x1", x); l.setAttribute("y1", fyTop);
+      l.setAttribute("x2", x); l.setAttribute("y2", fyBot);
+      l.setAttribute("class", "grid-line");
+      svgFase.appendChild(l);
+    });
+    [fyTop, fyTop + 40, fyMid + 40, fyBot].forEach(y => {
+      const l = document.createElementNS(ns, "line");
+      l.setAttribute("x1", fxStart); l.setAttribute("y1", y);
+      l.setAttribute("x2", fxEnd); l.setAttribute("y2", y);
+      l.setAttribute("class", "grid-line");
+      svgFase.appendChild(l);
+    });
+    const zeroF = document.createElementNS(ns, "line");
+    zeroF.setAttribute("x1", fxStart); zeroF.setAttribute("y1", fyMid);
+    zeroF.setAttribute("x2", fxEnd); zeroF.setAttribute("y2", fyMid);
+    zeroF.setAttribute("class", "zero-line");
+    svgFase.appendChild(zeroF);
+
+    const labels = [
+      { x: 55, y: 25, text: "+180°", anchor: "end" },
+      { x: 55, y: fyMid + 4, text: "0°", anchor: "end" },
+      { x: 55, y: 200, text: "−180°", anchor: "end" },
+      { x: 60, y: 215, text: "20 Hz" },
+      { x: 320, y: 215, text: "1 kHz", anchor: "middle" },
+      { x: 580, y: 215, text: "20 kHz", anchor: "end" },
+    ];
+    labels.forEach(l => {
+      const t = document.createElementNS(ns, "text");
+      t.setAttribute("x", l.x); t.setAttribute("y", l.y);
+      t.setAttribute("class", "axis-text");
+      if (l.anchor) t.setAttribute("text-anchor", l.anchor);
+      t.textContent = l.text;
+      svgFase.appendChild(t);
+    });
+
+    // Curva de fase com wraps
+    const N = 300;
+    const segments = [];
+    let currentSeg = [];
+    let lastWrapped = null;
+
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      const x = fxStart + t * (fxEnd - fxStart);
+      const faseUnwrapped = -50 - t * 720 + 40 * Math.sin(t * 6);
+      let wrapped = faseUnwrapped;
+      while (wrapped > 180) wrapped -= 360;
+      while (wrapped < -180) wrapped += 360;
+      const y = fyMid - (wrapped / 180) * fyRange;
+      if (lastWrapped !== null && Math.abs(wrapped - lastWrapped) > 200) {
+        if (currentSeg.length > 1) segments.push(currentSeg);
+        currentSeg = [];
+      }
+      currentSeg.push([x.toFixed(1), y.toFixed(1)]);
+      lastWrapped = wrapped;
+    }
+    if (currentSeg.length > 1) segments.push(currentSeg);
+
+    segments.forEach(seg => {
+      const p = document.createElementNS(ns, "path");
+      p.setAttribute("d", "M " + seg.map(pt => pt.join(",")).join(" L "));
+      p.setAttribute("class", "curve navy");
+      svgFase.appendChild(p);
+    });
+  })();
+  </script>
+</body>
+</html>

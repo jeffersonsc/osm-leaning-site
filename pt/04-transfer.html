@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Função de transferência · OSM Guia visual</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/04-transfer.html" class="active">PT</a>
+        <a href="../en/04-transfer.html">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infográfico 04 / 15</div>
+        <h1>Função de transferência</h1>
+      </div>
+      <div class="subtitle">magnitude + fase + coerência<br>são uma coisa só</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">Os três juntos ou nenhum.</h2>
+        <p>Transfer function é a comparação matemática entre o que <strong>entrou</strong> no sistema (sinal do gerador, via loopback) e o que <strong>saiu</strong> (sinal captado pelo microfone). Tem 3 resultados que precisam ser lidos juntos:</p>
+
+        <div class="concept-list" style="margin-top: 24px;">
+          <div class="row terra">
+            <div class="key">Magnitude:</div>
+            <div class="val">QUANTO o sistema mudou cada frequência (em dB).</div>
+          </div>
+          <div class="row teal">
+            <div class="key">Fase:</div>
+            <div class="val">QUANTO o sistema atrasou cada frequência (em graus).</div>
+          </div>
+          <div class="row navy">
+            <div class="key">Coerência:</div>
+            <div class="val">QUANTO CONFIÁVEIS são os 2 acima (0 a 1).</div>
+          </div>
+        </div>
+
+        <div class="callout navy highlight-box" style="margin-top: 28px;">
+          <div class="head">✓ Como ativar no OSM</div>
+          <div class="item">
+            <span class="key">Cmd/Ctrl + 3</span>
+            <span class="val">abre 3 gráficos lado a lado</span>
+          </div>
+          <div class="item">
+            <span class="key">Em cada um</span>
+            <span class="val">escolha Magnitude / Phase / Coherence</span>
+          </div>
+          <div class="item">
+            <span class="key">FFT power 14, LPF 1 Hz</span>
+            <span class="val">padrão pra igreja/sala</span>
+          </div>
+          <div class="item">
+            <span class="key">Coherence threshold 0.7</span>
+            <span class="val">esconde dados ruins automaticamente</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="chart-wrap" style="padding: 12px 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span class="section-label" style="margin: 0;">Magnitude (dB)</span>
+            <span class="label-small" style="color: var(--text-faded); font-size: 10px;">+10 / 0 / −30</span>
+          </div>
+          <svg class="chart" viewBox="0 0 600 130" id="mag-svg"></svg>
+        </div>
+
+        <div class="chart-wrap" style="padding: 12px 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span class="section-label" style="margin: 0; color: var(--teal);">Fase (graus)</span>
+            <span class="label-small" style="color: var(--text-faded); font-size: 10px;">+180 / 0 / −180</span>
+          </div>
+          <svg class="chart" viewBox="0 0 600 130" id="phase-svg"></svg>
+        </div>
+
+        <div class="chart-wrap" style="padding: 12px 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span class="section-label navy" style="margin: 0;">Coerência (0–1)</span>
+            <span class="label-small" style="color: var(--text-faded); font-size: 10px;">20 Hz — 1 kHz — 20 kHz</span>
+          </div>
+          <svg class="chart" viewBox="0 0 600 130" id="coh-svg"></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="steps" style="margin-top: 16px;">
+      <div style="margin-bottom: 16px;" class="section-label">Ordem de leitura na hora de interpretar</div>
+      <div class="step">
+        <div class="num">1</div>
+        <div class="name" style="color: var(--navy);">Coerência</div>
+        <div class="desc">Olhe primeiro. Onde está baixa, ignore os outros 2.</div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="name" style="color: var(--teal);">Fase</div>
+        <div class="desc">Suave ou decrescente = ok. Saltos abruptos = problema (ou wrap, ver inf. 01).</div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="name" style="color: var(--terra);">Magnitude</div>
+        <div class="desc">Tendência geral, picos e vales — mas só onde coerência é boa.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="03-atraso.html">← Anterior: Atraso</a>
+    <div class="center">04 / 15 — Função de transferência</div>
+    <a href="05-fft.html">Próximo: FFT →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+    const W = 600, H = 130;
+    const xStart = 30, xEnd = W - 10, yTop = 10, yBot = H - 20;
+    const N = 200;
+
+    function gridAndAxis(svg) {
+      // Grid vertical
+      for (let i = 1; i < 6; i++) {
+        const x = xStart + (i / 6) * (xEnd - xStart);
+        const l = document.createElementNS(ns, "line");
+        l.setAttribute("x1", x); l.setAttribute("y1", yTop);
+        l.setAttribute("x2", x); l.setAttribute("y2", yBot);
+        l.setAttribute("class", "grid-line");
+        svg.appendChild(l);
+      }
+      // Grid horizontal central
+      const yMid = (yTop + yBot) / 2;
+      const lc = document.createElementNS(ns, "line");
+      lc.setAttribute("x1", xStart); lc.setAttribute("y1", yMid);
+      lc.setAttribute("x2", xEnd); lc.setAttribute("y2", yMid);
+      lc.setAttribute("class", "zero-line");
+      svg.appendChild(lc);
+    }
+
+    // ===== Magnitude =====
+    const svgMag = document.getElementById('mag-svg');
+    gridAndAxis(svgMag);
+    const ptsMag = [];
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      let v;
+      if (t < 0.15) v = 0.3 + t * 2.5;
+      else if (t < 0.75) v = 0.65 + 0.06 * Math.sin(t * 6);
+      else v = 0.65 - (t - 0.75) * 2;
+      v = Math.max(0, Math.min(1, v));
+      const x = xStart + t * (xEnd - xStart);
+      const y = yBot - v * (yBot - yTop);
+      ptsMag.push([x.toFixed(1), y.toFixed(1)]);
+    }
+    const pmag = document.createElementNS(ns, "path");
+    pmag.setAttribute("d", "M " + ptsMag.map(p => p.join(",")).join(" L "));
+    pmag.setAttribute("class", "curve terra");
+    svgMag.appendChild(pmag);
+
+    // ===== Fase =====
+    const svgPhase = document.getElementById('phase-svg');
+    gridAndAxis(svgPhase);
+    const yMidP = (yTop + yBot) / 2;
+    const yRangeP = (yBot - yTop) / 2;
+    const segments = [];
+    let currentSeg = [];
+    let lastWrapped = null;
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      const x = xStart + t * (xEnd - xStart);
+      const fU = -30 - t * 500 + 30 * Math.sin(t * 5);
+      let w = fU;
+      while (w > 180) w -= 360;
+      while (w < -180) w += 360;
+      const y = yMidP - (w / 180) * yRangeP;
+      if (lastWrapped !== null && Math.abs(w - lastWrapped) > 200) {
+        if (currentSeg.length > 1) segments.push(currentSeg);
+        currentSeg = [];
+      }
+      currentSeg.push([x.toFixed(1), y.toFixed(1)]);
+      lastWrapped = w;
+    }
+    if (currentSeg.length > 1) segments.push(currentSeg);
+    segments.forEach(seg => {
+      const p = document.createElementNS(ns, "path");
+      p.setAttribute("d", "M " + seg.map(pt => pt.join(",")).join(" L "));
+      p.setAttribute("class", "curve teal");
+      svgPhase.appendChild(p);
+    });
+
+    // ===== Coerência =====
+    const svgCoh = document.getElementById('coh-svg');
+    // Só grid, sem zero-line (coerência é 0 a 1, vai do bottom ao top)
+    for (let i = 1; i < 6; i++) {
+      const x = xStart + (i / 6) * (xEnd - xStart);
+      const l = document.createElementNS(ns, "line");
+      l.setAttribute("x1", x); l.setAttribute("y1", yTop);
+      l.setAttribute("x2", x); l.setAttribute("y2", yBot);
+      l.setAttribute("class", "grid-line");
+      svgCoh.appendChild(l);
+    }
+    const ptsCoh = [];
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      let v;
+      if (t < 0.10) v = 0.3 + t * 5;
+      else if (t < 0.85) v = 0.92 + 0.04 * Math.sin(t * 15);
+      else v = 0.92 - (t - 0.85) * 4.5;
+      v = Math.max(0, Math.min(1, v));
+      const x = xStart + t * (xEnd - xStart);
+      const y = yBot - v * (yBot - yTop) * 0.95 - 3;
+      ptsCoh.push([x.toFixed(1), y.toFixed(1)]);
+    }
+    const pcoh = document.createElementNS(ns, "path");
+    pcoh.setAttribute("d", "M " + ptsCoh.map(p => p.join(",")).join(" L "));
+    pcoh.setAttribute("class", "curve navy");
+    svgCoh.appendChild(pcoh);
+  })();
+  </script>
+</body>
+</html>

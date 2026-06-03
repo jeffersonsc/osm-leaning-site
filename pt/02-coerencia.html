@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coerência · OSM Guia visual</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/02-coerencia.html" class="active">PT</a>
+        <a href="../en/02-coherence.html">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infográfico 02 / 15</div>
+        <h1>Coerência</h1>
+      </div>
+      <div class="subtitle">a "qualidade" da medição,<br>ponto a ponto</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">0 = lixo. 1 = confiável.</h2>
+        <p>Coerência mede o quanto o som que chegou no microfone tem <strong>correlação</strong> com o sinal que o gerador mandou. Vai de 0 a 1, frequência por frequência.</p>
+
+        <p><strong style="color: var(--green);">Coerência alta</strong> = você está medindo a CAIXA.<br>
+        <strong style="color: var(--red);">Coerência baixa</strong> = você está medindo o RUÍDO da sala, ou as reflexões dominaram, ou o nível está baixo demais.</p>
+
+        <div class="callout terra highlight-box" style="margin-top: 24px;">
+          <div class="head">Regra de ouro</div>
+          <p style="font-weight: 600; color: var(--text); margin: 0;">Se a coerência caiu naquela frequência, NÃO confie no que magnitude e fase mostram ali.</p>
+          <p style="margin: 8px 0 0;">Não equalize um vale que está com coerência 0,3.</p>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Escala de coerência</div>
+        <div class="coh-scale" style="margin-top: 16px;">
+          <div class="row">
+            <div class="num" style="color: var(--green);">1,0</div>
+            <div class="bar-wrap">
+              <div class="bar" style="background: var(--green); width: 100%;">Medição perfeita — câmara anecoica</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="num" style="color: var(--green);">0,95</div>
+            <div class="bar-wrap">
+              <div class="bar" style="background: var(--green); width: 95%;">Excelente — meta em ambiente real</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="num" style="color: var(--amber);">0,85</div>
+            <div class="bar-wrap">
+              <div class="bar" style="background: var(--amber); width: 85%;">Aceitável — graves/agudos extremos</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="num" style="color: var(--terra);">0,60</div>
+            <div class="bar-wrap">
+              <div class="bar" style="background: var(--terra); width: 60%;">Ruim — algo interferindo, ignorar</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="num" style="color: var(--red);">0,20</div>
+            <div class="bar-wrap">
+              <div class="bar" style="background: var(--red); width: 20%;">Lixo — refazer setup</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom">
+      <div class="chart-wrap">
+        <div class="chart-title" style="text-align: left;">Exemplo real: magnitude + coerência na mesma tela</div>
+        <svg class="chart" viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg" id="coh-svg"></svg>
+      </div>
+
+      <div class="callout terra">
+        <div class="head">⚠ O que faz a coerência cair</div>
+        <div class="item">
+          <span class="key">Ruído ambiente</span>
+          <span class="val">ventilador, ar-condicionado, conversa, trânsito</span>
+        </div>
+        <div class="item">
+          <span class="key">Nível baixo</span>
+          <span class="val">sinal precisa estar 20+ dB acima do ruído</span>
+        </div>
+        <div class="item">
+          <span class="key">Reflexões fortes</span>
+          <span class="val">templo reverberante, mic perto de parede</span>
+        </div>
+        <div class="item">
+          <span class="key">Setup errado</span>
+          <span class="val">FFT inadequado, sinal sem energia naquela faixa</span>
+        </div>
+        <div class="item">
+          <span class="key">Caixa muda</span>
+          <span class="val">frequências fora da faixa da caixa medida</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="01-fase.html">← Anterior: Fase</a>
+    <div class="center">02 / 15 — Coerência</div>
+    <a href="03-atraso.html">Próximo: Atraso →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.getElementById('coh-svg');
+    const xStart = 40, xEnd = 580, yTop = 20, yBot = 200;
+
+    // Grid
+    for (let i = 1; i < 6; i++) {
+      const x = xStart + (i / 6) * (xEnd - xStart);
+      const l = document.createElementNS(ns, "line");
+      l.setAttribute("x1", x); l.setAttribute("y1", yTop);
+      l.setAttribute("x2", x); l.setAttribute("y2", yBot);
+      l.setAttribute("class", "grid-line");
+      svg.appendChild(l);
+    }
+    for (let i = 1; i < 4; i++) {
+      const y = yTop + (i / 4) * (yBot - yTop);
+      const l = document.createElementNS(ns, "line");
+      l.setAttribute("x1", xStart); l.setAttribute("y1", y);
+      l.setAttribute("x2", xEnd); l.setAttribute("y2", y);
+      l.setAttribute("class", "grid-line");
+      svg.appendChild(l);
+    }
+
+    // Curva de magnitude
+    const N = 200;
+    const ptsMag = [];
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      let v;
+      if (t < 0.15) v = 0.25 + t * 2.5;
+      else if (t < 0.75) v = 0.6 + 0.05 * Math.sin(t * 8);
+      else v = 0.6 - (t - 0.75) * 1.8;
+      v = Math.max(0, Math.min(1, v));
+      const x = xStart + t * (xEnd - xStart);
+      const y = yBot - v * (yBot - yTop);
+      ptsMag.push([x.toFixed(1), y.toFixed(1)]);
+    }
+    const pathMag = document.createElementNS(ns, "path");
+    pathMag.setAttribute("d", "M " + ptsMag.map(p => p.join(",")).join(" L "));
+    pathMag.setAttribute("class", "curve navy");
+    svg.appendChild(pathMag);
+
+    // Label magnitude
+    const tm = document.createElementNS(ns, "text");
+    tm.setAttribute("x", "570"); tm.setAttribute("y", "35");
+    tm.setAttribute("class", "label-small");
+    tm.setAttribute("text-anchor", "end");
+    tm.setAttribute("fill", "#5B7BD8");
+    tm.textContent = "magnitude (curva azul)";
+    svg.appendChild(tm);
+
+    // Coerência em segmentos coloridos
+    const segLen = 4;
+    let prev = null;
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      let v;
+      if (t < 0.10) v = 0.3 + t * 5;
+      else if (t < 0.85) v = 0.92 + 0.04 * Math.sin(t * 15);
+      else v = 0.92 - (t - 0.85) * 5;
+      v = Math.max(0, Math.min(1, v));
+      const x = xStart + t * (xEnd - xStart);
+      const y = yBot - v * (yBot - yTop) * 0.95 - 5;
+      if (prev) {
+        let cor;
+        if (v > 0.9) cor = "#34D399";
+        else if (v > 0.7) cor = "#F5B947";
+        else cor = "#F87171";
+        const line = document.createElementNS(ns, "line");
+        line.setAttribute("x1", prev.x); line.setAttribute("y1", prev.y);
+        line.setAttribute("x2", x); line.setAttribute("y2", y);
+        line.setAttribute("stroke", cor);
+        line.setAttribute("stroke-width", "2");
+        line.setAttribute("stroke-linecap", "round");
+        svg.appendChild(line);
+      }
+      prev = {x, y};
+    }
+
+    // Label coerência
+    const tc = document.createElementNS(ns, "text");
+    tc.setAttribute("x", "300"); tc.setAttribute("y", "225");
+    tc.setAttribute("class", "label-small");
+    tc.setAttribute("text-anchor", "middle");
+    tc.setAttribute("fill", "#8B97A8");
+    tc.textContent = "coerência (verde=boa · amarela=cuidado · vermelha=ignorar)";
+    svg.appendChild(tc);
+
+    // Eixos
+    [["20 Hz", xStart, "start"], ["1 kHz", (xStart+xEnd)/2, "middle"], ["20 kHz", xEnd, "end"]].forEach(([t, x, anc]) => {
+      const el = document.createElementNS(ns, "text");
+      el.setAttribute("x", x); el.setAttribute("y", 215);
+      el.setAttribute("class", "axis-text");
+      el.setAttribute("text-anchor", anc);
+      el.textContent = t;
+      svg.appendChild(el);
+    });
+  })();
+  </script>
+</body>
+</html>

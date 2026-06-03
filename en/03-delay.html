@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delay and delay finder · OSM Visual Guide</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/03-atraso.html">PT</a>
+        <a href="../en/03-delay.html" class="active">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infographic 03 / 15</div>
+        <h1>Delay and delay finder</h1>
+      </div>
+      <div class="subtitle">sound takes time to arrive —<br>and OSM measures it</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">Sound is not instantaneous.</h2>
+        <p>Sound travels at ~343 m/s in air (20°C). That means <strong>every meter of distance = 2.9 milliseconds of delay</strong>.</p>
+
+        <p>When you start the generator in OSM, the software plays the signal to the output AND records when it played. When the mic captures the sound, OSM compares the two and calculates how long it took — that's the <strong>estimated delay</strong>.</p>
+
+        <div class="callout terra highlight-box" style="margin-top: 24px;">
+          <div class="head">Delay finder (Cmd/Ctrl + E)</div>
+          <p style="font-weight: 600; color: var(--text); margin: 0;">Always apply before storing a measurement.</p>
+          <p style="margin: 8px 0 0;">Without it, phase is offset and comparisons are wrong.</p>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Distance ↔ delay ↔ wavelength</div>
+        <table class="viz" style="margin-top: 12px;">
+          <thead>
+            <tr>
+              <th>Distance</th>
+              <th>Delay</th>
+              <th>Freq.</th>
+              <th>λ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="strong">10 cm</td><td>0.29 ms</td><td class="muted">1 kHz</td><td class="muted">34 cm</td></tr>
+            <tr><td class="strong">34 cm</td><td>1 ms</td><td class="muted">500 Hz</td><td class="muted">68 cm</td></tr>
+            <tr><td class="strong">1 m</td><td>2.9 ms</td><td class="muted">100 Hz</td><td class="muted">3.4 m</td></tr>
+            <tr><td class="strong">3.4 m</td><td>10 ms</td><td class="muted">50 Hz</td><td class="muted">6.8 m</td></tr>
+            <tr><td class="strong">10 m</td><td>29 ms</td><td class="muted">20 Hz</td><td class="muted">17 m</td></tr>
+            <tr><td class="strong">17 m</td><td>50 ms</td><td class="muted">—</td><td class="muted">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom">
+      <div class="chart-wrap">
+        <div class="chart-title" style="text-align: left;">Sound's journey, in practice</div>
+        <svg class="chart" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" id="prop-svg"></svg>
+      </div>
+
+      <div class="callout navy">
+        <div class="head">✓ How to use in practice</div>
+        <div class="item">
+          <span class="key">Clean measurement</span>
+          <span class="val">Cmd+E before storing — always</span>
+        </div>
+        <div class="item">
+          <span class="key">Aligning speakers</span>
+          <span class="val">delay is what matches the phases</span>
+        </div>
+        <div class="item">
+          <span class="key">Rear fill</span>
+          <span class="val">delay the rear box to match the front</span>
+        </div>
+        <div class="item">
+          <span class="key">Sub + top</span>
+          <span class="val">a few ms of delay on the top aligns it with the sub</span>
+        </div>
+        <div class="item">
+          <span class="key">Diagnostics</span>
+          <span class="val">very high delay can indicate dominant reflections</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="02-coherence.html">← Previous: Coherence</a>
+    <div class="center">03 / 15 — Delay and delay finder</div>
+    <a href="04-transfer.html">Next: Transfer function →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.getElementById('prop-svg');
+
+    const spX = 50, spY = 95;
+    const spk = document.createElementNS(ns, "rect");
+    spk.setAttribute("x", spX); spk.setAttribute("y", spY);
+    spk.setAttribute("width", 36); spk.setAttribute("height", 48);
+    spk.setAttribute("rx", 3); spk.setAttribute("fill", "#5B7BD8");
+    svg.appendChild(spk);
+    const cone = document.createElementNS(ns, "circle");
+    cone.setAttribute("cx", spX + 18); cone.setAttribute("cy", spY + 24);
+    cone.setAttribute("r", 12); cone.setAttribute("fill", "#E47766");
+    svg.appendChild(cone);
+    const coneInner = document.createElementNS(ns, "circle");
+    coneInner.setAttribute("cx", spX + 18); coneInner.setAttribute("cy", spY + 24);
+    coneInner.setAttribute("r", 4); coneInner.setAttribute("fill", "#1A2332");
+    svg.appendChild(coneInner);
+    const lbl1 = document.createElementNS(ns, "text");
+    lbl1.setAttribute("x", spX + 18); lbl1.setAttribute("y", spY + 64);
+    lbl1.setAttribute("class", "label-bold");
+    lbl1.setAttribute("text-anchor", "middle");
+    lbl1.setAttribute("fill", "#E5E9F0");
+    lbl1.textContent = "SPEAKER";
+    svg.appendChild(lbl1);
+
+    const micX = 530, micY = 110;
+    const micBody = document.createElementNS(ns, "circle");
+    micBody.setAttribute("cx", micX); micBody.setAttribute("cy", micY);
+    micBody.setAttribute("r", 10); micBody.setAttribute("fill", "#4FD1C7");
+    svg.appendChild(micBody);
+    const micStand = document.createElementNS(ns, "rect");
+    micStand.setAttribute("x", micX - 2); micStand.setAttribute("y", micY + 8);
+    micStand.setAttribute("width", 4); micStand.setAttribute("height", 30);
+    micStand.setAttribute("fill", "#4FD1C7");
+    svg.appendChild(micStand);
+    const lbl2 = document.createElementNS(ns, "text");
+    lbl2.setAttribute("x", micX); lbl2.setAttribute("y", micY + 54);
+    lbl2.setAttribute("class", "label-bold");
+    lbl2.setAttribute("text-anchor", "middle");
+    lbl2.setAttribute("fill", "#E5E9F0");
+    lbl2.textContent = "MIC";
+    svg.appendChild(lbl2);
+
+    const startX = spX + 36 + 10;
+    const endX = micX - 14;
+    const nOndas = 6;
+    for (let i = 0; i < nOndas; i++) {
+      const opacity = 0.7 - i * 0.10;
+      const opx = startX + (i / nOndas) * (endX - startX);
+      const arc = document.createElementNS(ns, "path");
+      arc.setAttribute("d", `M ${opx} ${micY - 14} Q ${opx + 12} ${micY} ${opx} ${micY + 14}`);
+      arc.setAttribute("fill", "none");
+      arc.setAttribute("stroke", "#4FD1C7");
+      arc.setAttribute("stroke-width", "1.5");
+      arc.setAttribute("opacity", opacity.toFixed(2));
+      svg.appendChild(arc);
+    }
+
+    const arrowY = 190;
+    const measure = document.createElementNS(ns, "line");
+    measure.setAttribute("x1", spX + 18); measure.setAttribute("y1", arrowY);
+    measure.setAttribute("x2", micX); measure.setAttribute("y2", arrowY);
+    measure.setAttribute("stroke", "#5B7BD8");
+    measure.setAttribute("stroke-width", "1");
+    svg.appendChild(measure);
+    [spX + 18, micX].forEach(x => {
+      const t = document.createElementNS(ns, "line");
+      t.setAttribute("x1", x); t.setAttribute("y1", arrowY - 4);
+      t.setAttribute("x2", x); t.setAttribute("y2", arrowY + 4);
+      t.setAttribute("stroke", "#5B7BD8");
+      t.setAttribute("stroke-width", "1");
+      svg.appendChild(t);
+    });
+    const measureText = document.createElementNS(ns, "text");
+    measureText.setAttribute("x", (spX + 18 + micX) / 2);
+    measureText.setAttribute("y", arrowY - 8);
+    measureText.setAttribute("class", "label-bold");
+    measureText.setAttribute("text-anchor", "middle");
+    measureText.setAttribute("fill", "#5B7BD8");
+    measureText.setAttribute("font-size", "13");
+    measureText.textContent = "5 meters = 14.6 ms of delay";
+    svg.appendChild(measureText);
+
+    const topText = document.createElementNS(ns, "text");
+    topText.setAttribute("x", 300); topText.setAttribute("y", 30);
+    topText.setAttribute("class", "label-small");
+    topText.setAttribute("text-anchor", "middle");
+    topText.setAttribute("fill", "#8B97A8");
+    topText.setAttribute("font-style", "italic");
+    topText.textContent = "sound takes ~3 ms per meter";
+    svg.appendChild(topText);
+  })();
+  </script>
+</body>
+</html>

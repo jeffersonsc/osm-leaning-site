@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What is phase · OSM Visual Guide</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/01-fase.html">PT</a>
+        <a href="../en/01-phase.html" class="active">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infographic 01 / 15</div>
+        <h1>What is phase</h1>
+      </div>
+      <div class="subtitle">time delay measured in degrees,<br>frequency by frequency</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">It's not level, it's time.</h2>
+        <p>Phase is the <strong>time delay</strong> between the signal that left the mixer and the signal that reached the microphone — measured in <strong>degrees</strong>, frequency by frequency.</p>
+
+        <p>Why degrees? Because absolute time (ms) doesn't say much: 1 ms completely shifts a 1000 Hz wave but only half a wave at 500 Hz. Degrees normalize this by frequency: <strong>360° = one full wave</strong>, regardless of frequency.</p>
+
+        <div class="callout terra highlight-box" style="margin-top: 28px;">
+          <div class="head">Rule of thumb</div>
+          <p style="font-weight: 600; color: var(--text); margin: 0;">360° of delay = one full cycle of that frequency.</p>
+          <p style="margin: 8px 0 0;">180° = half a wave — one speaker pushes "up" while the other pushes "down".</p>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Two waves at the same frequency</div>
+        <svg class="chart" viewBox="0 0 500 380" xmlns="http://www.w3.org/2000/svg" id="ondas-svg"></svg>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom">
+      <div class="chart-wrap">
+        <div class="chart-title" style="text-align: left;">How it shows in OSM (phase graph)</div>
+        <svg class="chart" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" id="fase-svg"></svg>
+      </div>
+
+      <div class="callout navy">
+        <div class="head">✓ In practice, phase matters when:</div>
+        <p style="margin-bottom: 12px;">Two speakers play the same frequency — sub + top, main + rear fill, stereo L + R at a center point.</p>
+        <p style="margin-bottom: 12px;">If phases are close, speakers <strong style="color: var(--green);">sum</strong>. If they're opposite, they <strong style="color: var(--red);">cancel</strong>.</p>
+        <p style="margin: 0; color: var(--text-muted); font-size: 13px;">Magnitude alone lies: one speaker's curve can be perfect, but at the point where two overlap, <strong>phase</strong> decides whether it'll work.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="index.html">← Index</a>
+    <div class="center">01 / 15 — What is phase</div>
+    <a href="02-coherence.html">Next: Coherence →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+
+    // ===== SINE WAVES =====
+    const svgOndas = document.getElementById('ondas-svg');
+    const xStart = 150, xEnd = 490;
+    const cycles = 2.5, amp = 28;
+
+    const cases = [
+      { label: "In phase (0°)", sub: "sum — 2× amplitude", subColor: "var(--green)", offset: 0, yCenter: 55 },
+      { label: "90° out of phase", sub: "partial sum — ~1.4×", subColor: "var(--amber)", offset: Math.PI / 2, yCenter: 175 },
+      { label: "Opposite phase (180°)", sub: "CANCEL — silence", subColor: "var(--red)", offset: Math.PI, yCenter: 295 },
+    ];
+
+    function makeWave(offset, yCenter) {
+      const pts = [];
+      const N = 200;
+      for (let i = 0; i <= N; i++) {
+        const t = i / N;
+        const x = xStart + t * (xEnd - xStart);
+        const y = yCenter + amp * Math.sin(2 * Math.PI * cycles * t + offset);
+        pts.push([x.toFixed(1), y.toFixed(1)]);
+      }
+      return "M " + pts.map(p => p.join(",")).join(" L ");
+    }
+
+    cases.forEach(c => {
+      const text = document.createElementNS(ns, "text");
+      text.setAttribute("x", "10");
+      text.setAttribute("y", c.yCenter - 25);
+      text.setAttribute("class", "label-bold");
+      text.setAttribute("fill", "#E5E9F0");
+      text.textContent = c.label;
+      svgOndas.appendChild(text);
+
+      const sub = document.createElementNS(ns, "text");
+      sub.setAttribute("x", "10");
+      sub.setAttribute("y", c.yCenter - 10);
+      sub.setAttribute("class", "label-small");
+      sub.setAttribute("fill", c.subColor);
+      sub.textContent = c.sub;
+      svgOndas.appendChild(sub);
+
+      const zero = document.createElementNS(ns, "line");
+      zero.setAttribute("x1", xStart);
+      zero.setAttribute("y1", c.yCenter);
+      zero.setAttribute("x2", xEnd);
+      zero.setAttribute("y2", c.yCenter);
+      zero.setAttribute("class", "zero-line");
+      svgOndas.appendChild(zero);
+
+      const w1 = document.createElementNS(ns, "path");
+      w1.setAttribute("d", makeWave(0, c.yCenter));
+      w1.setAttribute("class", "curve navy");
+      svgOndas.appendChild(w1);
+
+      const w2 = document.createElementNS(ns, "path");
+      w2.setAttribute("d", makeWave(c.offset, c.yCenter));
+      w2.setAttribute("class", "curve terra");
+      svgOndas.appendChild(w2);
+    });
+
+    // ===== PHASE GRAPH =====
+    const svgFase = document.getElementById('fase-svg');
+    const fxStart = 60, fxEnd = 580, fyTop = 20, fyBot = 200;
+    const fyMid = (fyTop + fyBot) / 2;
+    const fyRange = (fyBot - fyTop) / 2;
+
+    [190, 320, 450].forEach(x => {
+      const l = document.createElementNS(ns, "line");
+      l.setAttribute("x1", x); l.setAttribute("y1", fyTop);
+      l.setAttribute("x2", x); l.setAttribute("y2", fyBot);
+      l.setAttribute("class", "grid-line");
+      svgFase.appendChild(l);
+    });
+    [fyTop, fyTop + 40, fyMid + 40, fyBot].forEach(y => {
+      const l = document.createElementNS(ns, "line");
+      l.setAttribute("x1", fxStart); l.setAttribute("y1", y);
+      l.setAttribute("x2", fxEnd); l.setAttribute("y2", y);
+      l.setAttribute("class", "grid-line");
+      svgFase.appendChild(l);
+    });
+    const zeroF = document.createElementNS(ns, "line");
+    zeroF.setAttribute("x1", fxStart); zeroF.setAttribute("y1", fyMid);
+    zeroF.setAttribute("x2", fxEnd); zeroF.setAttribute("y2", fyMid);
+    zeroF.setAttribute("class", "zero-line");
+    svgFase.appendChild(zeroF);
+
+    const labels = [
+      { x: 55, y: 25, text: "+180°", anchor: "end" },
+      { x: 55, y: fyMid + 4, text: "0°", anchor: "end" },
+      { x: 55, y: 200, text: "−180°", anchor: "end" },
+      { x: 60, y: 215, text: "20 Hz" },
+      { x: 320, y: 215, text: "1 kHz", anchor: "middle" },
+      { x: 580, y: 215, text: "20 kHz", anchor: "end" },
+    ];
+    labels.forEach(l => {
+      const t = document.createElementNS(ns, "text");
+      t.setAttribute("x", l.x); t.setAttribute("y", l.y);
+      t.setAttribute("class", "axis-text");
+      if (l.anchor) t.setAttribute("text-anchor", l.anchor);
+      t.textContent = l.text;
+      svgFase.appendChild(t);
+    });
+
+    const N = 300;
+    const segments = [];
+    let currentSeg = [];
+    let lastWrapped = null;
+
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      const x = fxStart + t * (fxEnd - fxStart);
+      const faseUnwrapped = -50 - t * 720 + 40 * Math.sin(t * 6);
+      let wrapped = faseUnwrapped;
+      while (wrapped > 180) wrapped -= 360;
+      while (wrapped < -180) wrapped += 360;
+      const y = fyMid - (wrapped / 180) * fyRange;
+      if (lastWrapped !== null && Math.abs(wrapped - lastWrapped) > 200) {
+        if (currentSeg.length > 1) segments.push(currentSeg);
+        currentSeg = [];
+      }
+      currentSeg.push([x.toFixed(1), y.toFixed(1)]);
+      lastWrapped = wrapped;
+    }
+    if (currentSeg.length > 1) segments.push(currentSeg);
+
+    segments.forEach(seg => {
+      const p = document.createElementNS(ns, "path");
+      p.setAttribute("d", "M " + seg.map(pt => pt.join(",")).join(" L "));
+      p.setAttribute("class", "curve navy");
+      svgFase.appendChild(p);
+    });
+  })();
+  </script>
+</body>
+</html>
