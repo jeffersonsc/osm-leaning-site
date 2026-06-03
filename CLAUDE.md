@@ -62,6 +62,6 @@ Breakpoints in `style.css`: 800px (grids collapse to 1 column) and 640px (typogr
 
 ## Content status
 
-- **Curso (Trilha 1)**: Bloco 1 complete. Blocos 2–6 are `coming-soon` cards on `/curso/index.html` — sourced from `apostila_curso_audio.pdf` in `~/Documents/Consultoria/Curso de Audio/`.
+- **Curso (Trilha 1)**: complete. All 6 blocos plus `e-agora.html` (encerramento). Sourced from `apostila_curso_audio.pdf` in `~/Documents/Consultoria/Curso de Audio/`.
 - **OSM (Trilha 2)**: Block 1 (pages 01–05, Fundamentals) complete in both languages. Blocks 2 (06–11) and 3 (12–15) are placeholders on the index pages — no HTML files exist for them yet. Source images for these are in `~/Documents/Consultoria/Materiais/PT/OSM-img/Images novas/` (75 slides) and `OSM-v1.5/` (57 screenshots).
 - **Materiais**: apostila + checklist PDFs in `/materiais/`. The page is prepared to receive more PDFs later (a future OSM training PDF, mentioned by user).
