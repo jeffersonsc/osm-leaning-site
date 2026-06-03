@@ -5,6 +5,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Posicionamento de caixas, sub, monitores e microfones · OSM Guia visual</title>
   <link rel="stylesheet" href="../style.css">
+  <style>
+    .topic-block { margin-top: 48px; }
+    .topic-block h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--terra);
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+    }
+    .topic-block .lead {
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      max-width: 720px;
+    }
+    .topic-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 800px) {
+      .topic-grid { grid-template-columns: 1fr; }
+    }
+    .topic-grid .key-points {
+      background: var(--bg-card);
+      border-left: 4px solid var(--terra);
+      border-radius: 4px;
+      padding: 16px 18px;
+      font-size: 14px;
+    }
+    .topic-grid .key-points strong { color: var(--text); }
+    .topic-grid .key-points .item {
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed var(--border);
+    }
+    .topic-grid .key-points .item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+    .topic-grid .key-points .deep-link {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-bottom: 1px dotted var(--text-muted);
+    }
+    .topic-grid .key-points .deep-link:hover {
+      color: var(--text);
+      border-bottom-color: var(--text);
+    }
+    .section-divider {
+      margin: 64px 0 32px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .section-divider h2 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .section-divider p {
+      color: var(--text-muted);
+      max-width: 720px;
+    }
+  </style>
 </head>
 <body>
   <div class="page">
@@ -27,80 +95,120 @@
     <div class="grid-2">
       <div>
         <h2 class="main-claim">Posição vence equalização.</h2>
-        <p>Você pode ter o sistema mais caro do mundo, mas se a caixa principal está apontada para o chão, o sub está no canto pegando ressonância da parede, e o microfone do pregador está a 30 cm da boca dele — nada do que você faça no OSM ou na mesa vai consertar.</p>
-
-        <p>Posicionamento é o primeiro alinhamento. É físico, custa zero, e tem o maior impacto no som final. Esta página é o checklist do que olhar antes de ligar o gerador.</p>
+        <p>Sistema mais caro do mundo não conserta caixa apontada para o chão, sub no canto pegando ressonância, ou mic do pregador a 30 cm da boca. Posicionamento é o primeiro alinhamento — físico, custa zero, impacto enorme.</p>
 
         <div class="callout terra highlight-box" style="margin-top: 24px;">
           <div class="head">A ordem do alinhamento</div>
-          <p style="margin: 0;"><strong>1.</strong> Posicione corretamente (esta página).<br><strong>2.</strong> Meça o que está acontecendo (medição).<br><strong>3.</strong> Ajuste delay, polaridade e EQ no processador (Infográficos 06-11).</p>
-          <p style="margin: 8px 0 0;">Inverter a ordem — equalizar antes de posicionar — gera horas de trabalho que vão por água abaixo quando alguém mexer numa caixa.</p>
+          <p style="margin: 0;"><strong>1.</strong> Posicione corretamente.<br><strong>2.</strong> Meça o que está acontecendo.<br><strong>3.</strong> Ajuste delay, polaridade e EQ no processador.</p>
         </div>
       </div>
 
       <div class="chart-wrap">
-        <div class="chart-title">Vista superior: templo típico</div>
+        <div class="chart-title">Vista superior: layout típico</div>
         <svg class="chart" viewBox="0 0 500 380" xmlns="http://www.w3.org/2000/svg" id="planta-svg"></svg>
       </div>
     </div>
 
-    <div class="grid-2-bottom">
-      <div class="callout navy">
-        <div class="head">📢 PA principal (frontais)</div>
-        <p style="margin-bottom: 8px;"><strong>Altura:</strong> tweeter na linha do ouvido do ouvinte em pé (1,60-1,80 m). Acima disso, agudos batem no teto; abaixo, na cabeça das primeiras filas.</p>
-        <p style="margin-bottom: 8px;"><strong>Ângulo (tilt):</strong> levemente apontado para o meio da plateia, não para o fundo. "Mirar" no fundo deixa o meio com pressão excessiva nos agudos.</p>
-        <p style="margin-bottom: 8px;"><strong>Splay (abertura):</strong> em par estéreo, 30°-45° entre as caixas é o padrão. Ajusta conforme a largura da igreja.</p>
-        <p style="margin: 0;"><strong>Distância da parede:</strong> mínimo 1 m da parede de trás. Encostar na parede reforça graves (modo de parede) e cria comb filtering.</p>
-      </div>
+    <!-- ============= SEÇÃO VISUAL ============= -->
 
-      <div class="callout terra">
-        <div class="head">🔊 Subwoofer</div>
-        <p style="margin-bottom: 8px;"><strong>Centro vs lados:</strong> sub no centro do palco soma melhor com o PA. Subs nos lados (próximos das caixas principais) podem cancelar com elas em frequências críticas — só vale com alinhamento eletrônico cuidadoso.</p>
-        <p style="margin-bottom: 8px;"><strong>Canto da igreja:</strong> reforça graves (+6 a +9 dB sem custo), mas excita modos da sala — som "incha" em frequência específica. Use só se precisar muito de SPL e tiver EQ para cortar o pico.</p>
-        <p style="margin-bottom: 8px;"><strong>Cardióide (sub em arranjo):</strong> 2-3 subs configurados em arranjo cardióide cancelam a energia que iria para trás do palco. Útil em ginásio para não "bombardear" o pastor de costas.</p>
-        <p style="margin: 0;"><strong>Distância do PA:</strong> quanto mais perto do PA, melhor a soma no crossover. Sub atrás do PA principal é ideal; sub à frente do palco gera atraso adicional.</p>
-      </div>
-    </div>
-
-    <div class="grid-2-bottom" style="margin-top: 24px;">
-      <div class="callout green">
-        <div class="head">🎧 Monitores de palco</div>
-        <p style="margin-bottom: 8px;"><strong>Floor wedge (caixa de chão):</strong> 30°-45° apontada para a pessoa, com tweeter a uns 30 cm do chão. Direcionada para o ouvido, NÃO para o peito (perde brilho) nem para o teto (microfoniza).</p>
-        <p style="margin-bottom: 8px;"><strong>Posição relativa ao microfone:</strong> wedge atrás do microfone, no eixo nulo do mic cardioide. Microfone na frente do wedge = realimentação instantânea.</p>
-        <p style="margin-bottom: 8px;"><strong>In-ear vs wedge:</strong> in-ear elimina microfonia, libera SPL, e dá mistura individual. Investimento maior, mas é o futuro mesmo em igreja pequena. Comece pelos vocalistas principais.</p>
-        <p style="margin: 0;"><strong>Quantos enviar:</strong> idealmente, cada músico/vocalista tem mistura própria (mais AUX no processador). Mistura única para o palco inteiro é compromisso.</p>
-      </div>
-
-      <div class="callout amber">
-        <div class="head">🎤 Microfones (voz e instrumento)</div>
-        <p style="margin-bottom: 8px;"><strong>Handheld para pregador:</strong> 5-10 cm da boca, levemente fora do eixo (evita "pop" do P e B). SM58 e similares são cardióides — reflexão de palco para a parte de trás do mic é cancelada.</p>
-        <p style="margin-bottom: 8px;"><strong>Headset:</strong> 1-2 cm do canto da boca, NÃO direto na frente (cospe). Garante distância constante mesmo quando o pregador se movimenta — solução ideal para quem caminha pelo palco.</p>
-        <p style="margin-bottom: 8px;"><strong>Lapela:</strong> centro do peito, 15-20 cm abaixo do queixo. Som mais aberto que headset mas pega ruído de roupa. Cuidado com colar e mover de microfone.</p>
-        <p style="margin-bottom: 8px;"><strong>Vocais do louvor (handheld dinâmico):</strong> mesma regra do pregador. Para condenser de mão (Shure KSM9, SM86), distância maior — 8-15 cm.</p>
-        <p style="margin: 0;"><strong>Mics de instrumento:</strong> bumbo a 5 cm da batedeira interna; caixa de pele superior a 1 dedo da pele; guitarra na borda do cone do alto-falante; teclado e violão via DI, sem mic.</p>
+    <div class="topic-block">
+      <h2>📢 PA principal</h2>
+      <p class="lead">Altura, ângulo e splay determinam quem ouve agudos limpos e quem ouve som "abafado".</p>
+      <div class="topic-grid">
+        <div class="chart-wrap">
+          <div class="chart-title">Vista lateral + vista superior</div>
+          <svg class="chart" viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" id="pa-svg"></svg>
+        </div>
+        <div class="key-points">
+          <div class="item"><strong>Altura:</strong> tweeter na linha do ouvido (1,60–1,80 m).</div>
+          <div class="item"><strong>Tilt:</strong> levemente para o meio da plateia, não para o fundo.</div>
+          <div class="item"><strong>Splay (par L+R):</strong> 30°–45° entre as caixas.</div>
+          <div class="item"><strong>Distância da parede:</strong> mínimo 1 m de trás.
+            <a href="#adv-pa" class="deep-link">ver explicação avançada ↓</a>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="grid-2-bottom" style="margin-top: 24px;">
-      <div class="callout navy">
-        <div class="head">📐 Microfone de medição (OSM)</div>
-        <p style="margin-bottom: 8px;"><strong>Altura:</strong> 1,60-1,80 m (linha do ouvido de pé) ou 1,20 m (sentado). Padrão é altura do ouvido para a postura predominante daquele ponto.</p>
-        <p style="margin-bottom: 8px;"><strong>Pontos de medição:</strong> 3 mínimo — mesa do som, meio da igreja, fundo (ou mezanino). Cada ponto stored separado para comparar.</p>
-        <p style="margin-bottom: 8px;"><strong>No eixo do PA:</strong> mic apontado para a caixa que está medindo. Para alinhamento de sub+top, mic na zona de cobertura comum (cruzamento da projeção das duas).</p>
-        <p style="margin: 0;"><strong>Longe de superfícies próximas:</strong> mic na parede ou em cima da mesa cria reflexão e comb filtering na própria medição. Use tripé, no mínimo 1 m de qualquer superfície ao redor.</p>
-      </div>
-
-      <div class="callout terra">
-        <div class="head">⚠ Erros de posicionamento que matam o som</div>
-        <p style="margin-bottom: 10px;"><strong>PA virado para o chão:</strong> caixa pendurada no teto mas inclinada demais. Agudos batem no piso, ouvinte ouve som "abafado".</p>
-        <p style="margin-bottom: 10px;"><strong>Sub em cima do palco:</strong> grave acopla com tablado, vira tremor estrutural. Sub no chão, no nível do PA.</p>
-        <p style="margin-bottom: 10px;"><strong>Monitor de chão apontado para a plateia:</strong> som do monitor vaza para a igreja, atrasado em relação ao PA. Pessoas na frente ouvem o palco "duplo".</p>
-        <p style="margin-bottom: 10px;"><strong>Microfone do pregador na altura do peito:</strong> caminho longo da voz, ganho aberto demais, microfonia certa.</p>
-        <p style="margin: 0;"><strong>Mic de medição sobre a mesa do operador:</strong> reflexão da mesa entra na medição, gráfico de Magnitude fica "sujo" nos médios.</p>
+    <div class="topic-block">
+      <h2>🔊 Subwoofer</h2>
+      <p class="lead">Quatro arranjos comuns, cada um com trade-off acústico diferente.</p>
+      <div class="topic-grid">
+        <div class="chart-wrap">
+          <div class="chart-title">Quatro posicionamentos típicos</div>
+          <svg class="chart" viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" id="sub-svg"></svg>
+        </div>
+        <div class="key-points">
+          <div class="item"><strong>Centro:</strong> melhor soma com o PA, sem cancelamentos laterais.</div>
+          <div class="item"><strong>Par lateral:</strong> mais SPL, mas exige alinhamento eletrônico para não cancelar.</div>
+          <div class="item"><strong>Canto:</strong> +6 a +9 dB de graves "grátis", mas excita modos da sala.</div>
+          <div class="item"><strong>Cardióide:</strong> cancela energia que iria para trás do palco.
+            <a href="#adv-sub" class="deep-link">ver explicação avançada ↓</a>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="grid-2-bottom" style="margin-top: 24px;">
+    <div class="topic-block">
+      <h2>🎧 Monitor de palco</h2>
+      <p class="lead">Direção do monitor e posição relativa ao microfone definem se há microfonia ou não.</p>
+      <div class="topic-grid">
+        <div class="chart-wrap">
+          <div class="chart-title">Vista lateral + padrão cardióide do mic</div>
+          <svg class="chart" viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" id="monitor-svg"></svg>
+        </div>
+        <div class="key-points">
+          <div class="item"><strong>Ângulo wedge:</strong> 30°–45° apontado para o ouvido, não para o teto.</div>
+          <div class="item"><strong>Tweeter:</strong> a uns 30 cm do chão.</div>
+          <div class="item"><strong>Posição vs mic:</strong> wedge no <em>eixo nulo</em> do mic cardióide (atrás dele).</div>
+          <div class="item"><strong>In-ear:</strong> elimina o problema todo (sem mic captando wedge).
+            <a href="#adv-monitor" class="deep-link">ver explicação avançada ↓</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-block">
+      <h2>🎤 Microfones de voz</h2>
+      <p class="lead">Distância da boca define ganho necessário, microfonia, e som no PA.</p>
+      <div class="topic-grid">
+        <div class="chart-wrap">
+          <div class="chart-title">Handheld, headset e lapela em escala</div>
+          <svg class="chart" viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" id="mic-svg"></svg>
+        </div>
+        <div class="key-points">
+          <div class="item"><strong>Handheld:</strong> 5–10 cm da boca, levemente fora do eixo.</div>
+          <div class="item"><strong>Headset:</strong> 1–2 cm do canto da boca (não direto na frente).</div>
+          <div class="item"><strong>Lapela:</strong> 15–20 cm abaixo do queixo, centro do peito.</div>
+          <div class="item"><strong>Mics de instrumento:</strong> regras próprias (bumbo, caixa, etc).
+            <a href="#adv-mic" class="deep-link">ver explicação avançada ↓</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-block">
+      <h2>📐 Microfone de medição (OSM)</h2>
+      <p class="lead">Onde colocar o tripé e em quantos pontos medir.</p>
+      <div class="topic-grid">
+        <div class="chart-wrap">
+          <div class="chart-title">3 pontos típicos de medição na igreja</div>
+          <svg class="chart" viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" id="medicao-svg"></svg>
+        </div>
+        <div class="key-points">
+          <div class="item"><strong>Altura:</strong> 1,60–1,80 m (em pé) ou 1,20 m (sentado).</div>
+          <div class="item"><strong>3 pontos mínimo:</strong> perto do palco, meio da igreja, fundo.</div>
+          <div class="item"><strong>No eixo do PA:</strong> apontado para a caixa que está medindo.</div>
+          <div class="item"><strong>Tripé estável:</strong> 1 m de qualquer superfície ao redor.
+            <a href="#adv-medicao" class="deep-link">ver explicação avançada ↓</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============= TABELA RESUMO E CHECKLIST ============= -->
+
+    <div class="grid-2-bottom" style="margin-top: 56px;">
       <table class="viz">
         <thead>
           <tr>
@@ -111,22 +219,83 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td><strong>PA frontal</strong></td><td>1 m da parede</td><td class="strong">1,80-2,40 m (tweeter)</td><td>Tilt apontado pro meio, não fundo</td></tr>
+          <tr><td><strong>PA frontal</strong></td><td>1 m da parede</td><td class="strong">1,80–2,40 m (tweeter)</td><td>Tilt para o meio, não fundo</td></tr>
           <tr class="highlight"><td><strong>Subwoofer</strong></td><td>Centro do palco, atrás do PA</td><td class="strong">Chão</td><td>Modo de canto se grudar na parede</td></tr>
-          <tr><td><strong>Monitor wedge</strong></td><td>30 cm do mic vocal</td><td class="strong">30 cm (tweeter, chão)</td><td>Eixo nulo do mic cardioide</td></tr>
-          <tr><td><strong>Mic pregador</strong></td><td>5-10 cm da boca</td><td class="strong">Boca</td><td>Fora do eixo das caixas de retorno</td></tr>
-          <tr><td><strong>Mic de medição</strong></td><td>1 m de qualquer superfície</td><td class="strong">1,60-1,80 m</td><td>Tripé estável, longe da mesa</td></tr>
+          <tr><td><strong>Monitor wedge</strong></td><td>30 cm do mic vocal</td><td class="strong">30 cm (tweeter)</td><td>Eixo nulo do mic cardióide</td></tr>
+          <tr><td><strong>Mic pregador</strong></td><td>5–10 cm da boca</td><td class="strong">Boca</td><td>Fora do eixo do retorno</td></tr>
+          <tr><td><strong>Mic de medição</strong></td><td>1 m de superfícies</td><td class="strong">1,60–1,80 m</td><td>Tripé estável</td></tr>
         </tbody>
       </table>
 
       <div class="callout green">
         <div class="head">✓ Checklist antes de medir</div>
-        <p style="margin-bottom: 8px;"><strong>☐</strong> PA frontais com tilt e splay corretos.</p>
-        <p style="margin-bottom: 8px;"><strong>☐</strong> Sub no centro, atrás do PA (ou cardioide se ginásio).</p>
-        <p style="margin-bottom: 8px;"><strong>☐</strong> Monitores apontados para os músicos, NÃO para a plateia.</p>
-        <p style="margin-bottom: 8px;"><strong>☐</strong> Microfones vocais bem posicionados em relação ao monitor.</p>
-        <p style="margin-bottom: 8px;"><strong>☐</strong> Mic de medição no tripé, longe de superfícies refletoras.</p>
-        <p style="margin: 0; padding-top: 8px; border-top: 1px solid var(--border);"><strong>Só agora:</strong> liga o generator, configura M e R, e começa a medir. Veja <a href="12-workflow-igreja.html" style="color: var(--terra);">workflow completo</a>.</p>
+        <p style="margin-bottom: 8px;"><strong>☐</strong> PA com tilt e splay corretos.</p>
+        <p style="margin-bottom: 8px;"><strong>☐</strong> Sub no centro, atrás do PA.</p>
+        <p style="margin-bottom: 8px;"><strong>☐</strong> Monitores apontados para músicos.</p>
+        <p style="margin-bottom: 8px;"><strong>☐</strong> Microfones no eixo nulo do retorno.</p>
+        <p style="margin-bottom: 8px;"><strong>☐</strong> Mic de medição no tripé, livre de reflexões.</p>
+        <p style="margin: 0; padding-top: 8px; border-top: 1px solid var(--border);">Só agora ligue o generator e comece a medir. Veja <a href="12-workflow-igreja.html" style="color: var(--terra);">workflow completo</a>.</p>
+      </div>
+    </div>
+
+    <!-- ============= SEÇÃO EXPLICAÇÕES AVANÇADAS ============= -->
+
+    <section class="section-divider">
+      <h2>Explicações avançadas</h2>
+      <p>O detalhe técnico de cada tópico, separado dos diagramas para não poluir o visual. Salte direto para o que interessa, ou leia em sequência.</p>
+    </section>
+
+    <div class="grid-2-bottom" id="adv-pa">
+      <div class="callout navy">
+        <div class="head">📢 PA principal — em detalhe</div>
+        <p style="margin-bottom: 10px;"><strong>Altura do tweeter:</strong> 1,60-1,80 m (linha do ouvido em pé). Acima disso, agudos batem no teto e voltam atrasados, gerando comb filtering. Abaixo, agudos batem na cabeça das primeiras filas e a plateia atrás escuta som abafado.</p>
+        <p style="margin-bottom: 10px;"><strong>Tilt (ângulo vertical):</strong> aponte para o <em>meio</em> da plateia. Mirar no fundo deixa o meio com excesso de agudo e perde definição na fileira de trás. Mirar muito perto deixa o fundo sem agudos.</p>
+        <p style="margin-bottom: 10px;"><strong>Splay (abertura entre L+R):</strong> 30°–45° é padrão. Igreja estreita pede menos splay (~25°); igreja larga pede mais (até 60°), mas a 60° a soma central pode comb-filtrar com Δd grande.</p>
+        <p style="margin: 0;"><strong>Distância da parede:</strong> 1 m mínimo. Colado na parede de trás, os graves refletem em fase com o som direto criando pico de +6 dB em ~80 Hz (modo de parede). E os médios criam comb filtering com a reflexão.</p>
+      </div>
+      <div class="callout terra" id="adv-sub">
+        <div class="head">🔊 Subwoofer — em detalhe</div>
+        <p style="margin-bottom: 10px;"><strong>Centro vs lateral:</strong> sub no centro do palco soma melhor com o PA porque a diferença de caminho até qualquer ponto da plateia é simétrica. Par lateral cria zonas de cancelamento em frequências críticas se não alinhar com delay.</p>
+        <p style="margin-bottom: 10px;"><strong>Canto da igreja:</strong> reforça graves de +6 a +9 dB porque o canto excita 3 superfícies (chão + 2 paredes) simultaneamente. Ganho "grátis", mas o som "incha" em frequência específica (modo da sala) que precisa cortar no EQ.</p>
+        <p style="margin-bottom: 10px;"><strong>Cardióide (3 subs em arranjo):</strong> 3 subs em fila com delay calculado e polaridade invertida no sub central produzem padrão cardióide — cancelam energia que iria para trás do palco. Útil em ginásio para não "bombardear" pastor/banda de costas e reduzir spillover.</p>
+        <p style="margin: 0;"><strong>Distância do PA:</strong> sub atrás do PA principal é ideal (soma direta no crossover). Sub à frente do palco gera atraso adicional que pode ou não somar bem com o PA, dependendo do crossover e delay aplicado.</p>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom" style="margin-top: 24px;" id="adv-monitor">
+      <div class="callout green">
+        <div class="head">🎧 Monitor de palco — em detalhe</div>
+        <p style="margin-bottom: 10px;"><strong>Floor wedge:</strong> 30°–45° apontado para a pessoa. Tweeter a uns 30 cm do chão. Direcionado para o ouvido, NÃO para o peito (perde brilho) nem para o teto (microfoniza ao bater e voltar).</p>
+        <p style="margin-bottom: 10px;"><strong>Eixo nulo do mic:</strong> microfones cardióides cancelam som que vem por trás (180° do eixo principal). Posicionando o wedge naquela região, o microfone praticamente não capta o monitor — solução elegante contra microfonia.</p>
+        <p style="margin-bottom: 10px;"><strong>In-ear monitor (IEM):</strong> elimina microfonia totalmente, libera SPL geral do palco, e dá mistura individual por músico. Investimento maior (~R$ 600 a R$ 3.000 por canal), mas é o futuro mesmo em igreja pequena. Comece pelos vocalistas principais e baterista.</p>
+        <p style="margin: 0;"><strong>Quantas mixagens:</strong> idealmente, cada músico tem mistura própria (mais AUX no processador). Mistura única para o palco inteiro é compromisso — sempre vai favorecer um instrumento e prejudicar outros.</p>
+      </div>
+      <div class="callout amber" id="adv-mic">
+        <div class="head">🎤 Microfones — em detalhe</div>
+        <p style="margin-bottom: 10px;"><strong>Handheld para pregador:</strong> 5–10 cm da boca, levemente fora do eixo (evita "pop" do P e B). SM58 e similares são cardióides — reflexão do palco para a parte de trás do mic é cancelada.</p>
+        <p style="margin-bottom: 10px;"><strong>Headset:</strong> 1–2 cm do canto da boca, NÃO direto na frente (cospe). Garante distância constante mesmo quando o pregador se movimenta — solução ideal para quem caminha pelo palco. Custo: R$ 300 a R$ 2.000 dependendo da qualidade.</p>
+        <p style="margin-bottom: 10px;"><strong>Lapela:</strong> centro do peito, 15–20 cm abaixo do queixo. Som mais aberto que headset mas pega ruído de roupa. Cuidado com colar (bate no mic) e movimento que vira o mic para o lado.</p>
+        <p style="margin-bottom: 10px;"><strong>Vocais do louvor (handheld dinâmico):</strong> mesma regra do pregador. Para condenser de mão (Shure KSM9, SM86), distância maior — 8–15 cm — porque captação mais sensível.</p>
+        <p style="margin: 0;"><strong>Mics de instrumento:</strong> bumbo a 5 cm da batedeira interna; caixa de pele superior a 1 dedo da pele; guitarra na borda do cone do alto-falante; teclado e violão via DI, sem mic (evita microfonia e captação cruzada).</p>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom" style="margin-top: 24px;" id="adv-medicao">
+      <div class="callout navy">
+        <div class="head">📐 Microfone de medição — em detalhe</div>
+        <p style="margin-bottom: 10px;"><strong>Altura:</strong> 1,60–1,80 m (linha do ouvido de pé) ou 1,20 m (sentado). Padrão é altura do ouvido para a postura predominante daquele ponto. Em igreja, geralmente em pé (louvor) ou sentado (sermão) — escolha conforme o foco da medição.</p>
+        <p style="margin-bottom: 10px;"><strong>Pontos de medição:</strong> 3 mínimo — perto do palco, meio da igreja, fundo (ou mezanino). Cada ponto stored separado no OSM para comparar. Igreja maior pode pedir 5+ pontos.</p>
+        <p style="margin-bottom: 10px;"><strong>No eixo do PA:</strong> microfone apontado para a caixa que está medindo. Para alinhamento de sub+top, mic na zona de cobertura comum (onde as duas projeções se cruzam — geralmente meio da igreja).</p>
+        <p style="margin: 0;"><strong>Longe de superfícies:</strong> mic na parede ou sobre a mesa cria reflexão e comb filtering na própria medição — gráfico de Magnitude fica "sujo" nos médios. Tripé, mínimo 1 m de qualquer superfície (chão é OK, foco em paredes e mesa).</p>
+      </div>
+
+      <div class="callout terra">
+        <div class="head">⚠ Erros de posicionamento que matam o som</div>
+        <p style="margin-bottom: 10px;"><strong>PA virado para o chão:</strong> caixa pendurada com inclinação excessiva. Agudos batem no piso, plateia ouve som "abafado".</p>
+        <p style="margin-bottom: 10px;"><strong>Sub em cima do palco:</strong> grave acopla com tablado, vira tremor estrutural e perde definição. Sub no chão, no nível do PA.</p>
+        <p style="margin-bottom: 10px;"><strong>Monitor de chão apontado para a plateia:</strong> som do monitor vaza para a igreja, atrasado em relação ao PA. Pessoas na frente ouvem o palco "duplo".</p>
+        <p style="margin-bottom: 10px;"><strong>Mic do pregador na altura do peito:</strong> caminho longo da voz, ganho aberto demais, microfonia certa. Diga ao pregador para subir o mic.</p>
+        <p style="margin: 0;"><strong>Mic de medição sobre a mesa do operador:</strong> reflexão da mesa entra na medição, gráfico de Magnitude fica "sujo" nos médios. Tripé separado, longe de móveis.</p>
       </div>
     </div>
 
@@ -141,96 +310,385 @@
   <script>
   (function() {
     const ns = "http://www.w3.org/2000/svg";
-    const svg = document.getElementById('planta-svg');
 
-    function R(x,y,w,h,fill,stroke,sw) {
-      const e = document.createElementNS(ns,'rect');
-      e.setAttribute('x',x); e.setAttribute('y',y);
-      e.setAttribute('width',w); e.setAttribute('height',h);
-      if (fill) e.setAttribute('fill', fill);
-      if (stroke) e.setAttribute('stroke', stroke);
-      if (sw) e.setAttribute('stroke-width', sw);
-      svg.appendChild(e);
+    /* ============= UTILS ============= */
+
+    function el(svg, tag, attrs) {
+      const e = document.createElementNS(ns, tag);
+      Object.entries(attrs || {}).forEach(([k, v]) => e.setAttribute(k, v));
+      return svg.appendChild(e);
     }
-    function C(cx,cy,r,fill) {
-      const e = document.createElementNS(ns,'circle');
-      e.setAttribute('cx',cx); e.setAttribute('cy',cy); e.setAttribute('r',r);
-      e.setAttribute('fill',fill);
-      svg.appendChild(e);
-    }
-    function T(x,y,t,opts) {
-      const e = document.createElementNS(ns,'text');
-      e.setAttribute('x',x); e.setAttribute('y',y);
-      if (opts && opts.anchor) e.setAttribute('text-anchor', opts.anchor);
-      e.setAttribute('font-size', (opts && opts.size) || 11);
-      e.setAttribute('fill', (opts && opts.fill) || '#E5E9F0');
-      e.setAttribute('font-family', 'sans-serif');
-      if (opts && opts.weight) e.setAttribute('font-weight', opts.weight);
+    function text(svg, x, y, t, opts) {
+      const e = el(svg, 'text', {
+        x, y,
+        'text-anchor': (opts && opts.anchor) || 'start',
+        'font-size': (opts && opts.size) || 11,
+        fill: (opts && opts.fill) || '#E5E9F0',
+        'font-family': 'sans-serif',
+        'font-weight': (opts && opts.weight) || 400,
+      });
       e.textContent = t;
-      svg.appendChild(e);
+      return e;
     }
-    function L(x1,y1,x2,y2,stroke,width,dash) {
-      const e = document.createElementNS(ns,'line');
-      e.setAttribute('x1',x1); e.setAttribute('y1',y1);
-      e.setAttribute('x2',x2); e.setAttribute('y2',y2);
-      e.setAttribute('stroke',stroke); e.setAttribute('stroke-width',width||1.5);
-      if (dash) e.setAttribute('stroke-dasharray', dash);
-      svg.appendChild(e);
+    function defsArrow(svg, id, color) {
+      let defs = svg.querySelector('defs');
+      if (!defs) defs = el(svg, 'defs', {});
+      const m = el(defs, 'marker', {
+        id, viewBox: '0 0 10 10', refX: 8, refY: 5,
+        markerWidth: 6, markerHeight: 6, orient: 'auto'
+      });
+      el(m, 'path', { d: 'M0,0 L10,5 L0,10 z', fill: color });
     }
 
-    // Templo retangular vista de cima
-    R(40, 40, 420, 300, '#1A2332', '#2D3B4D', 1);
-
-    // Palco
-    R(50, 50, 80, 60, 'rgba(228, 119, 102, 0.15)', '#E47766', 1);
-    T(90, 85, 'PALCO', { anchor: 'middle', size: 10, weight: 700, fill: '#E47766' });
-
-    // Pregador no palco (centro do palco)
-    C(90, 80, 4, '#F5B947');
-    T(115, 82, 'pregador', { size: 9, fill: '#F5B947' });
-
-    // Sub no chão, centro do palco (atrás do PA)
-    R(75, 95, 30, 16, 'rgba(91, 123, 216, 0.2)', '#5B7BD8', 1.5);
-    T(90, 106, 'SUB', { anchor: 'middle', size: 9, weight: 700, fill: '#5B7BD8' });
-
-    // PA frontais (esquerda e direita, frente do palco)
-    R(50, 130, 16, 28, 'rgba(228, 119, 102, 0.3)', '#E47766', 1.5);
-    R(114, 130, 16, 28, 'rgba(228, 119, 102, 0.3)', '#E47766', 1.5);
-    T(58, 148, 'PA', { anchor: 'middle', size: 9, weight: 700, fill: '#E47766' });
-    T(122, 148, 'PA', { anchor: 'middle', size: 9, weight: 700, fill: '#E47766' });
-
-    // Splay (linhas indicando direção das caixas, levemente apontadas para o centro do meio)
-    L(58, 158, 200, 270, '#E47766', 1, '3 2');
-    L(122, 158, 280, 270, '#E47766', 1, '3 2');
-
-    // Monitores de chão no palco (atrás dos PA, apontando para o pregador)
-    R(64, 95, 14, 8, 'rgba(52, 211, 153, 0.25)', '#34D399', 1);
-    R(102, 95, 14, 8, 'rgba(52, 211, 153, 0.25)', '#34D399', 1);
-    T(71, 91, 'M', { anchor: 'middle', size: 7, weight: 700, fill: '#34D399' });
-    T(109, 91, 'M', { anchor: 'middle', size: 7, weight: 700, fill: '#34D399' });
-
-    // Plateia - cadeiras simbólicas
-    for (let row = 0; row < 7; row++) {
-      for (let col = 0; col < 9; col++) {
-        const cx = 150 + col * 33;
-        const cy = 175 + row * 22;
-        C(cx, cy, 2, '#5A6478');
+    /* ============= 1) PLANTA TEMPLO (mesmo que antes) ============= */
+    (function planta() {
+      const svg = document.getElementById('planta-svg');
+      if (!svg) return;
+      el(svg, 'rect', { x: 40, y: 40, width: 420, height: 300, fill: '#1A2332', stroke: '#2D3B4D' });
+      // palco
+      el(svg, 'rect', { x: 50, y: 50, width: 80, height: 60, fill: 'rgba(228, 119, 102, 0.15)', stroke: '#E47766' });
+      text(svg, 90, 85, 'PALCO', { anchor: 'middle', size: 10, weight: 700, fill: '#E47766' });
+      el(svg, 'circle', { cx: 90, cy: 80, r: 4, fill: '#F5B947' });
+      text(svg, 115, 82, 'pregador', { size: 9, fill: '#F5B947' });
+      // sub
+      el(svg, 'rect', { x: 75, y: 95, width: 30, height: 16, fill: 'rgba(91, 123, 216, 0.2)', stroke: '#5B7BD8' });
+      text(svg, 90, 106, 'SUB', { anchor: 'middle', size: 9, weight: 700, fill: '#5B7BD8' });
+      // PA L+R
+      el(svg, 'rect', { x: 50, y: 130, width: 16, height: 28, fill: 'rgba(228, 119, 102, 0.3)', stroke: '#E47766' });
+      el(svg, 'rect', { x: 114, y: 130, width: 16, height: 28, fill: 'rgba(228, 119, 102, 0.3)', stroke: '#E47766' });
+      text(svg, 58, 148, 'PA', { anchor: 'middle', size: 9, weight: 700, fill: '#E47766' });
+      text(svg, 122, 148, 'PA', { anchor: 'middle', size: 9, weight: 700, fill: '#E47766' });
+      // splay
+      el(svg, 'line', { x1: 58, y1: 158, x2: 200, y2: 270, stroke: '#E47766', 'stroke-width': 1, 'stroke-dasharray': '3 2' });
+      el(svg, 'line', { x1: 122, y1: 158, x2: 280, y2: 270, stroke: '#E47766', 'stroke-width': 1, 'stroke-dasharray': '3 2' });
+      // monitores
+      el(svg, 'rect', { x: 64, y: 95, width: 14, height: 8, fill: 'rgba(52, 211, 153, 0.25)', stroke: '#34D399' });
+      el(svg, 'rect', { x: 102, y: 95, width: 14, height: 8, fill: 'rgba(52, 211, 153, 0.25)', stroke: '#34D399' });
+      // plateia
+      for (let row = 0; row < 7; row++) for (let col = 0; col < 9; col++) {
+        el(svg, 'circle', { cx: 150 + col * 33, cy: 175 + row * 22, r: 2, fill: '#5A6478' });
       }
-    }
+      // mic medição
+      el(svg, 'circle', { cx: 255, cy: 230, r: 4, fill: '#5B7BD8' });
+      text(svg, 280, 232, 'mic medição', { size: 9, fill: '#5B7BD8', weight: 700 });
+      // mesa
+      el(svg, 'rect', { x: 395, y: 295, width: 50, height: 30, fill: 'rgba(245, 185, 71, 0.2)', stroke: '#F5B947' });
+      text(svg, 420, 314, 'MESA', { anchor: 'middle', size: 9, weight: 700, fill: '#F5B947' });
+      text(svg, 40, 360, '🔴 PA · 🔵 SUB · 🟢 monitor · 🟡 mesa/mic medição', { size: 10, fill: '#8B97A8' });
+    })();
 
-    // Mic de medição (tripé) - posição central no meio da igreja
-    C(255, 230, 4, '#5B7BD8');
-    L(253, 234, 250, 245, '#5B7BD8', 1);
-    L(257, 234, 260, 245, '#5B7BD8', 1);
-    L(255, 234, 255, 245, '#5B7BD8', 1);
-    T(280, 232, 'mic medição', { size: 9, fill: '#5B7BD8', weight: 700 });
+    /* ============= 2) PA PRINCIPAL: vista lateral + vista superior ============= */
+    (function pa() {
+      const svg = document.getElementById('pa-svg');
+      if (!svg) return;
+      defsArrow(svg, 'pa-ar', '#E47766');
 
-    // Mesa do operador (fundo da igreja)
-    R(395, 295, 50, 30, 'rgba(245, 185, 71, 0.2)', '#F5B947', 1);
-    T(420, 314, 'MESA', { anchor: 'middle', size: 9, weight: 700, fill: '#F5B947' });
+      // VISTA LATERAL (esquerda, 0-350)
+      text(svg, 175, 14, 'Vista lateral', { anchor: 'middle', size: 11, weight: 700, fill: '#8B97A8' });
+      // chão
+      el(svg, 'line', { x1: 20, y1: 270, x2: 340, y2: 270, stroke: '#5A6478', 'stroke-width': 1.5 });
+      // palco
+      el(svg, 'rect', { x: 20, y: 250, width: 70, height: 20, fill: 'rgba(228, 119, 102, 0.15)', stroke: '#E47766' });
+      text(svg, 55, 285, 'palco', { anchor: 'middle', size: 9, fill: '#E47766' });
+      // PA pendurada (alto)
+      el(svg, 'rect', { x: 70, y: 90, width: 24, height: 42, fill: 'rgba(228, 119, 102, 0.3)', stroke: '#E47766', 'stroke-width': 1.5 });
+      text(svg, 82, 115, 'PA', { anchor: 'middle', size: 11, weight: 700, fill: '#E47766' });
+      // suporte / mounting
+      el(svg, 'line', { x1: 82, y1: 90, x2: 82, y2: 50, stroke: '#5A6478', 'stroke-width': 1.5, 'stroke-dasharray': '2 2' });
+      // teto
+      el(svg, 'line', { x1: 20, y1: 50, x2: 340, y2: 50, stroke: '#5A6478', 'stroke-width': 1.5 });
+      text(svg, 30, 44, 'teto', { size: 9, fill: '#8B97A8' });
+      // ear-line (linha do ouvido)
+      el(svg, 'line', { x1: 100, y1: 200, x2: 330, y2: 200, stroke: '#34D399', 'stroke-width': 1, 'stroke-dasharray': '4 3' });
+      text(svg, 335, 203, 'linha do ouvido (1,7 m)', { size: 9, fill: '#34D399', weight: 700 });
+      // tilt: PA apontando para meio (250, 200)
+      el(svg, 'line', { x1: 94, y1: 115, x2: 230, y2: 195, stroke: '#E47766', 'stroke-width': 1.5, 'marker-end': 'url(#pa-ar)' });
+      text(svg, 165, 145, 'tilt → meio', { size: 10, fill: '#E47766', weight: 700 });
+      // listener figure no meio
+      el(svg, 'circle', { cx: 230, cy: 215, r: 4, fill: '#5A6478' });
+      el(svg, 'line', { x1: 230, y1: 219, x2: 230, y2: 240, stroke: '#5A6478', 'stroke-width': 2 });
+      // wrong arrow (red): apontando pro chão
+      el(svg, 'line', { x1: 80, y1: 132, x2: 200, y2: 260, stroke: '#F87171', 'stroke-width': 1, 'stroke-dasharray': '3 2' });
+      text(svg, 145, 250, '✗ pro chão', { size: 9, fill: '#F87171', weight: 700 });
+      // wrong arrow (red): muito alto, pro fundo
+      el(svg, 'line', { x1: 94, y1: 95, x2: 320, y2: 130, stroke: '#F87171', 'stroke-width': 1, 'stroke-dasharray': '3 2' });
+      text(svg, 240, 120, '✗ pro fundo', { size: 9, fill: '#F87171', weight: 700 });
 
-    // Legendas externas
-    T(40, 360, '🔴 PA · 🔵 SUB · 🟢 monitor · 🟡 mesa/mic', { size: 10, fill: '#8B97A8' });
+      // VISTA SUPERIOR (direita, 380-680)
+      text(svg, 530, 14, 'Vista superior (splay)', { anchor: 'middle', size: 11, weight: 700, fill: '#8B97A8' });
+      // sala (visto de cima)
+      el(svg, 'rect', { x: 400, y: 30, width: 270, height: 260, fill: '#1A2332', stroke: '#2D3B4D' });
+      // palco no topo
+      el(svg, 'rect', { x: 470, y: 40, width: 130, height: 30, fill: 'rgba(228, 119, 102, 0.1)', stroke: '#E47766' });
+      text(svg, 535, 60, 'palco', { anchor: 'middle', size: 9, fill: '#E47766' });
+      // PA L+R
+      el(svg, 'rect', { x: 460, y: 76, width: 14, height: 22, fill: 'rgba(228, 119, 102, 0.3)', stroke: '#E47766' });
+      el(svg, 'rect', { x: 596, y: 76, width: 14, height: 22, fill: 'rgba(228, 119, 102, 0.3)', stroke: '#E47766' });
+      text(svg, 467, 92, 'L', { anchor: 'middle', size: 10, weight: 700, fill: '#E47766' });
+      text(svg, 603, 92, 'R', { anchor: 'middle', size: 10, weight: 700, fill: '#E47766' });
+      // splay lines: each PA aims toward middle of audience
+      // L mira para (550, 220), R mira para (520, 220)
+      el(svg, 'line', { x1: 467, y1: 98, x2: 540, y2: 220, stroke: '#E47766', 'stroke-width': 1.5 });
+      el(svg, 'line', { x1: 603, y1: 98, x2: 530, y2: 220, stroke: '#E47766', 'stroke-width': 1.5 });
+      // angle indicator: arc between the two lines at top
+      el(svg, 'path', {
+        d: 'M 475 120 A 30 30 0 0 0 595 120',
+        fill: 'none', stroke: '#F5B947', 'stroke-width': 1.5, 'stroke-dasharray': '3 2'
+      });
+      text(svg, 535, 110, '~35°', { anchor: 'middle', size: 11, weight: 700, fill: '#F5B947' });
+      // plateia: 5 rows x 9 cols
+      for (let r = 0; r < 5; r++) for (let c = 0; c < 9; c++) {
+        el(svg, 'circle', { cx: 425 + c * 25, cy: 150 + r * 22, r: 2, fill: '#5A6478' });
+      }
+      // listener no meio (recebe das duas caixas)
+      el(svg, 'circle', { cx: 535, cy: 220, r: 5, fill: '#34D399' });
+      text(svg, 545, 225, 'meio · sweet spot', { size: 9, fill: '#34D399', weight: 700 });
+      // parede de trás
+      el(svg, 'line', { x1: 470, y1: 76, x2: 470, y2: 40, stroke: '#5A6478', 'stroke-width': 2 });
+      text(svg, 410, 60, '≥1m parede', { size: 8, fill: '#F5B947' });
+      el(svg, 'line', { x1: 459, y1: 50, x2: 470, y2: 50, stroke: '#F5B947', 'stroke-width': 1 });
+    })();
+
+    /* ============= 3) SUB: 4 ARRANJOS ============= */
+    (function sub() {
+      const svg = document.getElementById('sub-svg');
+      if (!svg) return;
+
+      // 4 mini panels: cada um 160x140
+      const panels = [
+        { x: 20,  label: 'A · Centro',     desc: 'soma ótima' },
+        { x: 200, label: 'B · Par lateral', desc: '+ SPL, exige alinhamento' },
+        { x: 380, label: 'C · Canto',     desc: '+6 a +9 dB grátis, modo' },
+        { x: 540, label: 'D · Cardióide',  desc: 'cancela atrás' },
+      ];
+
+      panels.forEach((p, i) => {
+        // box
+        el(svg, 'rect', { x: p.x, y: 30, width: 140, height: 200, fill: '#1A2332', stroke: '#2D3B4D' });
+        // palco
+        el(svg, 'rect', { x: p.x + 30, y: 40, width: 80, height: 25, fill: 'rgba(228, 119, 102, 0.1)', stroke: '#E47766' });
+        text(svg, p.x + 70, 56, 'palco', { anchor: 'middle', size: 8, fill: '#E47766' });
+        // PA L+R em todos
+        el(svg, 'rect', { x: p.x + 20, y: 70, width: 8, height: 14, fill: 'rgba(228, 119, 102, 0.3)', stroke: '#E47766' });
+        el(svg, 'rect', { x: p.x + 112, y: 70, width: 8, height: 14, fill: 'rgba(228, 119, 102, 0.3)', stroke: '#E47766' });
+
+        // SUB conforme arranjo
+        if (i === 0) {
+          // A) centro
+          el(svg, 'rect', { x: p.x + 55, y: 90, width: 30, height: 14, fill: 'rgba(91, 123, 216, 0.3)', stroke: '#5B7BD8', 'stroke-width': 1.5 });
+          text(svg, p.x + 70, 100, 'SUB', { anchor: 'middle', size: 8, weight: 700, fill: '#5B7BD8' });
+          // soma symbol
+          text(svg, p.x + 70, 175, '+6 dB', { anchor: 'middle', size: 11, weight: 700, fill: '#34D399' });
+        } else if (i === 1) {
+          // B) par lateral
+          el(svg, 'rect', { x: p.x + 22, y: 90, width: 22, height: 14, fill: 'rgba(91, 123, 216, 0.3)', stroke: '#5B7BD8' });
+          el(svg, 'rect', { x: p.x + 96, y: 90, width: 22, height: 14, fill: 'rgba(91, 123, 216, 0.3)', stroke: '#5B7BD8' });
+          text(svg, p.x + 33, 100, 'SUB', { anchor: 'middle', size: 7, weight: 700, fill: '#5B7BD8' });
+          text(svg, p.x + 107, 100, 'SUB', { anchor: 'middle', size: 7, weight: 700, fill: '#5B7BD8' });
+          // null pattern indicator (vale no centro)
+          el(svg, 'line', { x1: p.x + 70, y1: 130, x2: p.x + 70, y2: 200, stroke: '#F87171', 'stroke-width': 1, 'stroke-dasharray': '2 2' });
+          text(svg, p.x + 70, 175, 'cancela?', { anchor: 'middle', size: 9, weight: 700, fill: '#F87171' });
+        } else if (i === 2) {
+          // C) canto
+          el(svg, 'rect', { x: p.x + 5, y: 90, width: 24, height: 14, fill: 'rgba(91, 123, 216, 0.3)', stroke: '#5B7BD8' });
+          text(svg, p.x + 17, 100, 'SUB', { anchor: 'middle', size: 7, weight: 700, fill: '#5B7BD8' });
+          // modo da sala
+          text(svg, p.x + 70, 175, 'modo +', { anchor: 'middle', size: 10, weight: 700, fill: '#F5B947' });
+          text(svg, p.x + 70, 188, 'da sala', { anchor: 'middle', size: 9, fill: '#F5B947' });
+        } else {
+          // D) cardióide: 3 subs em fila
+          el(svg, 'rect', { x: p.x + 30, y: 90, width: 16, height: 14, fill: 'rgba(91, 123, 216, 0.3)', stroke: '#5B7BD8' });
+          el(svg, 'rect', { x: p.x + 62, y: 90, width: 16, height: 14, fill: 'rgba(91, 123, 216, 0.3)', stroke: '#5B7BD8' });
+          el(svg, 'rect', { x: p.x + 94, y: 90, width: 16, height: 14, fill: 'rgba(91, 123, 216, 0.3)', stroke: '#5B7BD8' });
+          // central com polarity invert
+          text(svg, p.x + 70, 100, '−', { anchor: 'middle', size: 10, weight: 700, fill: '#F87171' });
+          // arrow showing cancellation atrás
+          defsArrow(svg, 'sub-ar' + i, '#F87171');
+          el(svg, 'line', { x1: p.x + 70, y1: 78, x2: p.x + 70, y2: 50, stroke: '#F87171', 'stroke-width': 1.5, 'marker-end': 'url(#sub-ar' + i + ')', 'stroke-dasharray': '3 2' });
+          text(svg, p.x + 70, 175, 'sem som', { anchor: 'middle', size: 9, weight: 700, fill: '#F87171' });
+          text(svg, p.x + 70, 188, 'atrás', { anchor: 'middle', size: 9, fill: '#F87171' });
+        }
+        // plateia
+        for (let r = 0; r < 3; r++) for (let c = 0; c < 5; c++) {
+          el(svg, 'circle', { cx: p.x + 22 + c * 22, cy: 130 + r * 12, r: 1.5, fill: '#5A6478' });
+        }
+        // label
+        text(svg, p.x + 70, 250, p.label, { anchor: 'middle', size: 11, weight: 700, fill: '#E5E9F0' });
+        text(svg, p.x + 70, 264, p.desc, { anchor: 'middle', size: 9, fill: '#8B97A8' });
+      });
+    })();
+
+    /* ============= 4) MONITOR DE PALCO ============= */
+    (function monitor() {
+      const svg = document.getElementById('monitor-svg');
+      if (!svg) return;
+      defsArrow(svg, 'mon-ar', '#34D399');
+      defsArrow(svg, 'mon-bad', '#F87171');
+
+      // VISTA LATERAL (esquerda, 0-350)
+      text(svg, 175, 14, 'Vista lateral (correto)', { anchor: 'middle', size: 11, weight: 700, fill: '#8B97A8' });
+      // chão
+      el(svg, 'line', { x1: 20, y1: 270, x2: 340, y2: 270, stroke: '#5A6478', 'stroke-width': 1.5 });
+      // músico (silhueta simples)
+      el(svg, 'circle', { cx: 180, cy: 130, r: 14, fill: '#F5B947' }); // cabeça
+      el(svg, 'rect', { x: 168, y: 145, width: 24, height: 70, fill: '#F5B947', rx: 4 }); // corpo
+      el(svg, 'line', { x1: 192, y1: 215, x2: 192, y2: 270, stroke: '#F5B947', 'stroke-width': 3 }); // perna
+      el(svg, 'line', { x1: 168, y1: 215, x2: 168, y2: 270, stroke: '#F5B947', 'stroke-width': 3 });
+      // microfone na mão
+      el(svg, 'rect', { x: 195, y: 155, width: 8, height: 22, fill: '#E47766', stroke: '#E47766', rx: 2 });
+      el(svg, 'line', { x1: 199, y1: 155, x2: 220, y2: 130, stroke: '#E47766', 'stroke-width': 1.5 }); // direção do mic
+      text(svg, 222, 128, 'mic', { size: 9, fill: '#E47766', weight: 700 });
+
+      // wedge monitor no chão atrás do músico
+      el(svg, 'polygon', { points: '95,260 145,260 140,235 100,235', fill: 'rgba(52, 211, 153, 0.3)', stroke: '#34D399', 'stroke-width': 1.5 });
+      text(svg, 120, 252, 'wedge', { anchor: 'middle', size: 8, weight: 700, fill: '#34D399' });
+      // ângulo apontando para os ouvidos do músico
+      el(svg, 'line', { x1: 130, y1: 235, x2: 168, y2: 132, stroke: '#34D399', 'stroke-width': 1.5, 'marker-end': 'url(#mon-ar)' });
+      text(svg, 100, 200, '30°–45°', { size: 10, fill: '#34D399', weight: 700 });
+
+      // VISTA SUPERIOR (direita, 380-680)
+      text(svg, 530, 14, 'Padrão cardióide do mic (visto de cima)', { anchor: 'middle', size: 11, weight: 700, fill: '#8B97A8' });
+      // mic no centro
+      el(svg, 'circle', { cx: 530, cy: 170, r: 6, fill: '#E47766' });
+      text(svg, 530, 175, 'M', { anchor: 'middle', size: 8, weight: 700, fill: 'white' });
+      // padrão cardióide (cardioid heart-shape, abertura para cima)
+      el(svg, 'path', {
+        d: 'M 530 170 Q 530 70 460 110 Q 410 150 460 230 Q 530 270 600 230 Q 650 150 600 110 Q 530 70 530 170',
+        fill: 'rgba(228, 119, 102, 0.1)', stroke: '#E47766', 'stroke-width': 1.5
+      });
+      // null atrás (parte de baixo)
+      text(svg, 530, 290, 'eixo nulo (atrás)', { anchor: 'middle', size: 10, weight: 700, fill: '#34D399' });
+      // wedge no eixo nulo (correto)
+      el(svg, 'rect', { x: 510, y: 250, width: 40, height: 16, fill: 'rgba(52, 211, 153, 0.3)', stroke: '#34D399', 'stroke-width': 1.5 });
+      text(svg, 530, 261, 'wedge', { anchor: 'middle', size: 8, weight: 700, fill: '#34D399' });
+      // som vindo do front
+      el(svg, 'line', { x1: 530, y1: 80, x2: 530, y2: 110, stroke: '#34D399', 'stroke-width': 1.5, 'marker-end': 'url(#mon-ar)' });
+      text(svg, 540, 90, 'voz', { size: 10, fill: '#34D399', weight: 700 });
+      // wedge na frente do mic = ERRADO
+      el(svg, 'rect', { x: 510, y: 80, width: 40, height: 12, fill: 'rgba(248, 113, 113, 0.2)', stroke: '#F87171', 'stroke-width': 1, 'stroke-dasharray': '3 2' });
+      text(svg, 440, 90, '✗ wedge aqui', { size: 9, fill: '#F87171', weight: 700, anchor: 'end' });
+      text(svg, 440, 102, '= microfonia', { size: 9, fill: '#F87171', anchor: 'end' });
+    })();
+
+    /* ============= 5) MICROFONES: handheld + headset + lapela ============= */
+    (function mic() {
+      const svg = document.getElementById('mic-svg');
+      if (!svg) return;
+
+      const tipos = [
+        { x: 50,  label: 'Handheld', dist: '5–10 cm', desc: 'levemente fora do eixo', mic: 'hand' },
+        { x: 270, label: 'Headset',  dist: '1–2 cm',  desc: 'canto da boca, não em frente', mic: 'head' },
+        { x: 490, label: 'Lapela',   dist: '15–20 cm abaixo do queixo', desc: 'centro do peito', mic: 'lap' },
+      ];
+
+      tipos.forEach(t => {
+        // box
+        el(svg, 'rect', { x: t.x, y: 30, width: 170, height: 220, fill: '#1A2332', stroke: '#2D3B4D' });
+
+        // pessoa (silhueta de cabeça + ombros)
+        const cx = t.x + 85;
+        // cabeça
+        el(svg, 'circle', { cx, cy: 100, r: 25, fill: 'rgba(245, 185, 71, 0.3)', stroke: '#F5B947', 'stroke-width': 1.5 });
+        // boca
+        el(svg, 'circle', { cx: cx + 4, cy: 108, r: 2, fill: '#F5B947' });
+        // ombros / peito
+        el(svg, 'path', {
+          d: `M ${cx - 35} 200 Q ${cx - 35} 145 ${cx} 145 Q ${cx + 35} 145 ${cx + 35} 200`,
+          fill: 'rgba(245, 185, 71, 0.2)', stroke: '#F5B947', 'stroke-width': 1.5
+        });
+
+        if (t.mic === 'hand') {
+          // mic handheld a 8cm da boca
+          el(svg, 'rect', { x: cx + 20, y: 102, width: 8, height: 22, fill: '#E47766', rx: 2 });
+          el(svg, 'line', { x1: cx + 24, y1: 124, x2: cx + 24, y2: 165, stroke: '#E47766', 'stroke-width': 2 });
+          // arrow de distância
+          el(svg, 'line', { x1: cx + 6, y1: 108, x2: cx + 20, y2: 108, stroke: '#34D399', 'stroke-width': 1 });
+          text(svg, cx + 13, 102, '8cm', { anchor: 'middle', size: 9, weight: 700, fill: '#34D399' });
+        } else if (t.mic === 'head') {
+          // headset: arco passando pela cabeça
+          el(svg, 'path', { d: `M ${cx - 25} 80 Q ${cx} 70 ${cx + 25} 80`, fill: 'none', stroke: '#E47766', 'stroke-width': 1.5 });
+          // mic na ponta do headset, perto do canto da boca
+          el(svg, 'circle', { cx: cx + 10, cy: 105, r: 3, fill: '#E47766' });
+          // braço
+          el(svg, 'line', { x1: cx + 22, y1: 80, x2: cx + 10, y2: 105, stroke: '#E47766', 'stroke-width': 1.5 });
+          text(svg, cx + 30, 105, '~1cm', { size: 9, weight: 700, fill: '#34D399' });
+        } else {
+          // lapela: clip no peito
+          el(svg, 'circle', { cx: cx + 5, cy: 170, r: 3, fill: '#E47766' });
+          // linha tracejada da boca ao mic
+          el(svg, 'line', { x1: cx + 4, y1: 110, x2: cx + 5, y2: 167, stroke: '#34D399', 'stroke-width': 1, 'stroke-dasharray': '2 2' });
+          text(svg, cx + 12, 145, '18cm', { size: 9, weight: 700, fill: '#34D399' });
+          // cabinho descendente
+          el(svg, 'path', { d: `M ${cx + 5} 170 Q ${cx + 5} 195 ${cx - 15} 210`, fill: 'none', stroke: '#E47766', 'stroke-width': 1.5 });
+        }
+
+        // labels
+        text(svg, cx, 245, t.label, { anchor: 'middle', size: 12, weight: 700, fill: '#E5E9F0' });
+        text(svg, cx, 274, t.dist, { anchor: 'middle', size: 10, weight: 700, fill: '#E47766' });
+        text(svg, cx, 292, t.desc, { anchor: 'middle', size: 9, fill: '#8B97A8' });
+      });
+    })();
+
+    /* ============= 6) MIC DE MEDIÇÃO: 3 pontos + tripé ============= */
+    (function medicao() {
+      const svg = document.getElementById('medicao-svg');
+      if (!svg) return;
+
+      // VISTA LATERAL (esquerda 0-280): tripé do mic
+      text(svg, 140, 14, 'Tripé do mic (vista lateral)', { anchor: 'middle', size: 11, weight: 700, fill: '#8B97A8' });
+      // chão
+      el(svg, 'line', { x1: 20, y1: 290, x2: 260, y2: 290, stroke: '#5A6478', 'stroke-width': 1.5 });
+      // tripé
+      el(svg, 'line', { x1: 140, y1: 130, x2: 140, y2: 285, stroke: '#5B7BD8', 'stroke-width': 2 });
+      el(svg, 'line', { x1: 140, y1: 285, x2: 115, y2: 290, stroke: '#5B7BD8', 'stroke-width': 1.5 });
+      el(svg, 'line', { x1: 140, y1: 285, x2: 165, y2: 290, stroke: '#5B7BD8', 'stroke-width': 1.5 });
+      el(svg, 'line', { x1: 140, y1: 285, x2: 140, y2: 290, stroke: '#5B7BD8', 'stroke-width': 1.5 });
+      // mic
+      el(svg, 'circle', { cx: 140, cy: 125, r: 8, fill: '#5B7BD8' });
+      text(svg, 140, 130, 'M', { anchor: 'middle', size: 9, weight: 700, fill: 'white' });
+      // altura
+      el(svg, 'line', { x1: 60, y1: 125, x2: 60, y2: 290, stroke: '#F5B947', 'stroke-width': 1, 'stroke-dasharray': '2 2' });
+      text(svg, 55, 210, '1,70 m', { anchor: 'end', size: 11, weight: 700, fill: '#F5B947' });
+      // parede à direita
+      el(svg, 'line', { x1: 260, y1: 30, x2: 260, y2: 290, stroke: '#5A6478', 'stroke-width': 2 });
+      text(svg, 245, 50, 'parede', { anchor: 'end', size: 9, fill: '#8B97A8' });
+      // clearance arrow
+      el(svg, 'line', { x1: 148, y1: 125, x2: 252, y2: 125, stroke: '#F5B947', 'stroke-width': 1, 'stroke-dasharray': '3 2' });
+      text(svg, 200, 118, '≥1m', { anchor: 'middle', size: 10, weight: 700, fill: '#F5B947' });
+      // PA acima/à esquerda apontando pro mic
+      el(svg, 'rect', { x: 30, y: 70, width: 14, height: 30, fill: 'rgba(228, 119, 102, 0.3)', stroke: '#E47766' });
+      text(svg, 37, 60, 'PA', { anchor: 'middle', size: 9, weight: 700, fill: '#E47766' });
+      defsArrow(svg, 'med-ar', '#E47766');
+      el(svg, 'line', { x1: 50, y1: 90, x2: 130, y2: 122, stroke: '#E47766', 'stroke-width': 1, 'stroke-dasharray': '3 2', 'marker-end': 'url(#med-ar)' });
+
+      // VISTA SUPERIOR (direita 320-680): 3 pontos no templo
+      text(svg, 500, 14, '3 pontos de medição (planta)', { anchor: 'middle', size: 11, weight: 700, fill: '#8B97A8' });
+      el(svg, 'rect', { x: 320, y: 30, width: 360, height: 260, fill: '#1A2332', stroke: '#2D3B4D' });
+      // palco
+      el(svg, 'rect', { x: 330, y: 40, width: 70, height: 50, fill: 'rgba(228, 119, 102, 0.15)', stroke: '#E47766' });
+      text(svg, 365, 68, 'palco', { anchor: 'middle', size: 10, fill: '#E47766' });
+      // PA
+      el(svg, 'rect', { x: 408, y: 50, width: 10, height: 18, fill: 'rgba(228, 119, 102, 0.3)', stroke: '#E47766' });
+      // plateia
+      for (let r = 0; r < 6; r++) for (let c = 0; c < 7; c++) {
+        el(svg, 'circle', { cx: 425 + c * 30, cy: 120 + r * 22, r: 1.5, fill: '#5A6478' });
+      }
+      // mesa fundo
+      el(svg, 'rect', { x: 615, y: 245, width: 50, height: 30, fill: 'rgba(245, 185, 71, 0.2)', stroke: '#F5B947' });
+      text(svg, 640, 264, 'MESA', { anchor: 'middle', size: 9, weight: 700, fill: '#F5B947' });
+
+      // 3 pontos
+      const pontos = [
+        { x: 460, y: 130, label: '1', desc: 'perto do palco' },
+        { x: 500, y: 200, label: '2', desc: 'meio' },
+        { x: 605, y: 260, label: '3', desc: 'fundo (mesa)' },
+      ];
+      pontos.forEach(p => {
+        el(svg, 'circle', { cx: p.x, cy: p.y, r: 10, fill: 'rgba(91, 123, 216, 0.3)', stroke: '#5B7BD8', 'stroke-width': 2 });
+        text(svg, p.x, p.y + 4, p.label, { anchor: 'middle', size: 11, weight: 700, fill: '#5B7BD8' });
+        text(svg, p.x, p.y + 24, p.desc, { anchor: 'middle', size: 9, fill: '#8B97A8' });
+      });
+    })();
   })();
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
