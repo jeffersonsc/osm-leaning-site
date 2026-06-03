@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Posicionamento de caixas, sub, monitores e microfones · OSM Guia visual</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page">
+
+    <div class="header-top">
+      <div class="lang-toggle">
+        <a href="../pt/16-posicionamento.html" class="active">PT</a>
+        <a href="../en/index.html">EN</a>
+      </div>
+    </div>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Infográfico 16 / 16</div>
+        <h1>Posicionamento</h1>
+      </div>
+      <div class="subtitle">caixas, sub, monitores e microfones —<br>antes de medir, posicione direito</div>
+    </header>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="main-claim">Posição vence equalização.</h2>
+        <p>Você pode ter o sistema mais caro do mundo, mas se a caixa principal está apontada para o chão, o sub está no canto pegando ressonância da parede, e o microfone do pregador está a 30 cm da boca dele — nada do que você faça no OSM ou na mesa vai consertar.</p>
+
+        <p>Posicionamento é o primeiro alinhamento. É físico, custa zero, e tem o maior impacto no som final. Esta página é o checklist do que olhar antes de ligar o gerador.</p>
+
+        <div class="callout terra highlight-box" style="margin-top: 24px;">
+          <div class="head">A ordem do alinhamento</div>
+          <p style="margin: 0;"><strong>1.</strong> Posicione corretamente (esta página).<br><strong>2.</strong> Meça o que está acontecendo (medição).<br><strong>3.</strong> Ajuste delay, polaridade e EQ no processador (Infográficos 06-11).</p>
+          <p style="margin: 8px 0 0;">Inverter a ordem — equalizar antes de posicionar — gera horas de trabalho que vão por água abaixo quando alguém mexer numa caixa.</p>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Vista superior: templo típico</div>
+        <svg class="chart" viewBox="0 0 500 380" xmlns="http://www.w3.org/2000/svg" id="planta-svg"></svg>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom">
+      <div class="callout navy">
+        <div class="head">📢 PA principal (frontais)</div>
+        <p style="margin-bottom: 8px;"><strong>Altura:</strong> tweeter na linha do ouvido do ouvinte em pé (1,60-1,80 m). Acima disso, agudos batem no teto; abaixo, na cabeça das primeiras filas.</p>
+        <p style="margin-bottom: 8px;"><strong>Ângulo (tilt):</strong> levemente apontado para o meio da plateia, não para o fundo. "Mirar" no fundo deixa o meio com pressão excessiva nos agudos.</p>
+        <p style="margin-bottom: 8px;"><strong>Splay (abertura):</strong> em par estéreo, 30°-45° entre as caixas é o padrão. Ajusta conforme a largura da igreja.</p>
+        <p style="margin: 0;"><strong>Distância da parede:</strong> mínimo 1 m da parede de trás. Encostar na parede reforça graves (modo de parede) e cria comb filtering.</p>
+      </div>
+
+      <div class="callout terra">
+        <div class="head">🔊 Subwoofer</div>
+        <p style="margin-bottom: 8px;"><strong>Centro vs lados:</strong> sub no centro do palco soma melhor com o PA. Subs nos lados (próximos das caixas principais) podem cancelar com elas em frequências críticas — só vale com alinhamento eletrônico cuidadoso.</p>
+        <p style="margin-bottom: 8px;"><strong>Canto da igreja:</strong> reforça graves (+6 a +9 dB sem custo), mas excita modos da sala — som "incha" em frequência específica. Use só se precisar muito de SPL e tiver EQ para cortar o pico.</p>
+        <p style="margin-bottom: 8px;"><strong>Cardióide (sub em arranjo):</strong> 2-3 subs configurados em arranjo cardióide cancelam a energia que iria para trás do palco. Útil em ginásio para não "bombardear" o pastor de costas.</p>
+        <p style="margin: 0;"><strong>Distância do PA:</strong> quanto mais perto do PA, melhor a soma no crossover. Sub atrás do PA principal é ideal; sub à frente do palco gera atraso adicional.</p>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom" style="margin-top: 24px;">
+      <div class="callout green">
+        <div class="head">🎧 Monitores de palco</div>
+        <p style="margin-bottom: 8px;"><strong>Floor wedge (caixa de chão):</strong> 30°-45° apontada para a pessoa, com tweeter a uns 30 cm do chão. Direcionada para o ouvido, NÃO para o peito (perde brilho) nem para o teto (microfoniza).</p>
+        <p style="margin-bottom: 8px;"><strong>Posição relativa ao microfone:</strong> wedge atrás do microfone, no eixo nulo do mic cardioide. Microfone na frente do wedge = realimentação instantânea.</p>
+        <p style="margin-bottom: 8px;"><strong>In-ear vs wedge:</strong> in-ear elimina microfonia, libera SPL, e dá mistura individual. Investimento maior, mas é o futuro mesmo em igreja pequena. Comece pelos vocalistas principais.</p>
+        <p style="margin: 0;"><strong>Quantos enviar:</strong> idealmente, cada músico/vocalista tem mistura própria (mais AUX no processador). Mistura única para o palco inteiro é compromisso.</p>
+      </div>
+
+      <div class="callout amber">
+        <div class="head">🎤 Microfones (voz e instrumento)</div>
+        <p style="margin-bottom: 8px;"><strong>Handheld para pregador:</strong> 5-10 cm da boca, levemente fora do eixo (evita "pop" do P e B). SM58 e similares são cardióides — reflexão de palco para a parte de trás do mic é cancelada.</p>
+        <p style="margin-bottom: 8px;"><strong>Headset:</strong> 1-2 cm do canto da boca, NÃO direto na frente (cospe). Garante distância constante mesmo quando o pregador se movimenta — solução ideal para quem caminha pelo palco.</p>
+        <p style="margin-bottom: 8px;"><strong>Lapela:</strong> centro do peito, 15-20 cm abaixo do queixo. Som mais aberto que headset mas pega ruído de roupa. Cuidado com colar e mover de microfone.</p>
+        <p style="margin-bottom: 8px;"><strong>Vocais do louvor (handheld dinâmico):</strong> mesma regra do pregador. Para condenser de mão (Shure KSM9, SM86), distância maior — 8-15 cm.</p>
+        <p style="margin: 0;"><strong>Mics de instrumento:</strong> bumbo a 5 cm da batedeira interna; caixa de pele superior a 1 dedo da pele; guitarra na borda do cone do alto-falante; teclado e violão via DI, sem mic.</p>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom" style="margin-top: 24px;">
+      <div class="callout navy">
+        <div class="head">📐 Microfone de medição (OSM)</div>
+        <p style="margin-bottom: 8px;"><strong>Altura:</strong> 1,60-1,80 m (linha do ouvido de pé) ou 1,20 m (sentado). Padrão é altura do ouvido para a postura predominante daquele ponto.</p>
+        <p style="margin-bottom: 8px;"><strong>Pontos de medição:</strong> 3 mínimo — mesa do som, meio da igreja, fundo (ou mezanino). Cada ponto stored separado para comparar.</p>
+        <p style="margin-bottom: 8px;"><strong>No eixo do PA:</strong> mic apontado para a caixa que está medindo. Para alinhamento de sub+top, mic na zona de cobertura comum (cruzamento da projeção das duas).</p>
+        <p style="margin: 0;"><strong>Longe de superfícies próximas:</strong> mic na parede ou em cima da mesa cria reflexão e comb filtering na própria medição. Use tripé, no mínimo 1 m de qualquer superfície ao redor.</p>
+      </div>
+
+      <div class="callout terra">
+        <div class="head">⚠ Erros de posicionamento que matam o som</div>
+        <p style="margin-bottom: 10px;"><strong>PA virado para o chão:</strong> caixa pendurada no teto mas inclinada demais. Agudos batem no piso, ouvinte ouve som "abafado".</p>
+        <p style="margin-bottom: 10px;"><strong>Sub em cima do palco:</strong> grave acopla com tablado, vira tremor estrutural. Sub no chão, no nível do PA.</p>
+        <p style="margin-bottom: 10px;"><strong>Monitor de chão apontado para a plateia:</strong> som do monitor vaza para a igreja, atrasado em relação ao PA. Pessoas na frente ouvem o palco "duplo".</p>
+        <p style="margin-bottom: 10px;"><strong>Microfone do pregador na altura do peito:</strong> caminho longo da voz, ganho aberto demais, microfonia certa.</p>
+        <p style="margin: 0;"><strong>Mic de medição sobre a mesa do operador:</strong> reflexão da mesa entra na medição, gráfico de Magnitude fica "sujo" nos médios.</p>
+      </div>
+    </div>
+
+    <div class="grid-2-bottom" style="margin-top: 24px;">
+      <table class="viz">
+        <thead>
+          <tr>
+            <th>Elemento</th>
+            <th>Distância mínima</th>
+            <th>Altura típica</th>
+            <th>Atenção principal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>PA frontal</strong></td><td>1 m da parede</td><td class="strong">1,80-2,40 m (tweeter)</td><td>Tilt apontado pro meio, não fundo</td></tr>
+          <tr class="highlight"><td><strong>Subwoofer</strong></td><td>Centro do palco, atrás do PA</td><td class="strong">Chão</td><td>Modo de canto se grudar na parede</td></tr>
+          <tr><td><strong>Monitor wedge</strong></td><td>30 cm do mic vocal</td><td class="strong">30 cm (tweeter, chão)</td><td>Eixo nulo do mic cardioide</td></tr>
+          <tr><td><strong>Mic pregador</strong></td><td>5-10 cm da boca</td><td class="strong">Boca</td><td>Fora do eixo das caixas de retorno</td></tr>
+          <tr><td><strong>Mic de medição</strong></td><td>1 m de qualquer superfície</td><td class="strong">1,60-1,80 m</td><td>Tripé estável, longe da mesa</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout green">
+        <div class="head">✓ Checklist antes de medir</div>
+        <p style="margin-bottom: 8px;"><strong>☐</strong> PA frontais com tilt e splay corretos.</p>
+        <p style="margin-bottom: 8px;"><strong>☐</strong> Sub no centro, atrás do PA (ou cardioide se ginásio).</p>
+        <p style="margin-bottom: 8px;"><strong>☐</strong> Monitores apontados para os músicos, NÃO para a plateia.</p>
+        <p style="margin-bottom: 8px;"><strong>☐</strong> Microfones vocais bem posicionados em relação ao monitor.</p>
+        <p style="margin-bottom: 8px;"><strong>☐</strong> Mic de medição no tripé, longe de superfícies refletoras.</p>
+        <p style="margin: 0; padding-top: 8px; border-top: 1px solid var(--border);"><strong>Só agora:</strong> liga o generator, configura M e R, e começa a medir. Veja <a href="12-workflow-igreja.html" style="color: var(--terra);">workflow completo</a>.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="15-erros-comuns.html">← Anterior: Erros comuns</a>
+    <div class="center">16 / 16 — Posicionamento</div>
+    <a href="index.html">Voltar ao índice →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.getElementById('planta-svg');
+
+    function R(x,y,w,h,fill,stroke,sw) {
+      const e = document.createElementNS(ns,'rect');
+      e.setAttribute('x',x); e.setAttribute('y',y);
+      e.setAttribute('width',w); e.setAttribute('height',h);
+      if (fill) e.setAttribute('fill', fill);
+      if (stroke) e.setAttribute('stroke', stroke);
+      if (sw) e.setAttribute('stroke-width', sw);
+      svg.appendChild(e);
+    }
+    function C(cx,cy,r,fill) {
+      const e = document.createElementNS(ns,'circle');
+      e.setAttribute('cx',cx); e.setAttribute('cy',cy); e.setAttribute('r',r);
+      e.setAttribute('fill',fill);
+      svg.appendChild(e);
+    }
+    function T(x,y,t,opts) {
+      const e = document.createElementNS(ns,'text');
+      e.setAttribute('x',x); e.setAttribute('y',y);
+      if (opts && opts.anchor) e.setAttribute('text-anchor', opts.anchor);
+      e.setAttribute('font-size', (opts && opts.size) || 11);
+      e.setAttribute('fill', (opts && opts.fill) || '#E5E9F0');
+      e.setAttribute('font-family', 'sans-serif');
+      if (opts && opts.weight) e.setAttribute('font-weight', opts.weight);
+      e.textContent = t;
+      svg.appendChild(e);
+    }
+    function L(x1,y1,x2,y2,stroke,width,dash) {
+      const e = document.createElementNS(ns,'line');
+      e.setAttribute('x1',x1); e.setAttribute('y1',y1);
+      e.setAttribute('x2',x2); e.setAttribute('y2',y2);
+      e.setAttribute('stroke',stroke); e.setAttribute('stroke-width',width||1.5);
+      if (dash) e.setAttribute('stroke-dasharray', dash);
+      svg.appendChild(e);
+    }
+
+    // Templo retangular vista de cima
+    R(40, 40, 420, 300, '#1A2332', '#2D3B4D', 1);
+
+    // Palco
+    R(50, 50, 80, 60, 'rgba(228, 119, 102, 0.15)', '#E47766', 1);
+    T(90, 85, 'PALCO', { anchor: 'middle', size: 10, weight: 700, fill: '#E47766' });
+
+    // Pregador no palco (centro do palco)
+    C(90, 80, 4, '#F5B947');
+    T(115, 82, 'pregador', { size: 9, fill: '#F5B947' });
+
+    // Sub no chão, centro do palco (atrás do PA)
+    R(75, 95, 30, 16, 'rgba(91, 123, 216, 0.2)', '#5B7BD8', 1.5);
+    T(90, 106, 'SUB', { anchor: 'middle', size: 9, weight: 700, fill: '#5B7BD8' });
+
+    // PA frontais (esquerda e direita, frente do palco)
+    R(50, 130, 16, 28, 'rgba(228, 119, 102, 0.3)', '#E47766', 1.5);
+    R(114, 130, 16, 28, 'rgba(228, 119, 102, 0.3)', '#E47766', 1.5);
+    T(58, 148, 'PA', { anchor: 'middle', size: 9, weight: 700, fill: '#E47766' });
+    T(122, 148, 'PA', { anchor: 'middle', size: 9, weight: 700, fill: '#E47766' });
+
+    // Splay (linhas indicando direção das caixas, levemente apontadas para o centro do meio)
+    L(58, 158, 200, 270, '#E47766', 1, '3 2');
+    L(122, 158, 280, 270, '#E47766', 1, '3 2');
+
+    // Monitores de chão no palco (atrás dos PA, apontando para o pregador)
+    R(64, 95, 14, 8, 'rgba(52, 211, 153, 0.25)', '#34D399', 1);
+    R(102, 95, 14, 8, 'rgba(52, 211, 153, 0.25)', '#34D399', 1);
+    T(71, 91, 'M', { anchor: 'middle', size: 7, weight: 700, fill: '#34D399' });
+    T(109, 91, 'M', { anchor: 'middle', size: 7, weight: 700, fill: '#34D399' });
+
+    // Plateia - cadeiras simbólicas
+    for (let row = 0; row < 7; row++) {
+      for (let col = 0; col < 9; col++) {
+        const cx = 150 + col * 33;
+        const cy = 175 + row * 22;
+        C(cx, cy, 2, '#5A6478');
+      }
+    }
+
+    // Mic de medição (tripé) - posição central no meio da igreja
+    C(255, 230, 4, '#5B7BD8');
+    L(253, 234, 250, 245, '#5B7BD8', 1);
+    L(257, 234, 260, 245, '#5B7BD8', 1);
+    L(255, 234, 255, 245, '#5B7BD8', 1);
+    T(280, 232, 'mic medição', { size: 9, fill: '#5B7BD8', weight: 700 });
+
+    // Mesa do operador (fundo da igreja)
+    R(395, 295, 50, 30, 'rgba(245, 185, 71, 0.2)', '#F5B947', 1);
+    T(420, 314, 'MESA', { anchor: 'middle', size: 9, weight: 700, fill: '#F5B947' });
+
+    // Legendas externas
+    T(40, 360, '🔴 PA · 🔵 SUB · 🟢 monitor · 🟡 mesa/mic', { size: 10, fill: '#8B97A8' });
+  })();
+  </script>
+</body>
+</html>
