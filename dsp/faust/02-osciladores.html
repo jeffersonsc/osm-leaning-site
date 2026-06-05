@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAUST 02 — Osciladores e geradores | Áudio em Rust — BR</title>
+<meta name="description" content="Módulo 2 do curso FAUST: os.osc, os.sawtooth, os.square, os.noise. Sliders de frequência e amplitude. Primeiro gerador de tom de teste.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0908;--bg-elevated:#12100f;--bg-code:#161413;--border:#2a2624;--text:#e8e3dc;--text-muted:#9a918a;--text-dim:#6b635d;--accent:#d4704a;--warning:#c9a961;--success:#7ea87e;--faust:#7ab0c4;--faust-dim:#2a4550;--font-display:'Fraunces',Georgia,serif;--font-body:'Inter Tight',system-ui,sans-serif;--font-mono:'JetBrains Mono','Courier New',monospace;--max-width:820px;--wide-width:1100px}
+*{box-sizing:border-box;margin:0;padding:0}::selection{background:var(--faust-dim);color:var(--text)}html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;font-size:17px;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;z-index:1;opacity:0.4;mix-blend-mode:overlay}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--faust-dim)}a:hover{border-color:var(--accent)}
+header{position:sticky;top:0;z-index:100;background:rgba(10,9,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.header-inner{max-width:var(--wide-width);margin:0 auto;padding:16px 32px;display:flex;justify-content:space-between;align-items:center;gap:24px}
+.brand{font-family:var(--font-display);font-size:15px;font-weight:500;font-style:italic;color:var(--text);border:none;display:flex;align-items:center;gap:10px}
+.brand-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent)}
+.crumb,.header-meta{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);letter-spacing:0.05em;text-transform:uppercase;border:none}.crumb:hover{color:var(--accent)}
+.hero{max-width:var(--wide-width);margin:0 auto;padding:80px 32px 56px;position:relative;z-index:2}
+.hero-label{font-family:var(--font-mono);font-size:13px;color:var(--faust);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.hero-label::before{content:'';width:40px;height:1px;background:var(--faust)}
+.hero h1{font-family:var(--font-display);font-size:clamp(40px,6vw,72px);line-height:1;font-weight:400;letter-spacing:-0.03em;margin-bottom:28px;max-width:900px}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--faust)}
+.hero-subtitle{font-size:19px;line-height:1.5;color:var(--text-muted);max-width:680px;margin-bottom:36px}
+.hero-meta{display:flex;gap:36px;padding-top:28px;border-top:1px solid var(--border);flex-wrap:wrap}
+.meta-item{display:flex;flex-direction:column;gap:4px}
+.meta-label{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em}
+.meta-value{font-family:var(--font-display);font-size:17px;color:var(--text);font-style:italic}
+article{max-width:var(--max-width);margin:0 auto;padding:0 32px;position:relative;z-index:2}
+section{margin-bottom:64px;scroll-margin-top:80px}
+.section-number{font-family:var(--font-mono);font-size:11px;color:var(--faust);letter-spacing:0.15em;text-transform:uppercase;display:block;margin-bottom:12px}
+article h2{font-family:var(--font-display);font-size:36px;font-weight:400;letter-spacing:-0.02em;margin-bottom:20px;line-height:1.1}
+article h2 em{font-style:italic;color:var(--faust);font-weight:300}
+article h3{font-family:var(--font-display);font-size:22px;font-weight:500;margin:32px 0 14px;color:var(--text)}
+article h4{font-family:var(--font-body);font-size:15px;font-weight:700;margin:20px 0 10px;color:var(--text);text-transform:uppercase;letter-spacing:0.04em}
+article p{margin-bottom:16px;color:var(--text)}
+article p.lead{font-size:21px;line-height:1.5;color:var(--text);margin-bottom:28px}
+article p em{font-style:italic}
+article p strong{font-weight:600;color:var(--text)}
+article ul,article ol{margin:0 0 18px 28px}article li{margin-bottom:8px;color:var(--text-muted)}article li strong{color:var(--text)}
+code{font-family:var(--font-mono);background:var(--bg-code);color:var(--accent);padding:1px 6px;border-radius:3px;font-size:0.92em;border:1px solid var(--border)}
+.code-block{margin:24px 0;background:var(--bg-code);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.code-header{display:flex;justify-content:space-between;padding:10px 16px;background:var(--bg-elevated);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:12px;color:var(--text-dim)}
+.code-lang{color:var(--faust)}
+.code-block pre{padding:18px 20px;overflow-x:auto;font-family:var(--font-mono);font-size:14px;line-height:1.7;color:var(--text)}
+.code-block .tk-kw{color:#c4a4d4;font-weight:500}.code-block .tk-fn{color:var(--accent)}.code-block .tk-str{color:var(--success)}.code-block .tk-num{color:var(--warning)}.code-block .tk-cm{color:var(--text-dim);font-style:italic}
+.callout{margin:28px 0;padding:20px 24px;background:var(--bg-elevated);border-left:3px solid var(--faust);border-radius:0 6px 6px 0}
+.callout.terra{border-left-color:var(--accent)}.callout.warning{border-left-color:var(--warning)}.callout.success{border-left-color:var(--success)}
+.callout-title{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--faust);margin-bottom:10px}
+.callout.terra .callout-title{color:var(--accent)}.callout.warning .callout-title{color:var(--warning)}.callout.success .callout-title{color:var(--success)}
+.callout p:last-child{margin-bottom:0}
+.toc{margin:0 0 56px;padding:22px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px}
+.toc-title{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--faust);margin-bottom:12px}
+.toc ol{margin:0;padding-left:22px}.toc li{margin-bottom:6px;color:var(--text-muted)}.toc a{color:var(--text-muted);border:none}.toc a:hover{color:var(--accent)}
+.glossary{margin:56px 0 32px;padding:24px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px}
+.glossary-title{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--faust);margin-bottom:16px}
+.glossary dl{display:grid;grid-template-columns:1fr 2fr;gap:12px 24px}
+.glossary dt{font-family:var(--font-mono);font-size:12px;color:var(--accent);font-weight:700}
+.glossary dd{color:var(--text-muted);font-size:14px;line-height:1.5}
+footer{max-width:var(--wide-width);margin:80px auto 0;padding:32px 32px 64px;border-top:1px solid var(--border);position:relative;z-index:2}
+.footer-grid{padding:24px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;margin-bottom:24px}
+.footer-next-label{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px}
+.footer-next-title{font-family:var(--font-display);font-size:24px;font-weight:400;margin-bottom:6px}
+.footer-next-title em{font-style:italic;color:var(--faust);font-weight:300}
+.footer-next-title a{color:var(--text);border:none}.footer-next-title a:hover{color:var(--accent)}
+.footer-next-desc{color:var(--text-muted);font-size:14px}
+.footer-meta{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-meta a{color:var(--text-muted);border:none}.footer-meta a:hover{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:18px 0}
+th{text-align:left;padding:10px;font-family:var(--font-mono);font-size:12px;color:var(--faust);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border)}
+td{padding:10px;border-bottom:1px solid var(--border);color:var(--text-muted);font-size:14.5px}
+@media (max-width:760px){.glossary dl{grid-template-columns:1fr;gap:4px 0}.glossary dt{margin-top:12px}.hero{padding:56px 24px 36px}.hero-meta{gap:24px}article{padding:0 24px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../../index.html" class="crumb">← Church Audio Tech</a>
+    <a href="index.html" class="brand">
+      <span class="brand-dot"></span>
+      FAUST — <em>plugin</em>
+    </a>
+    <span class="header-meta">MÓD 02 / 08</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Módulo 02 — Geradores</div>
+  <h1>Osciladores e <em>geradores</em>.</h1>
+  <p class="hero-subtitle">A senoide é só o aquecimento. Saw, square, pulse, noise — cada um pra um propósito (síntese, teste de PA, medição de sala). E pela primeira vez você tem um plugin com slider funcional.</p>
+  <div class="hero-meta">
+    <div class="meta-item"><span class="meta-label">Leitura</span><span class="meta-value">≈ 20 min</span></div>
+    <div class="meta-item"><span class="meta-label">Experimento</span><span class="meta-value">≈ 30 min</span></div>
+    <div class="meta-item"><span class="meta-label">Pré-requisito</span><span class="meta-value">Módulo 01</span></div>
+    <div class="meta-item"><span class="meta-label">Entrega</span><span class="meta-value">gerador multi-onda</span></div>
+  </div>
+</div>
+
+<article>
+
+<nav class="toc">
+  <div class="toc-title">Sumário</div>
+  <ol>
+    <li><a href="#geradores">Geradores no namespace os.</a></li>
+    <li><a href="#senoide">os.osc — senoide pura</a></li>
+    <li><a href="#sawtooth">os.sawtooth, os.triangle, os.square</a></li>
+    <li><a href="#noise">no.noise — ruído branco e rosa</a></li>
+    <li><a href="#sliders">Sliders e UI básica</a></li>
+    <li><a href="#aplicacao">Aplicação: gerador de tom de teste</a></li>
+    <li><a href="#glossario">Glossário rápido</a></li>
+  </ol>
+</nav>
+
+<section id="geradores">
+<span class="section-number">§ 01</span>
+<h2>Geradores no namespace <em>os.</em></h2>
+
+<p class="lead">Em FAUST, qualquer oscilador é uma função que, sem input, devolve uma forma de onda. <code>os.</code> é o namespace de "oscillators" — vem com 30+ funções.</p>
+
+<p>Os mais usados na prática:</p>
+
+<table>
+  <thead><tr><th>Função</th><th>Onda</th><th>Uso típico</th></tr></thead>
+  <tbody>
+    <tr><td><code>os.osc(f)</code></td><td>senoide</td><td>tom puro, oscilador de modulação (LFO)</td></tr>
+    <tr><td><code>os.sawtooth(f)</code></td><td>dente de serra</td><td>sintetizador analógico, bass</td></tr>
+    <tr><td><code>os.triangle(f)</code></td><td>triangular</td><td>tom suave, intermediário senoide/saw</td></tr>
+    <tr><td><code>os.square(f)</code></td><td>quadrada</td><td>som "chiptune", hollow</td></tr>
+    <tr><td><code>os.pulsetrain(f, duty)</code></td><td>pulso PWM</td><td>síntese clássica de sintetizador</td></tr>
+    <tr><td><code>no.noise</code></td><td>ruído branco</td><td>medição de sala, hi-hat, vento</td></tr>
+    <tr><td><code>no.pink_noise</code></td><td>ruído rosa</td><td>medição (mais natural), reference</td></tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <div class="callout-title">Ruído rosa pra igreja</div>
+  <p>Pra <strong>medir a resposta da sala</strong> da igreja, o sinal padrão é ruído rosa: tem energia equivalente em cada oitava (igual ao que o ouvido percebe). Tocar ruído rosa do plugin no PA e medir com Open Sound Meter dá a curva de resposta da sala.</p>
+</div>
+
+</section>
+
+<section id="senoide">
+<span class="section-number">§ 02</span>
+<h2>os.osc — <em>senoide</em> pura.</h2>
+
+<p>O hello world do FAUST: senoide com slider de frequência.</p>
+
+<div class="code-block">
+<div class="code-header"><span>senoide.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name <span class="tk-str">"Senoide pura"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"frequência [unit:Hz]"</span>, <span class="tk-num">440</span>, <span class="tk-num">20</span>, <span class="tk-num">20000</span>, <span class="tk-num">1</span>);
+vol  = <span class="tk-fn">hslider</span>(<span class="tk-str">"volume [unit:dB]"</span>, -<span class="tk-num">12</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>, <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
+
+<span class="tk-fn">process</span> = os.<span class="tk-fn">osc</span>(freq) * vol &lt;: _ , _;</code></pre>
+</div>
+
+<p>Detalhes novos:</p>
+<ul>
+  <li><code>[unit:dB]</code> nos metadados do slider faz o DAW mostrar como dB.</li>
+  <li><code>ba.db2linear</code> converte o valor em dB pra ganho linear (porque <code>* vol</code> precisa ser linear).</li>
+  <li><code>:</code> aplicado depois do <code>hslider</code> passa o output dele direto pro <code>db2linear</code> — sequencial em ação.</li>
+</ul>
+
+</section>
+
+<section id="sawtooth">
+<span class="section-number">§ 03</span>
+<h2>os.sawtooth, os.triangle, <em>os.square</em>.</h2>
+
+<p>Trocando <code>os.osc</code> por uma dessas, você muda o timbre. Vamos fazer um plugin que deixa o usuário escolher.</p>
+
+<div class="code-block">
+<div class="code-header"><span>multiwave.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name <span class="tk-str">"Multi-Wave Gen"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"frequência [unit:Hz]"</span>, <span class="tk-num">440</span>, <span class="tk-num">20</span>, <span class="tk-num">2000</span>, <span class="tk-num">1</span>);
+vol  = <span class="tk-fn">hslider</span>(<span class="tk-str">"volume"</span>, <span class="tk-num">0.3</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
+
+<span class="tk-cm">// Seletor de onda: 0 = sine, 1 = saw, 2 = triangle, 3 = square</span>
+wave = <span class="tk-fn">nentry</span>(<span class="tk-str">"forma [style:menu{'sine':0;'saw':1;'tri':2;'square':3}]"</span>, <span class="tk-num">0</span>, <span class="tk-num">0</span>, <span class="tk-num">3</span>, <span class="tk-num">1</span>);
+
+<span class="tk-cm">// ba.selectn escolhe entre N entradas baseado num seletor</span>
+oscs = os.<span class="tk-fn">osc</span>(freq), os.<span class="tk-fn">sawtooth</span>(freq), os.<span class="tk-fn">triangle</span>(freq), os.<span class="tk-fn">square</span>(freq);
+
+<span class="tk-fn">process</span> = oscs : ba.<span class="tk-fn">selectn</span>(<span class="tk-num">4</span>, wave) * vol &lt;: _ , _;</code></pre>
+</div>
+
+<p>O <code>nentry</code> com <code>style:menu</code> vira um dropdown no DAW. <code>ba.selectn</code> escolhe um dos 4 sinais com base no valor do <code>wave</code>.</p>
+
+</section>
+
+<section id="noise">
+<span class="section-number">§ 04</span>
+<h2>no.noise — <em>ruído</em> branco e rosa.</h2>
+
+<p>Ruído não tem frequência — é energia espalhada por todo o espectro. Útil pra teste de sistema, hi-hat, snare, vento, percussão.</p>
+
+<div class="code-block">
+<div class="code-header"><span>noise.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name <span class="tk-str">"Ruído Tester"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+vol  = <span class="tk-fn">hslider</span>(<span class="tk-str">"volume [unit:dB]"</span>, -<span class="tk-num">20</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>, <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
+tipo = <span class="tk-fn">nentry</span>(<span class="tk-str">"tipo [style:menu{'branco':0;'rosa':1}]"</span>, <span class="tk-num">1</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">1</span>);
+
+ruido = no.<span class="tk-fn">noise</span> , no.<span class="tk-fn">pink_noise</span> : ba.<span class="tk-fn">selectn</span>(<span class="tk-num">2</span>, tipo);
+
+<span class="tk-fn">process</span> = ruido * vol &lt;: _ , _;</code></pre>
+</div>
+
+<div class="callout terra">
+  <div class="callout-title">Diferença prática</div>
+  <p>Branco soa "agudo demais" — energia igual por Hz, então acumula muito agudo. Rosa soa "neutro" — energia igual por oitava, o que casa com como o ouvido percebe. Pra medir e ouvir como referência, sempre rosa.</p>
+</div>
+
+</section>
+
+<section id="sliders">
+<span class="section-number">§ 05</span>
+<h2>Sliders e <em>UI</em> básica.</h2>
+
+<p>Catalogando os controles que viraram automáticos no DAW:</p>
+
+<table>
+  <thead><tr><th>Controle</th><th>Vira no DAW</th><th>Uso</th></tr></thead>
+  <tbody>
+    <tr><td><code>hslider("L", def, min, max, step)</code></td><td>slider horizontal</td><td>frequência, volume, qualquer valor contínuo</td></tr>
+    <tr><td><code>vslider(...)</code></td><td>slider vertical</td><td>idem, layout vertical</td></tr>
+    <tr><td><code>nentry(...)</code></td><td>entry numérica (ou dropdown)</td><td>seletor de modo, presets</td></tr>
+    <tr><td><code>checkbox("L")</code></td><td>checkbox</td><td>bypass, on/off de seções</td></tr>
+    <tr><td><code>button("L")</code></td><td>botão momentâneo</td><td>trigger de envelope, panic</td></tr>
+    <tr><td><code>hbargraph("L", min, max)</code></td><td>level meter horizontal</td><td>mostrar output, gain reduction</td></tr>
+    <tr><td><code>vbargraph(...)</code></td><td>level meter vertical</td><td>idem, vertical</td></tr>
+  </tbody>
+</table>
+
+<h3>Metadata útil nos labels</h3>
+
+<ul>
+  <li><code>[unit:Hz]</code>, <code>[unit:dB]</code>, <code>[unit:ms]</code>, <code>[unit:%]</code> — formatação.</li>
+  <li><code>[scale:log]</code> — slider logarítmico (ideal pra frequência).</li>
+  <li><code>[style:knob]</code> — vira knob em vez de slider (no Faust Editor; alguns DAWs honram).</li>
+  <li><code>[style:menu{'a':0;'b':1}]</code> — dropdown.</li>
+  <li><code>[tooltip:texto]</code> — dica de ajuda.</li>
+</ul>
+
+<div class="code-block">
+<div class="code-header"><span>frequência log</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-cm">// slider de frequência com escala logarítmica — natural pra ouvido</span>
+freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"frequência [unit:Hz][scale:log][tooltip:freq da nota]"</span>,
+              <span class="tk-num">440</span>, <span class="tk-num">20</span>, <span class="tk-num">20000</span>, <span class="tk-num">0.1</span>);</code></pre>
+</div>
+
+</section>
+
+<section id="aplicacao">
+<span class="section-number">§ 06</span>
+<h2>Aplicação: <em>gerador</em> de tom de teste.</h2>
+
+<p>Plugin prático: tester completo de PA. Senoide pra testar grave/médio/agudo, ruído rosa pra medir resposta da sala, botão de mute pra cortar rapidamente.</p>
+
+<div class="code-block">
+<div class="code-header"><span>tester.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name <span class="tk-str">"Tester PA — Igreja"</span>;
+<span class="tk-kw">declare</span> author <span class="tk-str">"Jefferson Cunha"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+<span class="tk-cm">// Fonte: 0 = senoide, 1 = ruído rosa</span>
+fonte = <span class="tk-fn">nentry</span>(<span class="tk-str">"fonte [style:menu{'senoide':0;'ruído rosa':1}]"</span>, <span class="tk-num">0</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">1</span>);
+
+<span class="tk-cm">// Frequência da senoide (log, pra cobrir 20 Hz a 20 kHz com curva natural)</span>
+freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"frequência [unit:Hz][scale:log]"</span>, <span class="tk-num">1000</span>, <span class="tk-num">20</span>, <span class="tk-num">20000</span>, <span class="tk-num">1</span>);
+
+<span class="tk-cm">// Volume em dB pra não estourar</span>
+vol = <span class="tk-fn">hslider</span>(<span class="tk-str">"volume [unit:dB]"</span>, -<span class="tk-num">20</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>, <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
+
+<span class="tk-cm">// Mute pra cortar rápido (checkbox: 0 toca, 1 muta)</span>
+mute = <span class="tk-fn">checkbox</span>(<span class="tk-str">"mute"</span>);
+
+<span class="tk-cm">// Soma das duas fontes selecionadas</span>
+sinal = os.<span class="tk-fn">osc</span>(freq) , no.<span class="tk-fn">pink_noise</span> : ba.<span class="tk-fn">selectn</span>(<span class="tk-num">2</span>, fonte);
+
+<span class="tk-fn">process</span> = sinal * vol * (<span class="tk-num">1</span> - mute) &lt;: _ , _;</code></pre>
+</div>
+
+<p>Isso é um plugin completo. Pluga no Reaper, abre no master, e você tem: tom de teste com slider de frequência (pra varrer e identificar ressonâncias), ruído rosa pra medir, e mute imediato.</p>
+
+<div class="callout success">
+  <div class="callout-title">Roteiro de uso no culto</div>
+  <p>(1) Abre o tester como insert no master. (2) Toca ruído rosa em -20 dB. (3) Sai no templo com o medidor (Open Sound Meter). (4) Identifica picos/vales na resposta. (5) Volta pro tester, troca pra senoide e varre as frequências críticas pra confirmar. (6) Aperta mute, fecha o plugin.</p>
+</div>
+
+</section>
+
+<section id="glossario">
+<div class="glossary">
+<div class="glossary-title">Glossário rápido</div>
+<dl>
+  <dt>os.osc(f)</dt>
+  <dd>Senoide pura na frequência f.</dd>
+  <dt>os.sawtooth(f)</dt>
+  <dd>Dente de serra. Rico em harmônicos.</dd>
+  <dt>os.square(f)</dt>
+  <dd>Onda quadrada. Só harmônicos ímpares.</dd>
+  <dt>no.noise</dt>
+  <dd>Ruído branco. Energia igual por Hz.</dd>
+  <dt>no.pink_noise</dt>
+  <dd>Ruído rosa. Energia igual por oitava.</dd>
+  <dt>ba.db2linear(x)</dt>
+  <dd>Converte dB pra ganho linear (10^(x/20)).</dd>
+  <dt>ba.selectn(N, idx)</dt>
+  <dd>Seleciona 1 entre N sinais paralelos.</dd>
+  <dt>nentry(...)</dt>
+  <dd>Entrada numérica. Vira dropdown com [style:menu].</dd>
+  <dt>checkbox("L")</dt>
+  <dd>Vira on/off no DAW.</dd>
+  <dt>[unit:Hz]</dt>
+  <dd>Metadado de unidade — formata como "440 Hz".</dd>
+  <dt>[scale:log]</dt>
+  <dd>Slider logarítmico — natural pra frequência.</dd>
+</dl>
+</div>
+</section>
+
+</article>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-next-label">Próximo módulo</div>
+    <div class="footer-next-title"><a href="03-filtros.html">03 — Filtros: <em>biquad</em> em 1 linha</a></div>
+    <div class="footer-next-desc">Comparação direta: o biquad que tomou 80 linhas em Rust no módulo 04 da Trilha DSP, em FAUST cabe em 1 linha.</div>
+  </div>
+  <div class="footer-meta">
+    <a href="01-sintaxe.html">← Módulo anterior</a>
+    <a href="index.html">↑ Curso FAUST</a>
+    <a href="../../index.html">← Church Audio Tech</a>
+  </div>
+</footer>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

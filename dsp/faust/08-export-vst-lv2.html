@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAUST 08 — Export VST, LV2, AU, Web | Áudio em Rust — BR</title>
+<meta name="description" content="Módulo 8 do curso FAUST: faust2vst, faust2lv2, faust2au, faust2webaudio. Empacotar e distribuir o plugin pro DAW.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0908;--bg-elevated:#12100f;--bg-code:#161413;--border:#2a2624;--text:#e8e3dc;--text-muted:#9a918a;--text-dim:#6b635d;--accent:#d4704a;--warning:#c9a961;--success:#7ea87e;--faust:#7ab0c4;--faust-dim:#2a4550;--font-display:'Fraunces',Georgia,serif;--font-body:'Inter Tight',system-ui,sans-serif;--font-mono:'JetBrains Mono','Courier New',monospace;--max-width:820px;--wide-width:1100px}
+*{box-sizing:border-box;margin:0;padding:0}::selection{background:var(--faust-dim);color:var(--text)}html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;font-size:17px;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;z-index:1;opacity:0.4;mix-blend-mode:overlay}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--faust-dim)}a:hover{border-color:var(--accent)}
+header{position:sticky;top:0;z-index:100;background:rgba(10,9,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.header-inner{max-width:var(--wide-width);margin:0 auto;padding:16px 32px;display:flex;justify-content:space-between;align-items:center;gap:24px}
+.brand{font-family:var(--font-display);font-size:15px;font-weight:500;font-style:italic;color:var(--text);border:none;display:flex;align-items:center;gap:10px}
+.brand-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent)}
+.crumb,.header-meta{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);letter-spacing:0.05em;text-transform:uppercase;border:none}.crumb:hover{color:var(--accent)}
+.hero{max-width:var(--wide-width);margin:0 auto;padding:80px 32px 56px;position:relative;z-index:2}
+.hero-label{font-family:var(--font-mono);font-size:13px;color:var(--faust);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.hero-label::before{content:'';width:40px;height:1px;background:var(--faust)}
+.hero h1{font-family:var(--font-display);font-size:clamp(40px,6vw,72px);line-height:1;font-weight:400;letter-spacing:-0.03em;margin-bottom:28px;max-width:900px}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--faust)}
+.hero-subtitle{font-size:19px;line-height:1.5;color:var(--text-muted);max-width:680px;margin-bottom:36px}
+.hero-meta{display:flex;gap:36px;padding-top:28px;border-top:1px solid var(--border);flex-wrap:wrap}
+.meta-item{display:flex;flex-direction:column;gap:4px}
+.meta-label{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em}
+.meta-value{font-family:var(--font-display);font-size:17px;color:var(--text);font-style:italic}
+article{max-width:var(--max-width);margin:0 auto;padding:0 32px;position:relative;z-index:2}
+section{margin-bottom:64px;scroll-margin-top:80px}
+.section-number{font-family:var(--font-mono);font-size:11px;color:var(--faust);letter-spacing:0.15em;text-transform:uppercase;display:block;margin-bottom:12px}
+article h2{font-family:var(--font-display);font-size:36px;font-weight:400;letter-spacing:-0.02em;margin-bottom:20px;line-height:1.1}
+article h2 em{font-style:italic;color:var(--faust);font-weight:300}
+article h3{font-family:var(--font-display);font-size:22px;font-weight:500;margin:32px 0 14px;color:var(--text)}
+article h4{font-family:var(--font-body);font-size:15px;font-weight:700;margin:20px 0 10px;color:var(--text);text-transform:uppercase;letter-spacing:0.04em}
+article p{margin-bottom:16px;color:var(--text)}
+article p.lead{font-size:21px;line-height:1.5;color:var(--text);margin-bottom:28px}
+article p em{font-style:italic}article p strong{font-weight:600;color:var(--text)}
+article ul,article ol{margin:0 0 18px 28px}article li{margin-bottom:8px;color:var(--text-muted)}article li strong{color:var(--text)}
+code{font-family:var(--font-mono);background:var(--bg-code);color:var(--accent);padding:1px 6px;border-radius:3px;font-size:0.92em;border:1px solid var(--border)}
+.code-block{margin:24px 0;background:var(--bg-code);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.code-header{display:flex;justify-content:space-between;padding:10px 16px;background:var(--bg-elevated);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:12px;color:var(--text-dim)}
+.code-lang{color:var(--faust)}
+.code-block pre{padding:18px 20px;overflow-x:auto;font-family:var(--font-mono);font-size:14px;line-height:1.7;color:var(--text)}
+.code-block .tk-kw{color:#c4a4d4;font-weight:500}.code-block .tk-fn{color:var(--accent)}.code-block .tk-str{color:var(--success)}.code-block .tk-num{color:var(--warning)}.code-block .tk-cm{color:var(--text-dim);font-style:italic}
+.callout{margin:28px 0;padding:20px 24px;background:var(--bg-elevated);border-left:3px solid var(--faust);border-radius:0 6px 6px 0}
+.callout.terra{border-left-color:var(--accent)}.callout.warning{border-left-color:var(--warning)}.callout.success{border-left-color:var(--success)}
+.callout-title{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--faust);margin-bottom:10px}
+.callout.terra .callout-title{color:var(--accent)}.callout.warning .callout-title{color:var(--warning)}.callout.success .callout-title{color:var(--success)}
+.callout p:last-child{margin-bottom:0}
+.toc{margin:0 0 56px;padding:22px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px}
+.toc-title{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--faust);margin-bottom:12px}
+.toc ol{margin:0;padding-left:22px}.toc li{margin-bottom:6px;color:var(--text-muted)}.toc a{color:var(--text-muted);border:none}.toc a:hover{color:var(--accent)}
+.glossary{margin:56px 0 32px;padding:24px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px}
+.glossary-title{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--faust);margin-bottom:16px}
+.glossary dl{display:grid;grid-template-columns:1fr 2fr;gap:12px 24px}
+.glossary dt{font-family:var(--font-mono);font-size:12px;color:var(--accent);font-weight:700}
+.glossary dd{color:var(--text-muted);font-size:14px;line-height:1.5}
+footer{max-width:var(--wide-width);margin:80px auto 0;padding:32px 32px 64px;border-top:1px solid var(--border);position:relative;z-index:2}
+.footer-grid{padding:24px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;margin-bottom:24px}
+.footer-next-label{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px}
+.footer-next-title{font-family:var(--font-display);font-size:24px;font-weight:400;margin-bottom:6px}
+.footer-next-title em{font-style:italic;color:var(--faust);font-weight:300}
+.footer-next-title a{color:var(--text);border:none}.footer-next-title a:hover{color:var(--accent)}
+.footer-next-desc{color:var(--text-muted);font-size:14px}
+.footer-meta{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-meta a{color:var(--text-muted);border:none}.footer-meta a:hover{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:18px 0}
+th{text-align:left;padding:10px;font-family:var(--font-mono);font-size:12px;color:var(--faust);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border)}
+td{padding:10px;border-bottom:1px solid var(--border);color:var(--text-muted);font-size:14.5px}
+@media (max-width:760px){.glossary dl{grid-template-columns:1fr;gap:4px 0}.glossary dt{margin-top:12px}.hero{padding:56px 24px 36px}.hero-meta{gap:24px}article{padding:0 24px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../../index.html" class="crumb">← Church Audio Tech</a>
+    <a href="index.html" class="brand"><span class="brand-dot"></span>FAUST — <em>plugin</em></a>
+    <span class="header-meta">MÓD 08 / 08</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Módulo 08 — Export</div>
+  <h1>Export: <em>VST</em>, LV2, AU, Web.</h1>
+  <p class="hero-subtitle">Você tem 7 plugins .dsp escritos. Hora de transformar em arquivos binários que rodam no Reaper, Ardour, Logic, Live, ou no browser. Esse módulo fecha o ciclo: <em>FAUST → plugin de verdade</em>.</p>
+  <div class="hero-meta">
+    <div class="meta-item"><span class="meta-label">Leitura</span><span class="meta-value">≈ 18 min</span></div>
+    <div class="meta-item"><span class="meta-label">Setup</span><span class="meta-value">≈ 45 min</span></div>
+    <div class="meta-item"><span class="meta-label">Pré-requisito</span><span class="meta-value">Módulos 01–07</span></div>
+    <div class="meta-item"><span class="meta-label">Entrega</span><span class="meta-value">VST no DAW</span></div>
+  </div>
+</div>
+
+<article>
+
+<nav class="toc">
+  <div class="toc-title">Sumário</div>
+  <ol>
+    <li><a href="#duas-rotas">Duas rotas: web export ou local</a></li>
+    <li><a href="#instalar">Instalar FAUST local</a></li>
+    <li><a href="#vst">faust2vst, faust2vst3</a></li>
+    <li><a href="#lv2">faust2lv2 (Linux)</a></li>
+    <li><a href="#au">faust2au (macOS)</a></li>
+    <li><a href="#web">faust2webaudio</a></li>
+    <li><a href="#distribuir">Distribuição</a></li>
+    <li><a href="#fim">Fim do curso</a></li>
+  </ol>
+</nav>
+
+<section id="duas-rotas">
+<span class="section-number">§ 01</span>
+<h2>Duas rotas: <em>web export</em> ou local.</h2>
+
+<p class="lead">FAUST tem duas formas de gerar o binário do plugin: pelo serviço web do Faust IDE, ou rodando o compilador localmente. Pra quem só quer testar 1 plugin, o web export resolve em 30 segundos.</p>
+
+<table>
+  <thead><tr><th>Rota</th><th>Quando usar</th><th>Limitação</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Web export</strong></td><td>1 plugin, testar rápido, sem instalar nada</td><td>depende do servidor, pode ficar fora do ar</td></tr>
+    <tr><td><strong>Local</strong></td><td>vários plugins, automação, controle total</td><td>precisa instalar FAUST + dependências</td></tr>
+  </tbody>
+</table>
+
+<h3>Web export — pra começar agora</h3>
+
+<ol>
+  <li>No <code>faustide.grame.fr</code>, abre seu plugin.</li>
+  <li>Botão Export (📦) no canto superior direito.</li>
+  <li>Escolhe a <strong>plataforma</strong>: <code>linux</code>, <code>osx</code>, <code>windows</code>, <code>web</code>.</li>
+  <li>Escolhe a <strong>arquitetura</strong>: <code>vst3</code>, <code>lv2</code>, <code>au</code>, <code>standalone</code>, <code>jaqt</code>.</li>
+  <li>Clica em Compile. Baixa o ZIP com o plugin.</li>
+</ol>
+
+<p>É realmente assim de simples. Pra um plugin de teste, esse é o caminho mais rápido.</p>
+
+</section>
+
+<section id="instalar">
+<span class="section-number">§ 02</span>
+<h2>Instalar FAUST <em>local</em>.</h2>
+
+<p>Pra uso sério (vários plugins, scripts), instala localmente.</p>
+
+<h3>Linux (Ubuntu/Debian)</h3>
+
+<div class="code-block">
+<div class="code-header"><span>bash</span><span class="code-lang">linux</span></div>
+<pre><code>sudo apt install faust faust-tools
+
+<span class="tk-cm"># verifica</span>
+faust --version</code></pre>
+</div>
+
+<h3>macOS (via Homebrew)</h3>
+
+<div class="code-block">
+<div class="code-header"><span>bash</span><span class="code-lang">macos</span></div>
+<pre><code>brew install faust</code></pre>
+</div>
+
+<h3>Windows</h3>
+
+<p>Baixa o instalador de <a href="https://faust.grame.fr/downloads/" target="_blank" rel="noopener">faust.grame.fr/downloads</a>. Inclui MSYS2 com os <code>faust2*</code> scripts.</p>
+
+<div class="callout warning">
+  <div class="callout-title">Dependências dos scripts faust2*</div>
+  <p>Cada <code>faust2vst</code>, <code>faust2lv2</code>, etc. depende de SDKs externos: VST SDK da Steinberg, LV2 da Linux Audio Devs, CoreAudio da Apple. No primeiro uso pode pedir pra instalar. Vale ler o output do script — geralmente fala o que falta.</p>
+</div>
+
+</section>
+
+<section id="vst">
+<span class="section-number">§ 03</span>
+<h2>faust2vst, <em>faust2vst3</em>.</h2>
+
+<p>VST é o formato padrão pra Windows. VST3 é a versão moderna (recomendado).</p>
+
+<div class="code-block">
+<div class="code-header"><span>bash</span><span class="code-lang">shell</span></div>
+<pre><code><span class="tk-cm"># VST3 — recomendado, multiplataforma</span>
+faust2vst3 meu_compressor.dsp
+
+<span class="tk-cm"># Pra plugin instrumento (synth polifônico do módulo 07)</span>
+faust2vst3 -nvoices <span class="tk-num">12</span> meu_synth.dsp
+
+<span class="tk-cm"># Output: meu_compressor.vst3 (ou pasta .vst3 no macOS)</span></code></pre>
+</div>
+
+<h3>Instalar no DAW</h3>
+
+<table>
+  <thead><tr><th>Sistema</th><th>Caminho VST3</th></tr></thead>
+  <tbody>
+    <tr><td>Windows</td><td><code>C:\Program Files\Common Files\VST3\</code></td></tr>
+    <tr><td>macOS</td><td><code>/Library/Audio/Plug-Ins/VST3/</code> ou <code>~/Library/Audio/Plug-Ins/VST3/</code></td></tr>
+    <tr><td>Linux</td><td><code>~/.vst3/</code> ou <code>/usr/lib/vst3/</code></td></tr>
+  </tbody>
+</table>
+
+<p>Copia o arquivo (ou pasta .vst3) pra esse diretório, abre o DAW, força rescan dos plugins, e ele aparece.</p>
+
+</section>
+
+<section id="lv2">
+<span class="section-number">§ 04</span>
+<h2>faust2lv2 (<em>Linux</em>).</h2>
+
+<p>LV2 é o padrão moderno do Linux (substitui o antigo LADSPA). Usado por Ardour, Carla, Qtractor, Mixbus, Reaper Linux.</p>
+
+<div class="code-block">
+<div class="code-header"><span>bash</span><span class="code-lang">shell</span></div>
+<pre><code>faust2lv2 meu_compressor.dsp
+
+<span class="tk-cm"># Output: meu_compressor.lv2/ (pasta com .ttl manifest + .so binário)</span></code></pre>
+</div>
+
+<p>Instalar:</p>
+
+<div class="code-block">
+<div class="code-header"><span>bash</span><span class="code-lang">shell</span></div>
+<pre><code>cp -r meu_compressor.lv2 ~/.lv2/</code></pre>
+</div>
+
+<p>Abre Ardour → Mixer → New plugin → procura "meu_compressor". Tá lá.</p>
+
+</section>
+
+<section id="au">
+<span class="section-number">§ 05</span>
+<h2>faust2au (<em>macOS</em>).</h2>
+
+<p>Audio Unit é o formato nativo do macOS. Usado por Logic, GarageBand, MainStage e qualquer DAW Mac.</p>
+
+<div class="code-block">
+<div class="code-header"><span>bash</span><span class="code-lang">shell</span></div>
+<pre><code>faust2au meu_compressor.dsp
+
+<span class="tk-cm"># Instala em ~/Library/Audio/Plug-Ins/Components/</span>
+cp -r meu_compressor.component ~/Library/Audio/Plug-Ins/Components/
+
+<span class="tk-cm"># Logic pode demorar pra reconhecer — vai em Logic Pro &gt; Preferences &gt; Plug-In Manager</span>
+<span class="tk-cm"># e clica em Reset &amp; Rescan Selection</span></code></pre>
+</div>
+
+</section>
+
+<section id="web">
+<span class="section-name">§ 06</span>
+<h2>faust2webaudio — <em>plugin</em> no browser.</h2>
+
+<p>Pra publicar seu plugin numa página web (demo, prototipagem rápida), use <code>faust2webaudio</code>.</p>
+
+<div class="code-block">
+<div class="code-header"><span>bash</span><span class="code-lang">shell</span></div>
+<pre><code>faust2webaudio meu_compressor.dsp
+
+<span class="tk-cm"># Output: pasta com HTML + JS + WASM autônomos</span>
+<span class="tk-cm"># abre o index.html no navegador, plugin roda direto</span></code></pre>
+</div>
+
+<p>Útil pra:</p>
+<ul>
+  <li><strong>Demo público</strong> — hospeda no GitHub Pages, qualquer pessoa testa sem instalar nada.</li>
+  <li><strong>Embed em site</strong> — coloca como widget na página, igual um SoundCloud.</li>
+  <li><strong>Cliente testar antes do release</strong> — manda link, ele aprova sem precisar baixar VST.</li>
+</ul>
+
+</section>
+
+<section id="distribuir">
+<span class="section-number">§ 07</span>
+<h2>Distribuição — empacotar e <em>publicar</em>.</h2>
+
+<p>Plugin pronto. Como entregar pra outros operadores?</p>
+
+<h3>Free (open source)</h3>
+
+<ul>
+  <li><strong>GitHub release</strong>: cria um repo com o <code>.dsp</code> + binários compilados pra Win/Mac/Linux. Tag de versão, ZIP com tudo.</li>
+  <li><strong>plugins4free.com</strong>, <strong>linuxaudio.org/freevsts</strong>: catálogos.</li>
+  <li><strong>KVR Audio</strong>: o catálogo de plugins de áudio mais visitado. Cria entry, anuncia.</li>
+</ul>
+
+<h3>Pago</h3>
+
+<ul>
+  <li><strong>Plugin Boutique / Plugin Alliance</strong>: distribuidores grandes, comissão alta mas alcance enorme.</li>
+  <li><strong>Gumroad</strong>: vende direto, comissão baixa, sem aprovação.</li>
+  <li><strong>Site próprio</strong>: pagamento via Stripe ou PagSeguro, entrega via download link.</li>
+</ul>
+
+<div class="callout">
+  <div class="callout-title">Licença</div>
+  <p>Sempre declara <code>declare license "MIT"</code> (ou outra) no .dsp. Pra plugin pago, geralmente <strong>proprietary</strong>. Pra colaborativo, MIT ou GPL. Inclui um <code>LICENSE</code> no repo.</p>
+</div>
+
+</section>
+
+<section id="fim">
+<span class="section-number">§ 08</span>
+<h2>Fim do curso <em>FAUST</em>.</h2>
+
+<p class="lead">Você passou pelos 8 módulos. Sabe construir plugin de áudio em FAUST, com UI organizada, polifonia, MIDI, exportar pro DAW e distribuir.</p>
+
+<h3>Próximos caminhos</h3>
+
+<ul>
+  <li><strong>Documentação oficial</strong> — <a href="https://faustdoc.grame.fr/" target="_blank" rel="noopener">faustdoc.grame.fr</a>. Reference completa de cada função.</li>
+  <li><strong>Library reference</strong> — <a href="https://faustlibraries.grame.fr/" target="_blank" rel="noopener">faustlibraries.grame.fr</a>. Cada função de cada namespace documentada.</li>
+  <li><strong>Examples</strong> — pasta <code>/examples/</code> da instalação FAUST. Centenas de exemplos.</li>
+  <li><strong>FAUST community</strong> — discord, mailing list, github discussions. Pergunta livre.</li>
+</ul>
+
+<h3>Trilhas do site que continuam</h3>
+
+<ul>
+  <li><strong>Trilha 4 · DSP em Rust</strong> — os módulos 6–11 do curso DSP cobrem dinâmicas, threading lock-free, grafo do mixer, RTP/AES67, PTP. Tudo pra construir um <strong>console digital</strong>, não só plugin solto.</li>
+  <li><strong>Trilha 3 · OSM medição</strong> — pra testar de verdade o que teus plugins fazem no sistema da igreja, com microfone de medição.</li>
+  <li><strong>Trilha 2 · Curso equipamentos</strong> — entender o que tem do outro lado do plugin: as caixas, amps, cabos.</li>
+</ul>
+
+<div class="callout success">
+  <div class="callout-title">O ciclo se fecha</div>
+  <p>Você opera o som da igreja (Trilha 1). Entende os equipamentos (Trilha 2). Mede e alinha o sistema (Trilha 3). E agora pode escrever os próprios plugins pra ajustar o que mais precisa (Trilha 4 · FAUST). Quatro lados do mesmo trabalho — tudo aberto, em português, pra que o som da igreja brasileira chegue limpo.</p>
+</div>
+
+<p style="margin-top: 40px; text-align: center;">
+  <a href="index.html" style="color: var(--faust);">↑ Voltar pro índice do curso FAUST</a>
+</p>
+
+</section>
+
+<section id="glossario">
+<div class="glossary">
+<div class="glossary-title">Glossário rápido</div>
+<dl>
+  <dt>faust2vst3</dt>
+  <dd>Gera plugin VST3 a partir do .dsp.</dd>
+  <dt>faust2lv2</dt>
+  <dd>Gera plugin LV2 (Linux).</dd>
+  <dt>faust2au</dt>
+  <dd>Gera plugin Audio Unit (macOS).</dd>
+  <dt>faust2webaudio</dt>
+  <dd>Gera plugin pra browser (HTML+JS+WASM).</dd>
+  <dt>faust2jack</dt>
+  <dd>Gera aplicação standalone usando JACK.</dd>
+  <dt>faust2caqt / faust2juce</dt>
+  <dd>Gera projeto JUCE em C++ pra customização.</dd>
+  <dt>-nvoices N</dt>
+  <dd>Flag pra ativar polifonia no export.</dd>
+  <dt>~/.vst3, ~/.lv2</dt>
+  <dd>Diretórios padrão pra plugins do usuário.</dd>
+  <dt>declare license</dt>
+  <dd>Metadado da licença, importante pra distribuição.</dd>
+</dl>
+</div>
+</section>
+
+</article>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-next-label">Encerramento</div>
+    <div class="footer-next-title"><a href="index.html">↑ <em>Voltar</em> pro índice do curso FAUST</a></div>
+    <div class="footer-next-desc">Você terminou os 8 módulos. Bom proveito construindo plugins!</div>
+  </div>
+  <div class="footer-meta">
+    <a href="07-polifonia.html">← Módulo anterior</a>
+    <a href="index.html">↑ Curso FAUST</a>
+    <a href="../../index.html">← Church Audio Tech</a>
+  </div>
+</footer>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

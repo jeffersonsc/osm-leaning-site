@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAUST 05 — Delay e reverb | Áudio em Rust — BR</title>
+<meta name="description" content="Módulo 5 do curso FAUST: de.delay com feedback, re.mono_freeverb, dub delay, schroeder reverb. Plugin de ambiente pra igreja.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0908;--bg-elevated:#12100f;--bg-code:#161413;--border:#2a2624;--text:#e8e3dc;--text-muted:#9a918a;--text-dim:#6b635d;--accent:#d4704a;--warning:#c9a961;--success:#7ea87e;--faust:#7ab0c4;--faust-dim:#2a4550;--font-display:'Fraunces',Georgia,serif;--font-body:'Inter Tight',system-ui,sans-serif;--font-mono:'JetBrains Mono','Courier New',monospace;--max-width:820px;--wide-width:1100px}
+*{box-sizing:border-box;margin:0;padding:0}::selection{background:var(--faust-dim);color:var(--text)}html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;font-size:17px;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;z-index:1;opacity:0.4;mix-blend-mode:overlay}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--faust-dim)}a:hover{border-color:var(--accent)}
+header{position:sticky;top:0;z-index:100;background:rgba(10,9,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.header-inner{max-width:var(--wide-width);margin:0 auto;padding:16px 32px;display:flex;justify-content:space-between;align-items:center;gap:24px}
+.brand{font-family:var(--font-display);font-size:15px;font-weight:500;font-style:italic;color:var(--text);border:none;display:flex;align-items:center;gap:10px}
+.brand-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent)}
+.crumb,.header-meta{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);letter-spacing:0.05em;text-transform:uppercase;border:none}.crumb:hover{color:var(--accent)}
+.hero{max-width:var(--wide-width);margin:0 auto;padding:80px 32px 56px;position:relative;z-index:2}
+.hero-label{font-family:var(--font-mono);font-size:13px;color:var(--faust);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.hero-label::before{content:'';width:40px;height:1px;background:var(--faust)}
+.hero h1{font-family:var(--font-display);font-size:clamp(40px,6vw,72px);line-height:1;font-weight:400;letter-spacing:-0.03em;margin-bottom:28px;max-width:900px}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--faust)}
+.hero-subtitle{font-size:19px;line-height:1.5;color:var(--text-muted);max-width:680px;margin-bottom:36px}
+.hero-meta{display:flex;gap:36px;padding-top:28px;border-top:1px solid var(--border);flex-wrap:wrap}
+.meta-item{display:flex;flex-direction:column;gap:4px}
+.meta-label{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em}
+.meta-value{font-family:var(--font-display);font-size:17px;color:var(--text);font-style:italic}
+article{max-width:var(--max-width);margin:0 auto;padding:0 32px;position:relative;z-index:2}
+section{margin-bottom:64px;scroll-margin-top:80px}
+.section-number{font-family:var(--font-mono);font-size:11px;color:var(--faust);letter-spacing:0.15em;text-transform:uppercase;display:block;margin-bottom:12px}
+article h2{font-family:var(--font-display);font-size:36px;font-weight:400;letter-spacing:-0.02em;margin-bottom:20px;line-height:1.1}
+article h2 em{font-style:italic;color:var(--faust);font-weight:300}
+article h3{font-family:var(--font-display);font-size:22px;font-weight:500;margin:32px 0 14px;color:var(--text)}
+article h4{font-family:var(--font-body);font-size:15px;font-weight:700;margin:20px 0 10px;color:var(--text);text-transform:uppercase;letter-spacing:0.04em}
+article p{margin-bottom:16px;color:var(--text)}
+article p.lead{font-size:21px;line-height:1.5;color:var(--text);margin-bottom:28px}
+article p em{font-style:italic}article p strong{font-weight:600;color:var(--text)}
+article ul,article ol{margin:0 0 18px 28px}article li{margin-bottom:8px;color:var(--text-muted)}article li strong{color:var(--text)}
+code{font-family:var(--font-mono);background:var(--bg-code);color:var(--accent);padding:1px 6px;border-radius:3px;font-size:0.92em;border:1px solid var(--border)}
+.code-block{margin:24px 0;background:var(--bg-code);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.code-header{display:flex;justify-content:space-between;padding:10px 16px;background:var(--bg-elevated);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:12px;color:var(--text-dim)}
+.code-lang{color:var(--faust)}
+.code-block pre{padding:18px 20px;overflow-x:auto;font-family:var(--font-mono);font-size:14px;line-height:1.7;color:var(--text)}
+.code-block .tk-kw{color:#c4a4d4;font-weight:500}.code-block .tk-fn{color:var(--accent)}.code-block .tk-str{color:var(--success)}.code-block .tk-num{color:var(--warning)}.code-block .tk-cm{color:var(--text-dim);font-style:italic}
+.callout{margin:28px 0;padding:20px 24px;background:var(--bg-elevated);border-left:3px solid var(--faust);border-radius:0 6px 6px 0}
+.callout.terra{border-left-color:var(--accent)}.callout.warning{border-left-color:var(--warning)}.callout.success{border-left-color:var(--success)}
+.callout-title{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--faust);margin-bottom:10px}
+.callout.terra .callout-title{color:var(--accent)}.callout.warning .callout-title{color:var(--warning)}.callout.success .callout-title{color:var(--success)}
+.callout p:last-child{margin-bottom:0}
+.toc{margin:0 0 56px;padding:22px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px}
+.toc-title{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--faust);margin-bottom:12px}
+.toc ol{margin:0;padding-left:22px}.toc li{margin-bottom:6px;color:var(--text-muted)}.toc a{color:var(--text-muted);border:none}.toc a:hover{color:var(--accent)}
+.glossary{margin:56px 0 32px;padding:24px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px}
+.glossary-title{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--faust);margin-bottom:16px}
+.glossary dl{display:grid;grid-template-columns:1fr 2fr;gap:12px 24px}
+.glossary dt{font-family:var(--font-mono);font-size:12px;color:var(--accent);font-weight:700}
+.glossary dd{color:var(--text-muted);font-size:14px;line-height:1.5}
+footer{max-width:var(--wide-width);margin:80px auto 0;padding:32px 32px 64px;border-top:1px solid var(--border);position:relative;z-index:2}
+.footer-grid{padding:24px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;margin-bottom:24px}
+.footer-next-label{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px}
+.footer-next-title{font-family:var(--font-display);font-size:24px;font-weight:400;margin-bottom:6px}
+.footer-next-title em{font-style:italic;color:var(--faust);font-weight:300}
+.footer-next-title a{color:var(--text);border:none}.footer-next-title a:hover{color:var(--accent)}
+.footer-next-desc{color:var(--text-muted);font-size:14px}
+.footer-meta{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-meta a{color:var(--text-muted);border:none}.footer-meta a:hover{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:18px 0}
+th{text-align:left;padding:10px;font-family:var(--font-mono);font-size:12px;color:var(--faust);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border)}
+td{padding:10px;border-bottom:1px solid var(--border);color:var(--text-muted);font-size:14.5px}
+@media (max-width:760px){.glossary dl{grid-template-columns:1fr;gap:4px 0}.glossary dt{margin-top:12px}.hero{padding:56px 24px 36px}.hero-meta{gap:24px}article{padding:0 24px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../../index.html" class="crumb">← Church Audio Tech</a>
+    <a href="index.html" class="brand"><span class="brand-dot"></span>FAUST — <em>plugin</em></a>
+    <span class="header-meta">MÓD 05 / 08</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Módulo 05 — Delay &amp; Reverb</div>
+  <h1>Delay e <em>reverb</em>.</h1>
+  <p class="hero-subtitle">de.delay com feedback, re.mono_freeverb pra ambiente, dub delay sincronizado com BPM. No fim, um plugin de reverb que dá "ar" sutil pra voz do pregador sem deixar fantasma.</p>
+  <div class="hero-meta">
+    <div class="meta-item"><span class="meta-label">Leitura</span><span class="meta-value">≈ 25 min</span></div>
+    <div class="meta-item"><span class="meta-label">Experimento</span><span class="meta-value">≈ 40 min</span></div>
+    <div class="meta-item"><span class="meta-label">Pré-requisito</span><span class="meta-value">Módulos 01–04</span></div>
+    <div class="meta-item"><span class="meta-label">Entrega</span><span class="meta-value">reverb pra igreja</span></div>
+  </div>
+</div>
+
+<article>
+
+<nav class="toc">
+  <div class="toc-title">Sumário</div>
+  <ol>
+    <li><a href="#delay">de.delay — atraso simples</a></li>
+    <li><a href="#feedback">Feedback e o dub delay</a></li>
+    <li><a href="#sync">Sincronia com BPM</a></li>
+    <li><a href="#reverb-pronto">re.mono_freeverb — reverb em 1 linha</a></li>
+    <li><a href="#schroeder">Schroeder reverb por dentro</a></li>
+    <li><a href="#aplicacao">Aplicação: reverb sutil de pregador</a></li>
+    <li><a href="#glossario">Glossário rápido</a></li>
+  </ol>
+</nav>
+
+<section id="delay">
+<span class="section-number">§ 01</span>
+<h2>de.delay — <em>atraso</em> simples.</h2>
+
+<p class="lead">Delay é o bloco mais básico de processamento temporal. Tudo o que envolve "ouvir o passado" — eco, reverb, chorus, flanger — começa com delay.</p>
+
+<p>FAUST tem 3 níveis de delay:</p>
+
+<table>
+  <thead><tr><th>Função</th><th>Característica</th></tr></thead>
+  <tbody>
+    <tr><td><code>mem</code></td><td>1 amostra de atraso (1/48000 s em 48 kHz)</td></tr>
+    <tr><td><code>@(N)</code></td><td>N amostras de atraso (fixo na compilação)</td></tr>
+    <tr><td><code>de.delay(maxN, n)</code></td><td>Delay com max N amostras, atual n (variável)</td></tr>
+    <tr><td><code>de.fdelay(maxN, n)</code></td><td>Fractional delay (n não-inteiro, interpolado)</td></tr>
+  </tbody>
+</table>
+
+<div class="code-block">
+<div class="code-header"><span>delay_simples.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+<span class="tk-cm">// Delay de 250 ms (atraso fixo em ms convertido pra samples)</span>
+delay_ms = <span class="tk-fn">hslider</span>(<span class="tk-str">"delay [unit:ms]"</span>, <span class="tk-num">250</span>, <span class="tk-num">10</span>, <span class="tk-num">2000</span>, <span class="tk-num">1</span>);
+delay_samples = delay_ms * ma.<span class="tk-fn">SR</span> / <span class="tk-num">1000</span>;
+
+<span class="tk-cm">// max 96000 samples = 2 segundos em 48 kHz</span>
+<span class="tk-fn">process</span> = _ : de.<span class="tk-fn">delay</span>(<span class="tk-num">96000</span>, delay_samples);</code></pre>
+</div>
+
+<p><code>ma.SR</code> é a sample rate atual. <code>delay_ms * SR / 1000</code> converte milissegundos pra amostras.</p>
+
+</section>
+
+<section id="feedback">
+<span class="section-number">§ 02</span>
+<h2>Feedback e o <em>dub delay</em>.</h2>
+
+<p>Delay simples só faz um eco. Pra ter múltiplos ecos decrescentes (estilo dub, eco de pedra), você precisa de feedback: a saída do delay volta pra entrada com atenuação.</p>
+
+<p>O operador <code>~</code> (recursivo) é o segredo do feedback em FAUST.</p>
+
+<div class="code-block">
+<div class="code-header"><span>dub_delay.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name <span class="tk-str">"Dub Delay"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+delay_ms = <span class="tk-fn">hslider</span>(<span class="tk-str">"delay [unit:ms]"</span>, <span class="tk-num">375</span>, <span class="tk-num">10</span>, <span class="tk-num">2000</span>, <span class="tk-num">1</span>);
+delay_samples = delay_ms * ma.<span class="tk-fn">SR</span> / <span class="tk-num">1000</span>;
+
+feedback = <span class="tk-fn">hslider</span>(<span class="tk-str">"feedback"</span>, <span class="tk-num">0.6</span>, <span class="tk-num">0</span>, <span class="tk-num">0.95</span>, <span class="tk-num">0.01</span>);
+mix      = <span class="tk-fn">hslider</span>(<span class="tk-str">"mix"</span>, <span class="tk-num">0.3</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
+
+<span class="tk-cm">// O dub clássico: feedback passa por lowpass pra "embaçar" cada repetição</span>
+delay_line = de.<span class="tk-fn">delay</span>(<span class="tk-num">96000</span>, delay_samples) : fi.<span class="tk-fn">lowpass</span>(<span class="tk-num">2</span>, <span class="tk-num">2500</span>);
+
+<span class="tk-cm">// ~ é o feedback: a saída de delay_line volta multiplicada por feedback</span>
+delayed(x) = x : (+ : delay_line) ~ *(feedback);
+
+<span class="tk-cm">// dry/wet mix</span>
+<span class="tk-fn">process</span>(x) = x * (<span class="tk-num">1</span> - mix) + delayed(x) * mix;</code></pre>
+</div>
+
+<div class="callout">
+  <div class="callout-title">O operador ~</div>
+  <p><code>f ~ g</code> significa: o output de <code>f</code> entra em <code>g</code>, e a saída de <code>g</code> volta pra entrada de <code>f</code>. É a forma básica de criar loops de feedback. Cuidado: <code>feedback</code> &gt; 1 explode (overflow). Sempre limite o slider pra ≤ 0.95.</p>
+</div>
+
+</section>
+
+<section id="sync">
+<span class="section-number">§ 03</span>
+<h2>Sincronia com <em>BPM</em>.</h2>
+
+<p>Pra louvor com banda, delay precisa estar sincronizado com o BPM (semínima, colcheia, etc.). FAUST não recebe BPM do DAW direto — você precisa adicionar como slider, ou (no plugin VST) configurar pra receber tempo.</p>
+
+<div class="code-block">
+<div class="code-header"><span>delay_sync.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+bpm = <span class="tk-fn">hslider</span>(<span class="tk-str">"BPM"</span>, <span class="tk-num">120</span>, <span class="tk-num">60</span>, <span class="tk-num">200</span>, <span class="tk-num">1</span>);
+
+<span class="tk-cm">// Divisão rítmica: 0=semibreve, 1=mínima, 2=semínima, 3=colcheia, 4=semicolcheia</span>
+div = <span class="tk-fn">nentry</span>(<span class="tk-str">"divisão [style:menu{'1/1':1;'1/2':2;'1/4':4;'1/8':8;'1/16':16}]"</span>, <span class="tk-num">4</span>, <span class="tk-num">1</span>, <span class="tk-num">16</span>, <span class="tk-num">1</span>);
+
+<span class="tk-cm">// segundos por semínima = 60/BPM; semínima/div = duração da divisão</span>
+delay_ms = (<span class="tk-num">60</span> / bpm * <span class="tk-num">4</span> / div) * <span class="tk-num">1000</span>;
+delay_samples = delay_ms * ma.<span class="tk-fn">SR</span> / <span class="tk-num">1000</span>;
+
+feedback = <span class="tk-fn">hslider</span>(<span class="tk-str">"feedback"</span>, <span class="tk-num">0.5</span>, <span class="tk-num">0</span>, <span class="tk-num">0.9</span>, <span class="tk-num">0.01</span>);
+mix = <span class="tk-fn">hslider</span>(<span class="tk-str">"mix"</span>, <span class="tk-num">0.25</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
+
+delay_line = de.<span class="tk-fn">fdelay</span>(<span class="tk-num">96000</span>, delay_samples);
+wet(x) = x : (+ : delay_line) ~ *(feedback);
+
+<span class="tk-fn">process</span>(x) = x * (<span class="tk-num">1</span> - mix) + wet(x) * mix;</code></pre>
+</div>
+
+</section>
+
+<section id="reverb-pronto">
+<span class="section-number">§ 04</span>
+<h2>re.mono_freeverb — reverb em <em>1 linha</em>.</h2>
+
+<p>Reverb (reverberação) simula o "ambiente" — um som tocando numa sala grande versus banheiro. FAUST traz vários algoritmos prontos.</p>
+
+<div class="code-block">
+<div class="code-header"><span>freeverb.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name <span class="tk-str">"Freeverb Simples"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+size  = <span class="tk-fn">hslider</span>(<span class="tk-str">"tamanho da sala"</span>, <span class="tk-num">0.5</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
+damp  = <span class="tk-fn">hslider</span>(<span class="tk-str">"damping"</span>, <span class="tk-num">0.5</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
+spread = <span class="tk-fn">hslider</span>(<span class="tk-str">"spread"</span>, <span class="tk-num">0.5</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
+mix    = <span class="tk-fn">hslider</span>(<span class="tk-str">"mix"</span>, <span class="tk-num">0.3</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
+
+wet(x) = x : re.<span class="tk-fn">mono_freeverb</span>(damp, <span class="tk-num">0.5</span>, size, spread);
+
+<span class="tk-fn">process</span>(x) = x * (<span class="tk-num">1</span> - mix) + wet(x) * mix;</code></pre>
+</div>
+
+<p>Outros reverbs:</p>
+<ul>
+  <li><code>re.stereo_freeverb</code> — versão stereo do Freeverb.</li>
+  <li><code>re.fdnrev0</code> — Feedback Delay Network reverb (mais natural).</li>
+  <li><code>re.zita_rev1</code> — Zita Rev1, baseado no Plate Reverb clássico de Fons Adriaensen.</li>
+  <li><code>re.dattorro_rev</code> — Dattorro reverb (figura-8 estrutural, smooth).</li>
+</ul>
+
+</section>
+
+<section id="schroeder">
+<span class="section-number">§ 05</span>
+<h2>Schroeder reverb <em>por dentro</em>.</h2>
+
+<p>Pra entender como reverb funciona, a estrutura clássica do <strong>Schroeder reverb</strong>: vários comb filters em paralelo + vários all-pass em série.</p>
+
+<ul>
+  <li><strong>Comb filter</strong> = delay + feedback. Cria "ressonâncias" no espectro.</li>
+  <li><strong>All-pass</strong> = filtro que muda fase sem mudar amplitude. "Difunde" as ressonâncias dos combs.</li>
+  <li>4 combs em paralelo + 2 all-pass em série = reverb tipo "câmara" simples.</li>
+</ul>
+
+<div class="code-block">
+<div class="code-header"><span>schroeder.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+<span class="tk-cm">// Cada comb com delay primo (evita ressonâncias coincidentes)</span>
+comb1 = fi.<span class="tk-fn">fb_comb</span>(<span class="tk-num">4096</span>, <span class="tk-num">1601</span>, <span class="tk-num">1</span>, <span class="tk-num">0.842</span>);
+comb2 = fi.<span class="tk-fn">fb_comb</span>(<span class="tk-num">4096</span>, <span class="tk-num">1867</span>, <span class="tk-num">1</span>, <span class="tk-num">0.812</span>);
+comb3 = fi.<span class="tk-fn">fb_comb</span>(<span class="tk-num">4096</span>, <span class="tk-num">2053</span>, <span class="tk-num">1</span>, <span class="tk-num">0.783</span>);
+comb4 = fi.<span class="tk-fn">fb_comb</span>(<span class="tk-num">4096</span>, <span class="tk-num">2251</span>, <span class="tk-num">1</span>, <span class="tk-num">0.768</span>);
+
+ap1 = fi.<span class="tk-fn">allpass_comb</span>(<span class="tk-num">2048</span>, <span class="tk-num">347</span>, -<span class="tk-num">0.7</span>);
+ap2 = fi.<span class="tk-fn">allpass_comb</span>(<span class="tk-num">2048</span>, <span class="tk-num">113</span>, -<span class="tk-num">0.7</span>);
+
+<span class="tk-cm">// Pipeline: split em 4 combs, soma, passa por 2 all-pass</span>
+schroeder(x) = x &lt;: comb1, comb2, comb3, comb4 :&gt; _ : ap1 : ap2;
+
+mix = <span class="tk-fn">hslider</span>(<span class="tk-str">"mix"</span>, <span class="tk-num">0.2</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
+<span class="tk-fn">process</span>(x) = x * (<span class="tk-num">1</span> - mix) + schroeder(x) * mix;</code></pre>
+</div>
+
+<p>É um reverb simples e instrutivo, mas <code>re.mono_freeverb</code> e <code>re.zita_rev1</code> soam muito melhor — eles usam variações modernas dessa mesma ideia.</p>
+
+</section>
+
+<section id="aplicacao">
+<span class="section-number">§ 06</span>
+<h2>Aplicação: <em>reverb</em> sutil de pregador.</h2>
+
+<p>Em igreja, reverb na voz é polêmico. Pouco demais e a voz fica "seca, sem peso". Demais e fica fantasma incompreensível. O equilíbrio: pré-delay curto + reverb curto + mix baixo + EQ no wet pra tirar grave.</p>
+
+<div class="code-block">
+<div class="code-header"><span>reverb_pregador.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name <span class="tk-str">"Reverb de Pregador"</span>;
+<span class="tk-kw">declare</span> author <span class="tk-str">"Jefferson Cunha"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+<span class="tk-cm">// === pré-delay (separa wet do dry pra clareza) ===</span>
+pre_ms = <span class="tk-fn">hslider</span>(<span class="tk-str">"pre-delay [unit:ms]"</span>, <span class="tk-num">20</span>, <span class="tk-num">0</span>, <span class="tk-num">100</span>, <span class="tk-num">1</span>);
+pre_samples = pre_ms * ma.<span class="tk-fn">SR</span> / <span class="tk-num">1000</span>;
+
+<span class="tk-cm">// === reverb (Zita: soa mais natural pra voz) ===</span>
+rev_time = <span class="tk-fn">hslider</span>(<span class="tk-str">"reverb time [unit:s]"</span>, <span class="tk-num">1.2</span>, <span class="tk-num">0.5</span>, <span class="tk-num">3</span>, <span class="tk-num">0.1</span>);
+
+<span class="tk-cm">// === EQ no wet — corta grave e brilho exagerado ===</span>
+wet_hp = <span class="tk-fn">hslider</span>(<span class="tk-str">"wet/low cut [unit:Hz]"</span>, <span class="tk-num">200</span>, <span class="tk-num">50</span>, <span class="tk-num">800</span>, <span class="tk-num">1</span>);
+wet_lp = <span class="tk-fn">hslider</span>(<span class="tk-str">"wet/high cut [unit:Hz]"</span>, <span class="tk-num">6000</span>, <span class="tk-num">2000</span>, <span class="tk-num">15000</span>, <span class="tk-num">100</span>);
+
+<span class="tk-cm">// === mix ===</span>
+mix = <span class="tk-fn">hslider</span>(<span class="tk-str">"mix"</span>, <span class="tk-num">0.15</span>, <span class="tk-num">0</span>, <span class="tk-num">0.5</span>, <span class="tk-num">0.01</span>);
+
+<span class="tk-cm">// pipeline do wet</span>
+wet(x) = x : de.<span class="tk-fn">delay</span>(<span class="tk-num">9600</span>, pre_samples)
+           : re.<span class="tk-fn">mono_freeverb</span>(<span class="tk-num">0.5</span>, <span class="tk-num">0.5</span>, rev_time * <span class="tk-num">0.3</span>, <span class="tk-num">0.6</span>)
+           : fi.<span class="tk-fn">highpass</span>(<span class="tk-num">2</span>, wet_hp)
+           : fi.<span class="tk-fn">lowpass</span>(<span class="tk-num">2</span>, wet_lp);
+
+<span class="tk-fn">process</span>(x) = (x * (<span class="tk-num">1</span> - mix) + wet(x) * mix) &lt;: _ , _;</code></pre>
+</div>
+
+<div class="callout success">
+  <div class="callout-title">Defaults pra pregador</div>
+  <p>Pre-delay 20 ms, reverb time 1.2 s, EQ do wet cortando abaixo de 200 Hz e acima de 6 kHz, mix 15%. Esse preset dá "presença e leve ar" sem deixar fantasma. Pra louvor, sobe mix pra 25-30% e aumenta reverb time pra 1.8 s.</p>
+</div>
+
+</section>
+
+<section id="glossario">
+<div class="glossary">
+<div class="glossary-title">Glossário rápido</div>
+<dl>
+  <dt>mem</dt>
+  <dd>Delay de 1 amostra.</dd>
+  <dt>@(N)</dt>
+  <dd>Atraso fixo de N amostras.</dd>
+  <dt>de.delay(max, n)</dt>
+  <dd>Delay variável até max amostras, atraso atual n.</dd>
+  <dt>de.fdelay(max, n)</dt>
+  <dd>Delay fracionário (interpola entre amostras).</dd>
+  <dt>~</dt>
+  <dd>Operador de feedback recursivo.</dd>
+  <dt>ma.SR</dt>
+  <dd>Sample rate atual (geralmente 48000).</dd>
+  <dt>re.mono_freeverb</dt>
+  <dd>Freeverb mono. (damping, sidefreq, roomsize, spread).</dd>
+  <dt>re.stereo_freeverb</dt>
+  <dd>Versão stereo.</dd>
+  <dt>re.zita_rev1</dt>
+  <dd>Zita Rev1 — soa mais natural pra voz.</dd>
+  <dt>fi.fb_comb(max, dly, b0, fb)</dt>
+  <dd>Comb com feedback — bloco básico de reverb.</dd>
+  <dt>fi.allpass_comb(max, dly, fb)</dt>
+  <dd>All-pass comb — difunde sem colorir.</dd>
+</dl>
+</div>
+</section>
+
+</article>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-next-label">Próximo módulo</div>
+    <div class="footer-next-title"><a href="06-ui-controles.html">06 — UI: <em>sliders</em>, grupos, meters</a></div>
+    <div class="footer-next-desc">Como deixar o plugin bonito no DAW. Hslider, vslider, hbargraph, group, tooltip.</div>
+  </div>
+  <div class="footer-meta">
+    <a href="04-dinamicas.html">← Módulo anterior</a>
+    <a href="index.html">↑ Curso FAUST</a>
+    <a href="../../index.html">← Church Audio Tech</a>
+  </div>
+</footer>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

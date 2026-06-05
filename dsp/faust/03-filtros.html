@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAUST 03 — Filtros: biquad em 1 linha | Áudio em Rust — BR</title>
+<meta name="description" content="Módulo 3 do curso FAUST: fi.lowpass, fi.highpass, fi.peak_eq, biquad com coeficientes. Comparação com a implementação Rust manual.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0908;--bg-elevated:#12100f;--bg-code:#161413;--border:#2a2624;--text:#e8e3dc;--text-muted:#9a918a;--text-dim:#6b635d;--accent:#d4704a;--warning:#c9a961;--success:#7ea87e;--faust:#7ab0c4;--faust-dim:#2a4550;--font-display:'Fraunces',Georgia,serif;--font-body:'Inter Tight',system-ui,sans-serif;--font-mono:'JetBrains Mono','Courier New',monospace;--max-width:820px;--wide-width:1100px}
+*{box-sizing:border-box;margin:0;padding:0}::selection{background:var(--faust-dim);color:var(--text)}html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;font-size:17px;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;z-index:1;opacity:0.4;mix-blend-mode:overlay}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--faust-dim)}a:hover{border-color:var(--accent)}
+header{position:sticky;top:0;z-index:100;background:rgba(10,9,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.header-inner{max-width:var(--wide-width);margin:0 auto;padding:16px 32px;display:flex;justify-content:space-between;align-items:center;gap:24px}
+.brand{font-family:var(--font-display);font-size:15px;font-weight:500;font-style:italic;color:var(--text);border:none;display:flex;align-items:center;gap:10px}
+.brand-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent)}
+.crumb,.header-meta{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);letter-spacing:0.05em;text-transform:uppercase;border:none}.crumb:hover{color:var(--accent)}
+.hero{max-width:var(--wide-width);margin:0 auto;padding:80px 32px 56px;position:relative;z-index:2}
+.hero-label{font-family:var(--font-mono);font-size:13px;color:var(--faust);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.hero-label::before{content:'';width:40px;height:1px;background:var(--faust)}
+.hero h1{font-family:var(--font-display);font-size:clamp(40px,6vw,72px);line-height:1;font-weight:400;letter-spacing:-0.03em;margin-bottom:28px;max-width:900px}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--faust)}
+.hero-subtitle{font-size:19px;line-height:1.5;color:var(--text-muted);max-width:680px;margin-bottom:36px}
+.hero-meta{display:flex;gap:36px;padding-top:28px;border-top:1px solid var(--border);flex-wrap:wrap}
+.meta-item{display:flex;flex-direction:column;gap:4px}
+.meta-label{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em}
+.meta-value{font-family:var(--font-display);font-size:17px;color:var(--text);font-style:italic}
+article{max-width:var(--max-width);margin:0 auto;padding:0 32px;position:relative;z-index:2}
+section{margin-bottom:64px;scroll-margin-top:80px}
+.section-number{font-family:var(--font-mono);font-size:11px;color:var(--faust);letter-spacing:0.15em;text-transform:uppercase;display:block;margin-bottom:12px}
+article h2{font-family:var(--font-display);font-size:36px;font-weight:400;letter-spacing:-0.02em;margin-bottom:20px;line-height:1.1}
+article h2 em{font-style:italic;color:var(--faust);font-weight:300}
+article h3{font-family:var(--font-display);font-size:22px;font-weight:500;margin:32px 0 14px;color:var(--text)}
+article h4{font-family:var(--font-body);font-size:15px;font-weight:700;margin:20px 0 10px;color:var(--text);text-transform:uppercase;letter-spacing:0.04em}
+article p{margin-bottom:16px;color:var(--text)}
+article p.lead{font-size:21px;line-height:1.5;color:var(--text);margin-bottom:28px}
+article p em{font-style:italic}article p strong{font-weight:600;color:var(--text)}
+article ul,article ol{margin:0 0 18px 28px}article li{margin-bottom:8px;color:var(--text-muted)}article li strong{color:var(--text)}
+code{font-family:var(--font-mono);background:var(--bg-code);color:var(--accent);padding:1px 6px;border-radius:3px;font-size:0.92em;border:1px solid var(--border)}
+.code-block{margin:24px 0;background:var(--bg-code);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.code-header{display:flex;justify-content:space-between;padding:10px 16px;background:var(--bg-elevated);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:12px;color:var(--text-dim)}
+.code-lang{color:var(--faust)}
+.code-block pre{padding:18px 20px;overflow-x:auto;font-family:var(--font-mono);font-size:14px;line-height:1.7;color:var(--text)}
+.code-block .tk-kw{color:#c4a4d4;font-weight:500}.code-block .tk-fn{color:var(--accent)}.code-block .tk-str{color:var(--success)}.code-block .tk-num{color:var(--warning)}.code-block .tk-cm{color:var(--text-dim);font-style:italic}
+.callout{margin:28px 0;padding:20px 24px;background:var(--bg-elevated);border-left:3px solid var(--faust);border-radius:0 6px 6px 0}
+.callout.terra{border-left-color:var(--accent)}.callout.warning{border-left-color:var(--warning)}.callout.success{border-left-color:var(--success)}
+.callout-title{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--faust);margin-bottom:10px}
+.callout.terra .callout-title{color:var(--accent)}.callout.warning .callout-title{color:var(--warning)}.callout.success .callout-title{color:var(--success)}
+.callout p:last-child{margin-bottom:0}
+.toc{margin:0 0 56px;padding:22px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px}
+.toc-title{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--faust);margin-bottom:12px}
+.toc ol{margin:0;padding-left:22px}.toc li{margin-bottom:6px;color:var(--text-muted)}.toc a{color:var(--text-muted);border:none}.toc a:hover{color:var(--accent)}
+.glossary{margin:56px 0 32px;padding:24px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px}
+.glossary-title{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--faust);margin-bottom:16px}
+.glossary dl{display:grid;grid-template-columns:1fr 2fr;gap:12px 24px}
+.glossary dt{font-family:var(--font-mono);font-size:12px;color:var(--accent);font-weight:700}
+.glossary dd{color:var(--text-muted);font-size:14px;line-height:1.5}
+footer{max-width:var(--wide-width);margin:80px auto 0;padding:32px 32px 64px;border-top:1px solid var(--border);position:relative;z-index:2}
+.footer-grid{padding:24px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;margin-bottom:24px}
+.footer-next-label{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px}
+.footer-next-title{font-family:var(--font-display);font-size:24px;font-weight:400;margin-bottom:6px}
+.footer-next-title em{font-style:italic;color:var(--faust);font-weight:300}
+.footer-next-title a{color:var(--text);border:none}.footer-next-title a:hover{color:var(--accent)}
+.footer-next-desc{color:var(--text-muted);font-size:14px}
+.footer-meta{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-meta a{color:var(--text-muted);border:none}.footer-meta a:hover{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:18px 0}
+th{text-align:left;padding:10px;font-family:var(--font-mono);font-size:12px;color:var(--faust);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border)}
+td{padding:10px;border-bottom:1px solid var(--border);color:var(--text-muted);font-size:14.5px}
+@media (max-width:760px){.glossary dl{grid-template-columns:1fr;gap:4px 0}.glossary dt{margin-top:12px}.hero{padding:56px 24px 36px}.hero-meta{gap:24px}article{padding:0 24px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../../index.html" class="crumb">← Church Audio Tech</a>
+    <a href="index.html" class="brand"><span class="brand-dot"></span>FAUST — <em>plugin</em></a>
+    <span class="header-meta">MÓD 03 / 08</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Módulo 03 — Filtros</div>
+  <h1>Filtros: <em>biquad</em> em 1 linha.</h1>
+  <p class="hero-subtitle">No módulo 04 da Trilha DSP a gente implementou biquad em Rust manualmente — coeficientes, formas direta I/II, estabilidade, 80+ linhas. Em FAUST, isso é <code>fi.lowpass(1, freq)</code>. Mesmo resultado, 80× menos código.</p>
+  <div class="hero-meta">
+    <div class="meta-item"><span class="meta-label">Leitura</span><span class="meta-value">≈ 25 min</span></div>
+    <div class="meta-item"><span class="meta-label">Experimento</span><span class="meta-value">≈ 40 min</span></div>
+    <div class="meta-item"><span class="meta-label">Pré-requisito</span><span class="meta-value">Módulos 01–02</span></div>
+    <div class="meta-item"><span class="meta-label">Entrega</span><span class="meta-value">EQ paramétrico</span></div>
+  </div>
+</div>
+
+<article>
+
+<nav class="toc">
+  <div class="toc-title">Sumário</div>
+  <ol>
+    <li><a href="#fi">O namespace fi. — filtros prontos</a></li>
+    <li><a href="#lowhigh">Lowpass, highpass, bandpass</a></li>
+    <li><a href="#peak">Peak EQ e shelf</a></li>
+    <li><a href="#biquad">Biquad direto (fi.tf2)</a></li>
+    <li><a href="#rust-vs-faust">Comparação: Rust manual vs FAUST</a></li>
+    <li><a href="#aplicacao">Aplicação: EQ paramétrico 3 bandas</a></li>
+    <li><a href="#glossario">Glossário rápido</a></li>
+  </ol>
+</nav>
+
+<section id="fi">
+<span class="section-number">§ 01</span>
+<h2>O namespace <em>fi.</em> — filtros prontos.</h2>
+
+<p class="lead"><code>fi.</code> tem 60+ filtros prontos pra usar. Biquads, butterworths, IIR/FIR, ladder, Moog-style, all-pass, comb, e por aí vai. Aqui foco nos 6 que cobrem 95% dos casos.</p>
+
+<table>
+  <thead><tr><th>Função</th><th>O que faz</th></tr></thead>
+  <tbody>
+    <tr><td><code>fi.lowpass(N, fc)</code></td><td>Passa-baixa de ordem N na frequência fc</td></tr>
+    <tr><td><code>fi.highpass(N, fc)</code></td><td>Passa-alta de ordem N na frequência fc</td></tr>
+    <tr><td><code>fi.bandpass(N, lo, hi)</code></td><td>Passa-faixa entre lo e hi</td></tr>
+    <tr><td><code>fi.notchw(B, fc)</code></td><td>Notch (rejeita-faixa) — pra cortar microfonia</td></tr>
+    <tr><td><code>fi.peak_eq(L, fc, B)</code></td><td>Peaking EQ: ganho L (linear) em fc, largura B em Hz</td></tr>
+    <tr><td><code>fi.low_shelf(L, fc)</code></td><td>Low shelf — ajusta tudo abaixo de fc</td></tr>
+    <tr><td><code>fi.high_shelf(L, fc)</code></td><td>High shelf — ajusta tudo acima de fc</td></tr>
+    <tr><td><code>fi.resonbp(fc, Q, G)</code></td><td>Bandpass ressonante (síntese, wah)</td></tr>
+  </tbody>
+</table>
+
+<p>Em todos: <code>N</code> = ordem (1 = 6 dB/oitava, 2 = 12 dB/oct, 3 = 18, 4 = 24). <code>fc</code> = corner frequency em Hz.</p>
+
+</section>
+
+<section id="lowhigh">
+<span class="section-number">§ 02</span>
+<h2>Lowpass, highpass, <em>bandpass</em>.</h2>
+
+<p>O combo mais usado em qualquer plugin de áudio. Aqui um plugin de "tone shaping" simples — lowpass + highpass com sliders.</p>
+
+<div class="code-block">
+<div class="code-header"><span>tone.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name <span class="tk-str">"Tone Control"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+<span class="tk-cm">// Highpass corta o sub-grave inútil. 80 Hz é o padrão pra voz.</span>
+hp_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"low cut [unit:Hz][scale:log]"</span>, <span class="tk-num">80</span>, <span class="tk-num">20</span>, <span class="tk-num">500</span>, <span class="tk-num">1</span>);
+
+<span class="tk-cm">// Lowpass corta o agudo áspero. 12 kHz é razoável.</span>
+lp_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"high cut [unit:Hz][scale:log]"</span>, <span class="tk-num">12000</span>, <span class="tk-num">2000</span>, <span class="tk-num">20000</span>, <span class="tk-num">1</span>);
+
+<span class="tk-cm">// Ordem 2 = inclinação 12 dB/oitava</span>
+<span class="tk-fn">process</span> = fi.<span class="tk-fn">highpass</span>(<span class="tk-num">2</span>, hp_freq) : fi.<span class="tk-fn">lowpass</span>(<span class="tk-num">2</span>, lp_freq);</code></pre>
+</div>
+
+<p>Pluga isso num canal de voz no DAW e você já tem um EQ de canal funcional.</p>
+
+<h3>Ordem importa</h3>
+
+<p><code>fi.lowpass(1, fc)</code> tem inclinação de 6 dB/oitava — corte suave, deixa muito passar. <code>fi.lowpass(4, fc)</code> tem inclinação de 24 dB/oitava — corte brusco, "wall". A diferença sonora é grande:</p>
+
+<ul>
+  <li><strong>Ordem 1</strong>: bom pra "tirar o brilho" sem perder ar.</li>
+  <li><strong>Ordem 2</strong>: padrão analógico clássico.</li>
+  <li><strong>Ordem 4</strong>: corte cirúrgico, usado em crossovers.</li>
+</ul>
+
+</section>
+
+<section id="peak">
+<span class="section-number">§ 03</span>
+<h2>Peak EQ e <em>shelf</em>.</h2>
+
+<p>Pra EQ paramétrico, você precisa de <strong>peaking EQ</strong> (sino: boost/cut em torno de uma freq) e <strong>shelves</strong> (sapata: boost/cut em tudo acima/abaixo).</p>
+
+<div class="code-block">
+<div class="code-header"><span>peaking.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name <span class="tk-str">"Peak EQ"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"freq [unit:Hz][scale:log]"</span>, <span class="tk-num">1000</span>, <span class="tk-num">20</span>, <span class="tk-num">20000</span>, <span class="tk-num">1</span>);
+gain_db = <span class="tk-fn">hslider</span>(<span class="tk-str">"ganho [unit:dB]"</span>, <span class="tk-num">0</span>, -<span class="tk-num">18</span>, <span class="tk-num">18</span>, <span class="tk-num">0.1</span>);
+bw   = <span class="tk-fn">hslider</span>(<span class="tk-str">"largura [unit:Hz]"</span>, <span class="tk-num">500</span>, <span class="tk-num">50</span>, <span class="tk-num">5000</span>, <span class="tk-num">10</span>);
+
+gain_linear = gain_db : ba.<span class="tk-fn">db2linear</span>;
+
+<span class="tk-fn">process</span> = fi.<span class="tk-fn">peak_eq</span>(gain_linear, freq, bw);</code></pre>
+</div>
+
+<p>Esse plugin tem 3 sliders: frequência, ganho, largura. É um <strong>EQ paramétrico</strong> de 1 banda. Multiplicar isso por 3 e você tem o de 3 bandas (que vamos fazer no fim do módulo).</p>
+
+</section>
+
+<section id="biquad">
+<span class="section-number">§ 04</span>
+<h2>Biquad direto (<em>fi.tf2</em>).</h2>
+
+<p>Os <code>fi.lowpass</code>, <code>fi.peak_eq</code>, etc. são wrappers que calculam coeficientes biquad internamente. Se você quer controle total sobre os coeficientes (b0, b1, b2, a1, a2), usa <code>fi.tf2</code>:</p>
+
+<div class="code-block">
+<div class="code-header"><span>biquad direto</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+<span class="tk-cm">// Coeficientes do biquad — você calcula via cookbook RBJ ou outro método</span>
+b0 = <span class="tk-num">0.1</span>;  b1 = <span class="tk-num">0.2</span>;  b2 = <span class="tk-num">0.1</span>;
+a1 = -<span class="tk-num">1.4</span>; a2 = <span class="tk-num">0.5</span>;
+
+<span class="tk-cm">// Transfer function de 2a ordem</span>
+<span class="tk-fn">process</span> = fi.<span class="tk-fn">tf2</span>(b0, b1, b2, a1, a2);</code></pre>
+</div>
+
+<p>Útil quando você implementou um filtro custom no módulo 04 da Trilha DSP em Rust e quer "traduzir" — só copia os coeficientes pro <code>fi.tf2</code> e funciona.</p>
+
+<div class="callout">
+  <div class="callout-title">EQ Cookbook</div>
+  <p>O <a href="../eq-cookbook-pt.html">EQ Cookbook em português</a> (tradução do RBJ Cookbook) tem todas as fórmulas pra calcular b0…a2 de qualquer filtro biquad. Se você sabe os coeficientes, <code>fi.tf2</code> é seu amigo.</p>
+</div>
+
+</section>
+
+<section id="rust-vs-faust">
+<span class="section-number">§ 05</span>
+<h2>Rust manual <em>vs</em> FAUST — o mesmo lowpass.</h2>
+
+<p>Comparação direta. Mesmo filtro (lowpass biquad ordem 2, fc=1000 Hz), duas implementações.</p>
+
+<h3>Rust manual (do módulo 04 da Trilha DSP)</h3>
+
+<div class="code-block">
+<div class="code-header"><span>biquad.rs</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">struct</span> Biquad {
+    b0: <span class="tk-type">f32</span>, b1: <span class="tk-type">f32</span>, b2: <span class="tk-type">f32</span>,
+    a1: <span class="tk-type">f32</span>, a2: <span class="tk-type">f32</span>,
+    x1: <span class="tk-type">f32</span>, x2: <span class="tk-type">f32</span>,
+    y1: <span class="tk-type">f32</span>, y2: <span class="tk-type">f32</span>,
+}
+
+<span class="tk-kw">impl</span> Biquad {
+    <span class="tk-kw">fn</span> <span class="tk-fn">lowpass</span>(fs: <span class="tk-type">f32</span>, fc: <span class="tk-type">f32</span>, q: <span class="tk-type">f32</span>) -&gt; <span class="tk-type">Self</span> {
+        <span class="tk-kw">let</span> w0 = <span class="tk-num">2.0</span> * std::f32::consts::PI * fc / fs;
+        <span class="tk-kw">let</span> cos_w0 = w0.<span class="tk-fn">cos</span>();
+        <span class="tk-kw">let</span> alpha = w0.<span class="tk-fn">sin</span>() / (<span class="tk-num">2.0</span> * q);
+        <span class="tk-kw">let</span> a0 = <span class="tk-num">1.0</span> + alpha;
+        Biquad {
+            b0: (<span class="tk-num">1.0</span> - cos_w0) / <span class="tk-num">2.0</span> / a0,
+            b1: (<span class="tk-num">1.0</span> - cos_w0) / a0,
+            b2: (<span class="tk-num">1.0</span> - cos_w0) / <span class="tk-num">2.0</span> / a0,
+            a1: -<span class="tk-num">2.0</span> * cos_w0 / a0,
+            a2: (<span class="tk-num">1.0</span> - alpha) / a0,
+            x1: <span class="tk-num">0.0</span>, x2: <span class="tk-num">0.0</span>, y1: <span class="tk-num">0.0</span>, y2: <span class="tk-num">0.0</span>,
+        }
+    }
+
+    <span class="tk-kw">fn</span> <span class="tk-fn">process</span>(&amp;<span class="tk-kw">mut self</span>, x: <span class="tk-type">f32</span>) -&gt; <span class="tk-type">f32</span> {
+        <span class="tk-kw">let</span> y = self.b0 * x + self.b1 * self.x1 + self.b2 * self.x2
+              - self.a1 * self.y1 - self.a2 * self.y2;
+        self.x2 = self.x1; self.x1 = x;
+        self.y2 = self.y1; self.y1 = y;
+        y
+    }
+}</code></pre>
+</div>
+
+<h3>FAUST</h3>
+
+<div class="code-block">
+<div class="code-header"><span>lowpass.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+<span class="tk-fn">process</span> = fi.<span class="tk-fn">lowpass</span>(<span class="tk-num">2</span>, <span class="tk-num">1000</span>);</code></pre>
+</div>
+
+<div class="callout success">
+  <div class="callout-title">Quando cada um</div>
+  <p><strong>FAUST</strong> pra prototipar rápido, gerar plugin, validar sonoridade, iterar com cliente. <strong>Rust</strong> pra quando você quer otimizar pra um caso muito específico, integrar com outro sistema, ou aprender o que tá por baixo. A FAUST gera Rust otimizado — então no fim do dia, o plugin que toca também é Rust (compilado pela FAUST).</p>
+</div>
+
+</section>
+
+<section id="aplicacao">
+<span class="section-number">§ 06</span>
+<h2>Aplicação: <em>EQ</em> paramétrico de 3 bandas.</h2>
+
+<p>EQ útil pra mixagem de voz, instrumento ou bus master. Low shelf + peak EQ + high shelf, cada um com freq e gain ajustáveis.</p>
+
+<div class="code-block">
+<div class="code-header"><span>eq3.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name <span class="tk-str">"EQ Paramétrico 3 bandas"</span>;
+<span class="tk-kw">declare</span> author <span class="tk-str">"Jefferson Cunha"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+<span class="tk-cm">// LOW SHELF — abaixo de 250 Hz (típico)</span>
+low_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"low/freq [unit:Hz][scale:log]"</span>, <span class="tk-num">100</span>, <span class="tk-num">20</span>, <span class="tk-num">500</span>, <span class="tk-num">1</span>);
+low_gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"low/ganho [unit:dB]"</span>, <span class="tk-num">0</span>, -<span class="tk-num">18</span>, <span class="tk-num">18</span>, <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
+
+<span class="tk-cm">// MID — peak EQ paramétrico</span>
+mid_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"mid/freq [unit:Hz][scale:log]"</span>, <span class="tk-num">1000</span>, <span class="tk-num">200</span>, <span class="tk-num">8000</span>, <span class="tk-num">1</span>);
+mid_gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"mid/ganho [unit:dB]"</span>, <span class="tk-num">0</span>, -<span class="tk-num">18</span>, <span class="tk-num">18</span>, <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
+mid_bw   = <span class="tk-fn">hslider</span>(<span class="tk-str">"mid/largura [unit:Hz]"</span>, <span class="tk-num">500</span>, <span class="tk-num">50</span>, <span class="tk-num">5000</span>, <span class="tk-num">10</span>);
+
+<span class="tk-cm">// HIGH SHELF — acima de 5 kHz</span>
+high_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"high/freq [unit:Hz][scale:log]"</span>, <span class="tk-num">8000</span>, <span class="tk-num">2000</span>, <span class="tk-num">20000</span>, <span class="tk-num">1</span>);
+high_gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"high/ganho [unit:dB]"</span>, <span class="tk-num">0</span>, -<span class="tk-num">18</span>, <span class="tk-num">18</span>, <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
+
+eq_mono = fi.<span class="tk-fn">low_shelf</span>(low_gain, low_freq)
+        : fi.<span class="tk-fn">peak_eq</span>(mid_gain, mid_freq, mid_bw)
+        : fi.<span class="tk-fn">high_shelf</span>(high_gain, high_freq);
+
+<span class="tk-cm">// Stereo — aplica nas duas vias</span>
+<span class="tk-fn">process</span> = eq_mono , eq_mono;</code></pre>
+</div>
+
+<p>Compila no editor.faust.grame.fr e olha o UI — 7 sliders organizados em grupos "low", "mid", "high" automaticamente (porque você usou o prefixo no label).</p>
+
+<div class="callout success">
+  <div class="callout-title">Pronto pra exportar</div>
+  <p>Esse EQ funciona. Quando você for pro Módulo 08 e exportar como VST, vai poder usar no Reaper, EQ-ar a voz do pregador, salvar como preset. Plugin de produção, em ~25 linhas.</p>
+</div>
+
+</section>
+
+<section id="glossario">
+<div class="glossary">
+<div class="glossary-title">Glossário rápido</div>
+<dl>
+  <dt>fi.lowpass(N, fc)</dt>
+  <dd>Passa-baixa de ordem N na frequência fc Hz.</dd>
+  <dt>fi.highpass(N, fc)</dt>
+  <dd>Passa-alta de ordem N.</dd>
+  <dt>fi.bandpass(N, lo, hi)</dt>
+  <dd>Passa-faixa entre lo e hi Hz.</dd>
+  <dt>fi.peak_eq(L, fc, B)</dt>
+  <dd>Peaking EQ: ganho L (linear) em fc, largura B em Hz.</dd>
+  <dt>fi.low_shelf(L, fc)</dt>
+  <dd>Low shelf: ajusta tudo abaixo de fc por ganho L.</dd>
+  <dt>fi.high_shelf(L, fc)</dt>
+  <dd>High shelf: ajusta tudo acima de fc.</dd>
+  <dt>fi.tf2(b0,b1,b2,a1,a2)</dt>
+  <dd>Biquad direto com coeficientes manuais.</dd>
+  <dt>fi.resonbp(fc, Q, G)</dt>
+  <dd>Bandpass ressonante (Q controla largura).</dd>
+  <dt>ordem do filtro</dt>
+  <dd>1 = 6 dB/oct, 2 = 12 dB/oct, 4 = 24 dB/oct.</dd>
+  <dt>group label "low/freq"</dt>
+  <dd>Prefixo no label cria grupos no UI do plugin.</dd>
+</dl>
+</div>
+</section>
+
+</article>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-next-label">Próximo módulo</div>
+    <div class="footer-next-title"><a href="04-dinamicas.html">04 — Dinâmicas: gate e <em>compressor</em></a></div>
+    <div class="footer-next-desc">Compressor de voz pro culto em 8 linhas. Threshold, ratio, attack, release ajustáveis.</div>
+  </div>
+  <div class="footer-meta">
+    <a href="02-osciladores.html">← Módulo anterior</a>
+    <a href="index.html">↑ Curso FAUST</a>
+    <a href="../../index.html">← Church Audio Tech</a>
+  </div>
+</footer>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

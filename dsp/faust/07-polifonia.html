@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAUST 07 — Polifonia e MIDI | Áudio em Rust — BR</title>
+<meta name="description" content="Módulo 7 do curso FAUST: process com freq/gain/gate, declare options nvoices, MIDI. Construir um sintetizador polifônico.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0908;--bg-elevated:#12100f;--bg-code:#161413;--border:#2a2624;--text:#e8e3dc;--text-muted:#9a918a;--text-dim:#6b635d;--accent:#d4704a;--warning:#c9a961;--success:#7ea87e;--faust:#7ab0c4;--faust-dim:#2a4550;--font-display:'Fraunces',Georgia,serif;--font-body:'Inter Tight',system-ui,sans-serif;--font-mono:'JetBrains Mono','Courier New',monospace;--max-width:820px;--wide-width:1100px}
+*{box-sizing:border-box;margin:0;padding:0}::selection{background:var(--faust-dim);color:var(--text)}html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;font-size:17px;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;z-index:1;opacity:0.4;mix-blend-mode:overlay}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--faust-dim)}a:hover{border-color:var(--accent)}
+header{position:sticky;top:0;z-index:100;background:rgba(10,9,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.header-inner{max-width:var(--wide-width);margin:0 auto;padding:16px 32px;display:flex;justify-content:space-between;align-items:center;gap:24px}
+.brand{font-family:var(--font-display);font-size:15px;font-weight:500;font-style:italic;color:var(--text);border:none;display:flex;align-items:center;gap:10px}
+.brand-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent)}
+.crumb,.header-meta{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);letter-spacing:0.05em;text-transform:uppercase;border:none}.crumb:hover{color:var(--accent)}
+.hero{max-width:var(--wide-width);margin:0 auto;padding:80px 32px 56px;position:relative;z-index:2}
+.hero-label{font-family:var(--font-mono);font-size:13px;color:var(--faust);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.hero-label::before{content:'';width:40px;height:1px;background:var(--faust)}
+.hero h1{font-family:var(--font-display);font-size:clamp(40px,6vw,72px);line-height:1;font-weight:400;letter-spacing:-0.03em;margin-bottom:28px;max-width:900px}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--faust)}
+.hero-subtitle{font-size:19px;line-height:1.5;color:var(--text-muted);max-width:680px;margin-bottom:36px}
+.hero-meta{display:flex;gap:36px;padding-top:28px;border-top:1px solid var(--border);flex-wrap:wrap}
+.meta-item{display:flex;flex-direction:column;gap:4px}
+.meta-label{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em}
+.meta-value{font-family:var(--font-display);font-size:17px;color:var(--text);font-style:italic}
+article{max-width:var(--max-width);margin:0 auto;padding:0 32px;position:relative;z-index:2}
+section{margin-bottom:64px;scroll-margin-top:80px}
+.section-number{font-family:var(--font-mono);font-size:11px;color:var(--faust);letter-spacing:0.15em;text-transform:uppercase;display:block;margin-bottom:12px}
+article h2{font-family:var(--font-display);font-size:36px;font-weight:400;letter-spacing:-0.02em;margin-bottom:20px;line-height:1.1}
+article h2 em{font-style:italic;color:var(--faust);font-weight:300}
+article h3{font-family:var(--font-display);font-size:22px;font-weight:500;margin:32px 0 14px;color:var(--text)}
+article h4{font-family:var(--font-body);font-size:15px;font-weight:700;margin:20px 0 10px;color:var(--text);text-transform:uppercase;letter-spacing:0.04em}
+article p{margin-bottom:16px;color:var(--text)}
+article p.lead{font-size:21px;line-height:1.5;color:var(--text);margin-bottom:28px}
+article p em{font-style:italic}article p strong{font-weight:600;color:var(--text)}
+article ul,article ol{margin:0 0 18px 28px}article li{margin-bottom:8px;color:var(--text-muted)}article li strong{color:var(--text)}
+code{font-family:var(--font-mono);background:var(--bg-code);color:var(--accent);padding:1px 6px;border-radius:3px;font-size:0.92em;border:1px solid var(--border)}
+.code-block{margin:24px 0;background:var(--bg-code);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.code-header{display:flex;justify-content:space-between;padding:10px 16px;background:var(--bg-elevated);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:12px;color:var(--text-dim)}
+.code-lang{color:var(--faust)}
+.code-block pre{padding:18px 20px;overflow-x:auto;font-family:var(--font-mono);font-size:14px;line-height:1.7;color:var(--text)}
+.code-block .tk-kw{color:#c4a4d4;font-weight:500}.code-block .tk-fn{color:var(--accent)}.code-block .tk-str{color:var(--success)}.code-block .tk-num{color:var(--warning)}.code-block .tk-cm{color:var(--text-dim);font-style:italic}
+.callout{margin:28px 0;padding:20px 24px;background:var(--bg-elevated);border-left:3px solid var(--faust);border-radius:0 6px 6px 0}
+.callout.terra{border-left-color:var(--accent)}.callout.warning{border-left-color:var(--warning)}.callout.success{border-left-color:var(--success)}
+.callout-title{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--faust);margin-bottom:10px}
+.callout.terra .callout-title{color:var(--accent)}.callout.warning .callout-title{color:var(--warning)}.callout.success .callout-title{color:var(--success)}
+.callout p:last-child{margin-bottom:0}
+.toc{margin:0 0 56px;padding:22px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px}
+.toc-title{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--faust);margin-bottom:12px}
+.toc ol{margin:0;padding-left:22px}.toc li{margin-bottom:6px;color:var(--text-muted)}.toc a{color:var(--text-muted);border:none}.toc a:hover{color:var(--accent)}
+.glossary{margin:56px 0 32px;padding:24px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px}
+.glossary-title{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--faust);margin-bottom:16px}
+.glossary dl{display:grid;grid-template-columns:1fr 2fr;gap:12px 24px}
+.glossary dt{font-family:var(--font-mono);font-size:12px;color:var(--accent);font-weight:700}
+.glossary dd{color:var(--text-muted);font-size:14px;line-height:1.5}
+footer{max-width:var(--wide-width);margin:80px auto 0;padding:32px 32px 64px;border-top:1px solid var(--border);position:relative;z-index:2}
+.footer-grid{padding:24px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;margin-bottom:24px}
+.footer-next-label{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px}
+.footer-next-title{font-family:var(--font-display);font-size:24px;font-weight:400;margin-bottom:6px}
+.footer-next-title em{font-style:italic;color:var(--faust);font-weight:300}
+.footer-next-title a{color:var(--text);border:none}.footer-next-title a:hover{color:var(--accent)}
+.footer-next-desc{color:var(--text-muted);font-size:14px}
+.footer-meta{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-meta a{color:var(--text-muted);border:none}.footer-meta a:hover{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:18px 0}
+th{text-align:left;padding:10px;font-family:var(--font-mono);font-size:12px;color:var(--faust);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border)}
+td{padding:10px;border-bottom:1px solid var(--border);color:var(--text-muted);font-size:14.5px}
+@media (max-width:760px){.glossary dl{grid-template-columns:1fr;gap:4px 0}.glossary dt{margin-top:12px}.hero{padding:56px 24px 36px}.hero-meta{gap:24px}article{padding:0 24px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../../index.html" class="crumb">← Church Audio Tech</a>
+    <a href="index.html" class="brand"><span class="brand-dot"></span>FAUST — <em>plugin</em></a>
+    <span class="header-meta">MÓD 07 / 08</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Módulo 07 — Polifonia</div>
+  <h1>Polifonia e <em>MIDI</em>.</h1>
+  <p class="hero-subtitle">Até agora todos os plugins foram <em>efeitos</em> — entra um sinal, sai outro. Aqui vira <strong>instrumento</strong>: o usuário toca no teclado MIDI e o plugin gera as notas. Sintetizador polifônico pronto pra DAW.</p>
+  <div class="hero-meta">
+    <div class="meta-item"><span class="meta-label">Leitura</span><span class="meta-value">≈ 22 min</span></div>
+    <div class="meta-item"><span class="meta-label">Experimento</span><span class="meta-value">≈ 40 min</span></div>
+    <div class="meta-item"><span class="meta-label">Pré-requisito</span><span class="meta-value">Módulos 01–06</span></div>
+    <div class="meta-item"><span class="meta-label">Entrega</span><span class="meta-value">sintetizador polifônico</span></div>
+  </div>
+</div>
+
+<article>
+
+<nav class="toc">
+  <div class="toc-title">Sumário</div>
+  <ol>
+    <li><a href="#convencao">A convenção freq/gain/gate</a></li>
+    <li><a href="#nvoices">declare options "[nvoices:8]"</a></li>
+    <li><a href="#monovoz">Sintetizador mono — uma voz</a></li>
+    <li><a href="#polifonia">Polifonia automática</a></li>
+    <li><a href="#envelope">Envelope ADSR</a></li>
+    <li><a href="#aplicacao">Aplicação: synth polifônico completo</a></li>
+    <li><a href="#glossario">Glossário rápido</a></li>
+  </ol>
+</nav>
+
+<section id="convencao">
+<span class="section-number">§ 01</span>
+<h2>A convenção <em>freq/gain/gate</em>.</h2>
+
+<p class="lead">FAUST não tem um "evento MIDI" no DSP — em vez disso, o plugin define <strong>3 sliders especiais</strong>: <code>freq</code> (frequência da nota), <code>gain</code> (velocity), <code>gate</code> (1 quando tecla pressionada, 0 quando solta). O wrapper VST conecta MIDI nesses 3.</p>
+
+<p>Reconhecimento é por <strong>label</strong>:</p>
+
+<table>
+  <thead><tr><th>Label do slider</th><th>O que recebe via MIDI</th></tr></thead>
+  <tbody>
+    <tr><td><code>"freq"</code></td><td>frequência da nota tocada (Hz) — derivada do MIDI note number</td></tr>
+    <tr><td><code>"gain"</code></td><td>velocity normalizada (0 a 1)</td></tr>
+    <tr><td><code>"gate"</code></td><td>1 = nota on, 0 = nota off</td></tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <div class="callout-title">Por convenção, não por mágica</div>
+  <p>O wrapper procura sliders com <strong>exatamente</strong> esses labels (case-sensitive). Se você escrever "Freq" ou "frequência" não vai funcionar. Use <code>"freq"</code>, <code>"gain"</code>, <code>"gate"</code>.</p>
+</div>
+
+</section>
+
+<section id="nvoices">
+<span class="section-number">§ 02</span>
+<h2>declare options <em>"[nvoices:8]"</em>.</h2>
+
+<p>Pra ativar polifonia, o plugin precisa anunciar quantas vozes simultâneas suporta. Isso é feito via <code>declare options</code>:</p>
+
+<div class="code-block">
+<div class="code-header"><span>polifonia.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> options <span class="tk-str">"[nvoices:8]"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+<span class="tk-cm">// process abaixo será replicado 8 vezes pelo compilador,</span>
+<span class="tk-cm">// um por nota simultânea — o usuário pode tocar 8 notas juntas.</span>
+
+freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"freq"</span>, <span class="tk-num">440</span>, <span class="tk-num">50</span>, <span class="tk-num">2000</span>, <span class="tk-num">0.01</span>);
+gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"gain"</span>, <span class="tk-num">0.5</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
+gate = <span class="tk-fn">button</span>(<span class="tk-str">"gate"</span>);
+
+<span class="tk-fn">process</span> = os.<span class="tk-fn">osc</span>(freq) * gain * gate &lt;: _ , _;</code></pre>
+</div>
+
+<p>Compilando isso pra VST com <code>faust2vst -nvoices 8</code> (módulo 08), o plugin aparece como <strong>instrument</strong> no DAW, recebe MIDI direto, e toca polifônico.</p>
+
+</section>
+
+<section id="monovoz">
+<span class="section-number">§ 03</span>
+<h2>Sintetizador <em>mono</em> — uma voz.</h2>
+
+<p>Antes de polifônico, fazemos monofônico. Um detalhe importante: <strong>gate é binário</strong>. Multiplicar por 0 quando solta corta abruptamente — vira "click" feio. Solução: envelope.</p>
+
+<div class="code-block">
+<div class="code-header"><span>synth_mono.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name <span class="tk-str">"Mono Synth"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"freq"</span>, <span class="tk-num">440</span>, <span class="tk-num">50</span>, <span class="tk-num">2000</span>, <span class="tk-num">0.01</span>);
+gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"gain"</span>, <span class="tk-num">0.5</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
+gate = <span class="tk-fn">button</span>(<span class="tk-str">"gate"</span>);
+
+<span class="tk-cm">// Envelope ADSR (attack, decay, sustain, release) suaviza o gate</span>
+env = en.<span class="tk-fn">adsr</span>(<span class="tk-num">0.01</span>, <span class="tk-num">0.1</span>, <span class="tk-num">0.7</span>, <span class="tk-num">0.3</span>, gate);
+
+<span class="tk-cm">// Sintetizador básico: oscilador * envelope * velocity</span>
+<span class="tk-fn">process</span> = os.<span class="tk-fn">sawtooth</span>(freq) * env * gain &lt;: _ , _;</code></pre>
+</div>
+
+<p>Sem o envelope, soltar a tecla cortaria o som no meio do ciclo. Com ele, suaviza pra zero em 300 ms (o release do ADSR).</p>
+
+</section>
+
+<section id="polifonia">
+<span class="section-number">§ 04</span>
+<h2>Polifonia <em>automática</em>.</h2>
+
+<p>Adicionando <code>declare options "[nvoices:8]"</code> ao código acima, o compilador FAUST replica internamente o <code>process</code> 8 vezes. Cada nota tocada vai pra uma voz livre.</p>
+
+<div class="code-block">
+<div class="code-header"><span>synth_poly.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name <span class="tk-str">"Poly Synth"</span>;
+<span class="tk-kw">declare</span> options <span class="tk-str">"[nvoices:8]"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"freq"</span>, <span class="tk-num">440</span>, <span class="tk-num">50</span>, <span class="tk-num">2000</span>, <span class="tk-num">0.01</span>);
+gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"gain"</span>, <span class="tk-num">0.5</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
+gate = <span class="tk-fn">button</span>(<span class="tk-str">"gate"</span>);
+
+env = en.<span class="tk-fn">adsr</span>(<span class="tk-num">0.01</span>, <span class="tk-num">0.1</span>, <span class="tk-num">0.7</span>, <span class="tk-num">0.3</span>, gate);
+
+<span class="tk-fn">process</span> = os.<span class="tk-fn">sawtooth</span>(freq) * env * gain &lt;: _ , _;</code></pre>
+</div>
+
+<div class="callout success">
+  <div class="callout-title">Como o wrapper gerencia vozes</div>
+  <p>Quando você toca uma nota nova: o wrapper procura uma voz livre (com gate=0 e envelope finalizado). Se não tem, ele "rouba" a voz mais antiga (voice stealing). Quando você solta: gate vai pra 0, envelope decai pelo release, voz fica livre de novo.</p>
+</div>
+
+</section>
+
+<section id="envelope">
+<span class="section-number">§ 05</span>
+<h2>Envelope <em>ADSR</em>.</h2>
+
+<p><code>en.adsr(a, d, s, r, gate)</code> — Attack, Decay, Sustain, Release. Tempos em segundos, sustain entre 0 e 1.</p>
+
+<table>
+  <thead><tr><th>Estágio</th><th>O que faz</th><th>Pra som de</th></tr></thead>
+  <tbody>
+    <tr><td>Attack</td><td>Sobe de 0 ao pico</td><td>órgão: instantâneo; pad: 1-2s</td></tr>
+    <tr><td>Decay</td><td>Cai do pico ao sustain</td><td>piano: rápido; pad: médio</td></tr>
+    <tr><td>Sustain</td><td>Mantém enquanto segura</td><td>órgão: 1.0; piano: 0.3</td></tr>
+    <tr><td>Release</td><td>Cai a 0 ao soltar</td><td>órgão: 0.1s; pad: 2s</td></tr>
+  </tbody>
+</table>
+
+<p>Presets clássicos:</p>
+
+<table>
+  <thead><tr><th>Instrumento</th><th>A</th><th>D</th><th>S</th><th>R</th></tr></thead>
+  <tbody>
+    <tr><td>Pluck/piano</td><td>0.001</td><td>0.5</td><td>0.0</td><td>0.3</td></tr>
+    <tr><td>Órgão</td><td>0.005</td><td>0.0</td><td>1.0</td><td>0.05</td></tr>
+    <tr><td>Pad</td><td>1.5</td><td>0.5</td><td>0.7</td><td>2.0</td></tr>
+    <tr><td>Bass</td><td>0.005</td><td>0.2</td><td>0.5</td><td>0.1</td></tr>
+  </tbody>
+</table>
+
+<p>Outras opções: <code>en.are(attack, release)</code> (só attack/release), <code>en.adsre(a, d, s, r, decay)</code> (versão exponencial).</p>
+
+</section>
+
+<section id="aplicacao">
+<span class="section-number">§ 06</span>
+<h2>Aplicação: <em>synth</em> polifônico completo.</h2>
+
+<p>Sintetizador playável com oscilador, ADSR ajustável, filtro com envelope, e UI organizada em tabs.</p>
+
+<div class="code-block">
+<div class="code-header"><span>synth_full.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name        <span class="tk-str">"Poly Synth pra Igreja"</span>;
+<span class="tk-kw">declare</span> author      <span class="tk-str">"Jefferson Cunha"</span>;
+<span class="tk-kw">declare</span> options     <span class="tk-str">"[nvoices:12]"</span>;
+<span class="tk-kw">declare</span> category    <span class="tk-str">"Synthesizer"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+<span class="tk-cm">// === MIDI bindings (labels exatos) ===</span>
+freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"freq"</span>, <span class="tk-num">440</span>, <span class="tk-num">50</span>, <span class="tk-num">2000</span>, <span class="tk-num">0.01</span>);
+gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"gain"</span>, <span class="tk-num">0.5</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
+gate = <span class="tk-fn">button</span>(<span class="tk-str">"gate"</span>);
+
+<span class="tk-cm">// === OSC ===</span>
+wave = <span class="tk-fn">nentry</span>(<span class="tk-str">"t:Osc/forma [style:menu{'sawtooth':0;'square':1;'tri':2;'sine':3}]"</span>, <span class="tk-num">0</span>, <span class="tk-num">0</span>, <span class="tk-num">3</span>, <span class="tk-num">1</span>);
+detune = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Osc/detune [unit:cents]"</span>, <span class="tk-num">0</span>, -<span class="tk-num">50</span>, <span class="tk-num">50</span>, <span class="tk-num">0.1</span>);
+
+<span class="tk-cm">// Aplica detune (cents → ratio: 2^(cents/1200))</span>
+detuned_freq = freq * pow(<span class="tk-num">2</span>, detune / <span class="tk-num">1200</span>);
+
+oscs = os.<span class="tk-fn">sawtooth</span>(detuned_freq) , os.<span class="tk-fn">square</span>(detuned_freq)
+     , os.<span class="tk-fn">triangle</span>(detuned_freq) , os.<span class="tk-fn">osc</span>(detuned_freq);
+osc_out = oscs : ba.<span class="tk-fn">selectn</span>(<span class="tk-num">4</span>, wave);
+
+<span class="tk-cm">// === ADSR de amplitude ===</span>
+atk = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Env/attack [unit:s]"</span>, <span class="tk-num">0.01</span>, <span class="tk-num">0.001</span>, <span class="tk-num">3</span>, <span class="tk-num">0.001</span>);
+dec = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Env/decay [unit:s]"</span>, <span class="tk-num">0.1</span>, <span class="tk-num">0.001</span>, <span class="tk-num">3</span>, <span class="tk-num">0.001</span>);
+sus = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Env/sustain"</span>, <span class="tk-num">0.7</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
+rel = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Env/release [unit:s]"</span>, <span class="tk-num">0.3</span>, <span class="tk-num">0.001</span>, <span class="tk-num">5</span>, <span class="tk-num">0.001</span>);
+amp_env = en.<span class="tk-fn">adsr</span>(atk, dec, sus, rel, gate);
+
+<span class="tk-cm">// === Filter low pass com envelope ===</span>
+cutoff = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Filter/cutoff [unit:Hz][scale:log]"</span>, <span class="tk-num">2000</span>, <span class="tk-num">100</span>, <span class="tk-num">20000</span>, <span class="tk-num">1</span>);
+env_amount = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Filter/env amount"</span>, <span class="tk-num">0.3</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
+modulated_cutoff = cutoff * (<span class="tk-num">1</span> + env_amount * amp_env * <span class="tk-num">4</span>);
+filtered = osc_out : fi.<span class="tk-fn">lowpass</span>(<span class="tk-num">2</span>, modulated_cutoff);
+
+<span class="tk-cm">// === Master ===</span>
+master = <span class="tk-fn">hslider</span>(<span class="tk-str">"master [unit:dB]"</span>, -<span class="tk-num">6</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>, <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
+
+<span class="tk-fn">process</span> = filtered * amp_env * gain * master &lt;: _ , _;</code></pre>
+</div>
+
+<p>Esse é um sintetizador de verdade. 12 vozes, 4 formas de onda, ADSR completo, filtro com envelope, detune fino. UI organizada em 3 tabs (Osc, Env, Filter).</p>
+
+<div class="callout success">
+  <div class="callout-title">Compilou. Toca?</div>
+  <p>No Faust IDE: clica em <strong>Run</strong> → vai aparecer um "MIDI in" pra você plugar teu teclado. No DAW (depois do módulo 08): plugin aparece como <strong>Instrument</strong>, você cria uma track de MIDI e arrasta o plugin nela. Toca o teclado e ouve.</p>
+</div>
+
+</section>
+
+<section id="glossario">
+<div class="glossary">
+<div class="glossary-title">Glossário rápido</div>
+<dl>
+  <dt>declare options "[nvoices:N]"</dt>
+  <dd>Define polifonia de N vozes.</dd>
+  <dt>"freq" (label)</dt>
+  <dd>Slider que recebe nota MIDI convertida pra Hz.</dd>
+  <dt>"gain" (label)</dt>
+  <dd>Slider que recebe velocity (0 a 1).</dd>
+  <dt>"gate" (button)</dt>
+  <dd>Button que recebe note on/off.</dd>
+  <dt>en.adsr(a, d, s, r, gate)</dt>
+  <dd>Envelope ADSR.</dd>
+  <dt>en.are(a, r, gate)</dt>
+  <dd>Envelope AR simplificado.</dd>
+  <dt>voice stealing</dt>
+  <dd>Quando todas vozes estão em uso, o wrapper "rouba" a voz mais antiga.</dd>
+  <dt>cents</dt>
+  <dd>Unidade de afinação. 100 cents = 1 semitom. Detune em cents.</dd>
+  <dt>declare category "Synthesizer"</dt>
+  <dd>Categoriza como instrumento no DAW.</dd>
+  <dt>pow(2, c/1200)</dt>
+  <dd>Converte cents pra ratio multiplicativa de frequência.</dd>
+</dl>
+</div>
+</section>
+
+</article>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-next-label">Próximo módulo</div>
+    <div class="footer-next-title"><a href="08-export-vst-lv2.html">08 — Export: <em>VST</em>, LV2, AU, Web</a></div>
+    <div class="footer-next-desc">Pega o .dsp e gera plugin pra Reaper, Ardour, Logic, web. faust2vst, faust2lv2 na prática.</div>
+  </div>
+  <div class="footer-meta">
+    <a href="06-ui-controles.html">← Módulo anterior</a>
+    <a href="index.html">↑ Curso FAUST</a>
+    <a href="../../index.html">← Church Audio Tech</a>
+  </div>
+</footer>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

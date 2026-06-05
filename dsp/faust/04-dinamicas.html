@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAUST 04 — Dinâmicas: gate e compressor | Áudio em Rust — BR</title>
+<meta name="description" content="Módulo 4 do curso FAUST: co.compressor_mono, en.amp_follower, gate. Compressor de voz pro culto em poucas linhas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0908;--bg-elevated:#12100f;--bg-code:#161413;--border:#2a2624;--text:#e8e3dc;--text-muted:#9a918a;--text-dim:#6b635d;--accent:#d4704a;--warning:#c9a961;--success:#7ea87e;--faust:#7ab0c4;--faust-dim:#2a4550;--font-display:'Fraunces',Georgia,serif;--font-body:'Inter Tight',system-ui,sans-serif;--font-mono:'JetBrains Mono','Courier New',monospace;--max-width:820px;--wide-width:1100px}
+*{box-sizing:border-box;margin:0;padding:0}::selection{background:var(--faust-dim);color:var(--text)}html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;font-size:17px;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;z-index:1;opacity:0.4;mix-blend-mode:overlay}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--faust-dim)}a:hover{border-color:var(--accent)}
+header{position:sticky;top:0;z-index:100;background:rgba(10,9,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.header-inner{max-width:var(--wide-width);margin:0 auto;padding:16px 32px;display:flex;justify-content:space-between;align-items:center;gap:24px}
+.brand{font-family:var(--font-display);font-size:15px;font-weight:500;font-style:italic;color:var(--text);border:none;display:flex;align-items:center;gap:10px}
+.brand-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent)}
+.crumb,.header-meta{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);letter-spacing:0.05em;text-transform:uppercase;border:none}.crumb:hover{color:var(--accent)}
+.hero{max-width:var(--wide-width);margin:0 auto;padding:80px 32px 56px;position:relative;z-index:2}
+.hero-label{font-family:var(--font-mono);font-size:13px;color:var(--faust);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.hero-label::before{content:'';width:40px;height:1px;background:var(--faust)}
+.hero h1{font-family:var(--font-display);font-size:clamp(40px,6vw,72px);line-height:1;font-weight:400;letter-spacing:-0.03em;margin-bottom:28px;max-width:900px}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--faust)}
+.hero-subtitle{font-size:19px;line-height:1.5;color:var(--text-muted);max-width:680px;margin-bottom:36px}
+.hero-meta{display:flex;gap:36px;padding-top:28px;border-top:1px solid var(--border);flex-wrap:wrap}
+.meta-item{display:flex;flex-direction:column;gap:4px}
+.meta-label{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em}
+.meta-value{font-family:var(--font-display);font-size:17px;color:var(--text);font-style:italic}
+article{max-width:var(--max-width);margin:0 auto;padding:0 32px;position:relative;z-index:2}
+section{margin-bottom:64px;scroll-margin-top:80px}
+.section-number{font-family:var(--font-mono);font-size:11px;color:var(--faust);letter-spacing:0.15em;text-transform:uppercase;display:block;margin-bottom:12px}
+article h2{font-family:var(--font-display);font-size:36px;font-weight:400;letter-spacing:-0.02em;margin-bottom:20px;line-height:1.1}
+article h2 em{font-style:italic;color:var(--faust);font-weight:300}
+article h3{font-family:var(--font-display);font-size:22px;font-weight:500;margin:32px 0 14px;color:var(--text)}
+article h4{font-family:var(--font-body);font-size:15px;font-weight:700;margin:20px 0 10px;color:var(--text);text-transform:uppercase;letter-spacing:0.04em}
+article p{margin-bottom:16px;color:var(--text)}
+article p.lead{font-size:21px;line-height:1.5;color:var(--text);margin-bottom:28px}
+article p em{font-style:italic}article p strong{font-weight:600;color:var(--text)}
+article ul,article ol{margin:0 0 18px 28px}article li{margin-bottom:8px;color:var(--text-muted)}article li strong{color:var(--text)}
+code{font-family:var(--font-mono);background:var(--bg-code);color:var(--accent);padding:1px 6px;border-radius:3px;font-size:0.92em;border:1px solid var(--border)}
+.code-block{margin:24px 0;background:var(--bg-code);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.code-header{display:flex;justify-content:space-between;padding:10px 16px;background:var(--bg-elevated);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:12px;color:var(--text-dim)}
+.code-lang{color:var(--faust)}
+.code-block pre{padding:18px 20px;overflow-x:auto;font-family:var(--font-mono);font-size:14px;line-height:1.7;color:var(--text)}
+.code-block .tk-kw{color:#c4a4d4;font-weight:500}.code-block .tk-fn{color:var(--accent)}.code-block .tk-str{color:var(--success)}.code-block .tk-num{color:var(--warning)}.code-block .tk-cm{color:var(--text-dim);font-style:italic}
+.callout{margin:28px 0;padding:20px 24px;background:var(--bg-elevated);border-left:3px solid var(--faust);border-radius:0 6px 6px 0}
+.callout.terra{border-left-color:var(--accent)}.callout.warning{border-left-color:var(--warning)}.callout.success{border-left-color:var(--success)}
+.callout-title{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--faust);margin-bottom:10px}
+.callout.terra .callout-title{color:var(--accent)}.callout.warning .callout-title{color:var(--warning)}.callout.success .callout-title{color:var(--success)}
+.callout p:last-child{margin-bottom:0}
+.toc{margin:0 0 56px;padding:22px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px}
+.toc-title{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--faust);margin-bottom:12px}
+.toc ol{margin:0;padding-left:22px}.toc li{margin-bottom:6px;color:var(--text-muted)}.toc a{color:var(--text-muted);border:none}.toc a:hover{color:var(--accent)}
+.glossary{margin:56px 0 32px;padding:24px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px}
+.glossary-title{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--faust);margin-bottom:16px}
+.glossary dl{display:grid;grid-template-columns:1fr 2fr;gap:12px 24px}
+.glossary dt{font-family:var(--font-mono);font-size:12px;color:var(--accent);font-weight:700}
+.glossary dd{color:var(--text-muted);font-size:14px;line-height:1.5}
+footer{max-width:var(--wide-width);margin:80px auto 0;padding:32px 32px 64px;border-top:1px solid var(--border);position:relative;z-index:2}
+.footer-grid{padding:24px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;margin-bottom:24px}
+.footer-next-label{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px}
+.footer-next-title{font-family:var(--font-display);font-size:24px;font-weight:400;margin-bottom:6px}
+.footer-next-title em{font-style:italic;color:var(--faust);font-weight:300}
+.footer-next-title a{color:var(--text);border:none}.footer-next-title a:hover{color:var(--accent)}
+.footer-next-desc{color:var(--text-muted);font-size:14px}
+.footer-meta{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-meta a{color:var(--text-muted);border:none}.footer-meta a:hover{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:18px 0}
+th{text-align:left;padding:10px;font-family:var(--font-mono);font-size:12px;color:var(--faust);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border)}
+td{padding:10px;border-bottom:1px solid var(--border);color:var(--text-muted);font-size:14.5px}
+@media (max-width:760px){.glossary dl{grid-template-columns:1fr;gap:4px 0}.glossary dt{margin-top:12px}.hero{padding:56px 24px 36px}.hero-meta{gap:24px}article{padding:0 24px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../../index.html" class="crumb">← Church Audio Tech</a>
+    <a href="index.html" class="brand"><span class="brand-dot"></span>FAUST — <em>plugin</em></a>
+    <span class="header-meta">MÓD 04 / 08</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Módulo 04 — Dinâmicas</div>
+  <h1>Dinâmicas: gate e <em>compressor</em>.</h1>
+  <p class="hero-subtitle">Compressor é o plugin que mais salva a voz do pregador (e a paciência do operador). Aqui você constrói um compressor com threshold, ratio, attack, release ajustáveis. Plugin pronto pra usar no culto.</p>
+  <div class="hero-meta">
+    <div class="meta-item"><span class="meta-label">Leitura</span><span class="meta-value">≈ 25 min</span></div>
+    <div class="meta-item"><span class="meta-label">Experimento</span><span class="meta-value">≈ 30 min</span></div>
+    <div class="meta-item"><span class="meta-label">Pré-requisito</span><span class="meta-value">Módulos 01–03</span></div>
+    <div class="meta-item"><span class="meta-label">Entrega</span><span class="meta-value">compressor + gate</span></div>
+  </div>
+</div>
+
+<article>
+
+<nav class="toc">
+  <div class="toc-title">Sumário</div>
+  <ol>
+    <li><a href="#anatomia">Anatomia de um compressor</a></li>
+    <li><a href="#pronto">co.compressor_mono — o pronto</a></li>
+    <li><a href="#meter">Gain reduction meter</a></li>
+    <li><a href="#manual">Compressor manual (envelope + gain)</a></li>
+    <li><a href="#gate">Gate — silenciar o que está baixo</a></li>
+    <li><a href="#aplicacao">Aplicação: compressor de pregador</a></li>
+    <li><a href="#glossario">Glossário rápido</a></li>
+  </ol>
+</nav>
+
+<section id="anatomia">
+<span class="section-number">§ 01</span>
+<h2>Anatomia de um <em>compressor</em>.</h2>
+
+<p class="lead">Compressor "amassa" o que está alto e mantém o que está baixo. Reduz a dinâmica.</p>
+
+<p>5 controles que aparecem em todo compressor do mundo:</p>
+
+<table>
+  <thead><tr><th>Controle</th><th>O que faz</th><th>Unidade</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Threshold</strong></td><td>nível em que o compressor "liga"</td><td>dB (geralmente -20 a -10)</td></tr>
+    <tr><td><strong>Ratio</strong></td><td>quanto comprime acima do threshold</td><td>X:1 (2:1 leve, 10:1 limit)</td></tr>
+    <tr><td><strong>Attack</strong></td><td>tempo pra começar a comprimir</td><td>ms (1 ms a 100 ms)</td></tr>
+    <tr><td><strong>Release</strong></td><td>tempo pra soltar depois do pico</td><td>ms (50 ms a 1000 ms)</td></tr>
+    <tr><td><strong>Makeup Gain</strong></td><td>ganho pra compensar o que foi comprimido</td><td>dB (0 a +12)</td></tr>
+  </tbody>
+</table>
+
+<p>Ratio 4:1 com threshold -20 dB: pico de -10 dB entra, sai como (-20 + (10/4)) = -17.5 dB. O excesso de 10 dB virou 2.5 dB. Comprimiu 7.5 dB.</p>
+
+</section>
+
+<section id="pronto">
+<span class="section-number">§ 02</span>
+<h2>co.compressor_mono — o <em>pronto</em>.</h2>
+
+<p>FAUST traz um compressor pronto: <code>co.compressor_mono(ratio, threshold, attack, release)</code>. Não precisa implementar nada — é uma linha.</p>
+
+<div class="code-block">
+<div class="code-header"><span>comp_simples.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name <span class="tk-str">"Compressor Simples"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+ratio    = <span class="tk-fn">hslider</span>(<span class="tk-str">"ratio"</span>, <span class="tk-num">4</span>, <span class="tk-num">1</span>, <span class="tk-num">20</span>, <span class="tk-num">0.1</span>);
+thresh   = <span class="tk-fn">hslider</span>(<span class="tk-str">"threshold [unit:dB]"</span>, -<span class="tk-num">18</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>, <span class="tk-num">0.1</span>);
+attack   = <span class="tk-fn">hslider</span>(<span class="tk-str">"attack [unit:ms]"</span>, <span class="tk-num">10</span>, <span class="tk-num">0.1</span>, <span class="tk-num">100</span>, <span class="tk-num">0.1</span>) : *(<span class="tk-num">0.001</span>);
+release  = <span class="tk-fn">hslider</span>(<span class="tk-str">"release [unit:ms]"</span>, <span class="tk-num">100</span>, <span class="tk-num">10</span>, <span class="tk-num">1000</span>, <span class="tk-num">1</span>)  : *(<span class="tk-num">0.001</span>);
+makeup_db = <span class="tk-fn">hslider</span>(<span class="tk-str">"makeup [unit:dB]"</span>, <span class="tk-num">0</span>, <span class="tk-num">0</span>, <span class="tk-num">24</span>, <span class="tk-num">0.1</span>);
+
+makeup = makeup_db : ba.<span class="tk-fn">db2linear</span>;
+
+<span class="tk-fn">process</span> = co.<span class="tk-fn">compressor_mono</span>(ratio, thresh, attack, release) * makeup;</code></pre>
+</div>
+
+<p>Detalhes:</p>
+<ul>
+  <li>FAUST espera attack/release em <strong>segundos</strong>, então o slider em ms é multiplicado por 0.001.</li>
+  <li>Makeup gain é aplicado depois — multiplicação simples.</li>
+  <li>Em stereo: aplica <code>co.compressor_mono</code> em paralelo nos dois canais (ou usa <code>co.compressor_stereo</code> que linka os 2).</li>
+</ul>
+
+</section>
+
+<section id="meter">
+<span class="section-number">§ 03</span>
+<h2>Gain reduction <em>meter</em>.</h2>
+
+<p>Operador profissional quer ver quanto o compressor está reduzindo. <code>hbargraph</code> mostra isso visualmente no DAW.</p>
+
+<div class="code-block">
+<div class="code-header"><span>comp_meter.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+<span class="tk-cm">// ...controles igual antes...</span>
+
+<span class="tk-cm">// Pega a gain reduction calculada — em dB pra exibir</span>
+gr_db = co.<span class="tk-fn">compression_gain_mono</span>(ratio, thresh, attack, release) : ba.<span class="tk-fn">linear2db</span>;
+
+<span class="tk-cm">// Exibe num bargraph horizontal — -24 dB (fundo) a 0 dB (sem redução)</span>
+gr_meter = <span class="tk-fn">hbargraph</span>(<span class="tk-str">"redução [unit:dB]"</span>, -<span class="tk-num">24</span>, <span class="tk-num">0</span>);
+
+<span class="tk-fn">process</span>(x) = x * (co.<span class="tk-fn">compression_gain_mono</span>(ratio, thresh, attack, release)(x) : (_ &lt;: attach(_, gr_db : gr_meter)));</code></pre>
+</div>
+
+<p><code>attach</code> é o segredo: ele "anexa" um sinal ao caminho sem afetá-lo. O bargraph "lê" mas não atrapalha o áudio.</p>
+
+</section>
+
+<section id="manual">
+<span class="section-number">§ 04</span>
+<h2>Compressor <em>manual</em> (envelope + gain).</h2>
+
+<p>Pra entender o que <code>co.compressor_mono</code> faz por dentro, vamos construir um do zero. 2 partes: <strong>detecção de envelope</strong> (quão alto está o sinal agora) e <strong>aplicação de ganho</strong> (quanto reduzir).</p>
+
+<div class="code-block">
+<div class="code-header"><span>comp_manual.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+ratio = <span class="tk-fn">hslider</span>(<span class="tk-str">"ratio"</span>, <span class="tk-num">4</span>, <span class="tk-num">1</span>, <span class="tk-num">20</span>, <span class="tk-num">0.1</span>);
+thresh_db = <span class="tk-fn">hslider</span>(<span class="tk-str">"threshold [unit:dB]"</span>, -<span class="tk-num">18</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>, <span class="tk-num">0.1</span>);
+attack = <span class="tk-fn">hslider</span>(<span class="tk-str">"attack [unit:ms]"</span>, <span class="tk-num">10</span>, <span class="tk-num">0.1</span>, <span class="tk-num">100</span>, <span class="tk-num">0.1</span>) : *(<span class="tk-num">0.001</span>);
+release = <span class="tk-fn">hslider</span>(<span class="tk-str">"release [unit:ms]"</span>, <span class="tk-num">100</span>, <span class="tk-num">10</span>, <span class="tk-num">1000</span>, <span class="tk-num">1</span>) : *(<span class="tk-num">0.001</span>);
+
+<span class="tk-cm">// 1. Detecta envelope (RMS-like via amp_follower)</span>
+envelope(x) = x : en.<span class="tk-fn">amp_follower</span>(release) : ba.<span class="tk-fn">linear2db</span>;
+
+<span class="tk-cm">// 2. Calcula a redução em dB pra cada amostra</span>
+gain_reduction(env) = ba.<span class="tk-fn">if</span>(env &gt; thresh_db,
+                          (env - thresh_db) * (<span class="tk-num">1</span>/ratio - <span class="tk-num">1</span>),
+                          <span class="tk-num">0</span>);
+
+<span class="tk-cm">// 3. Aplica a redução em ganho linear</span>
+<span class="tk-fn">process</span>(x) = x * (envelope(x) : gain_reduction : ba.<span class="tk-fn">db2linear</span>);</code></pre>
+</div>
+
+<p>Lê-se: "pega x, calcula o envelope em dB, se passou do threshold subtrai o excesso vezes (1/ratio − 1), volta pra linear, multiplica x por isso".</p>
+
+<div class="callout">
+  <div class="callout-title">Por que (1/ratio − 1)</div>
+  <p>Se ratio = 4 e o sinal está 8 dB acima do threshold, a saída deve estar 8/4 = 2 dB acima. Então a redução é 8 − 2 = 6 dB. Generalizando: redução = excesso × (1 − 1/ratio). Como queremos atenuar (ganho negativo), multiplicamos por (1/ratio − 1) que é negativo.</p>
+</div>
+
+</section>
+
+<section id="gate">
+<span class="section-number">§ 05</span>
+<h2>Gate — <em>silenciar</em> o que está baixo.</h2>
+
+<p>Gate é o oposto do compressor: cala o que está abaixo de um threshold. Útil pra eliminar ruído de fundo quando o mic está parado.</p>
+
+<div class="code-block">
+<div class="code-header"><span>gate.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+thresh_db = <span class="tk-fn">hslider</span>(<span class="tk-str">"gate threshold [unit:dB]"</span>, -<span class="tk-num">45</span>, -<span class="tk-num">90</span>, <span class="tk-num">0</span>, <span class="tk-num">0.1</span>);
+hold_ms   = <span class="tk-fn">hslider</span>(<span class="tk-str">"hold [unit:ms]"</span>, <span class="tk-num">50</span>, <span class="tk-num">0</span>, <span class="tk-num">500</span>, <span class="tk-num">1</span>) : *(<span class="tk-num">0.001</span>);
+release   = <span class="tk-fn">hslider</span>(<span class="tk-str">"release [unit:ms]"</span>, <span class="tk-num">100</span>, <span class="tk-num">10</span>, <span class="tk-num">2000</span>, <span class="tk-num">1</span>) : *(<span class="tk-num">0.001</span>);
+
+<span class="tk-cm">// co.gate_mono(threshold_db, attack_sec, hold_sec, release_sec, x)</span>
+<span class="tk-fn">process</span> = co.<span class="tk-fn">gate_mono</span>(thresh_db, <span class="tk-num">0.001</span>, hold_ms, release);</code></pre>
+</div>
+
+<p>Threshold típico pra voz de mic dinâmico: <strong>-45 a -55 dB</strong>. Hold curto (50 ms) pra não cortar palavras com gap natural. Release moderado (100-300 ms) pra não ouvir o gate fechando.</p>
+
+</section>
+
+<section id="aplicacao">
+<span class="section-number">§ 06</span>
+<h2>Aplicação: <em>compressor</em> de pregador.</h2>
+
+<p>Plugin completo: gate + compressor + makeup, pronto pra usar no canal do pulpit microphone.</p>
+
+<div class="code-block">
+<div class="code-header"><span>pregador.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name <span class="tk-str">"Compressor de Pregador"</span>;
+<span class="tk-kw">declare</span> author <span class="tk-str">"Jefferson Cunha"</span>;
+<span class="tk-kw">declare</span> description <span class="tk-str">"Gate + compressor calibrado pra mic de voz em culto"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+<span class="tk-cm">// ===== GATE =====</span>
+gate_thresh = <span class="tk-fn">hslider</span>(<span class="tk-str">"gate/threshold [unit:dB]"</span>, -<span class="tk-num">50</span>, -<span class="tk-num">90</span>, <span class="tk-num">0</span>, <span class="tk-num">0.1</span>);
+gate_hold   = <span class="tk-fn">hslider</span>(<span class="tk-str">"gate/hold [unit:ms]"</span>, <span class="tk-num">100</span>, <span class="tk-num">0</span>, <span class="tk-num">500</span>, <span class="tk-num">1</span>) : *(<span class="tk-num">0.001</span>);
+gate_rel    = <span class="tk-fn">hslider</span>(<span class="tk-str">"gate/release [unit:ms]"</span>, <span class="tk-num">200</span>, <span class="tk-num">10</span>, <span class="tk-num">2000</span>, <span class="tk-num">1</span>) : *(<span class="tk-num">0.001</span>);
+
+<span class="tk-cm">// ===== COMPRESSOR =====</span>
+comp_ratio  = <span class="tk-fn">hslider</span>(<span class="tk-str">"comp/ratio"</span>, <span class="tk-num">3</span>, <span class="tk-num">1</span>, <span class="tk-num">20</span>, <span class="tk-num">0.1</span>);
+comp_thresh = <span class="tk-fn">hslider</span>(<span class="tk-str">"comp/threshold [unit:dB]"</span>, -<span class="tk-num">18</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>, <span class="tk-num">0.1</span>);
+comp_atk    = <span class="tk-fn">hslider</span>(<span class="tk-str">"comp/attack [unit:ms]"</span>, <span class="tk-num">5</span>, <span class="tk-num">0.1</span>, <span class="tk-num">100</span>, <span class="tk-num">0.1</span>) : *(<span class="tk-num">0.001</span>);
+comp_rel    = <span class="tk-fn">hslider</span>(<span class="tk-str">"comp/release [unit:ms]"</span>, <span class="tk-num">80</span>, <span class="tk-num">10</span>, <span class="tk-num">1000</span>, <span class="tk-num">1</span>) : *(<span class="tk-num">0.001</span>);
+
+<span class="tk-cm">// ===== MAKEUP =====</span>
+makeup = <span class="tk-fn">hslider</span>(<span class="tk-str">"makeup [unit:dB]"</span>, <span class="tk-num">6</span>, <span class="tk-num">0</span>, <span class="tk-num">24</span>, <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
+
+<span class="tk-cm">// ===== METER =====</span>
+gr = co.<span class="tk-fn">compression_gain_mono</span>(comp_ratio, comp_thresh, comp_atk, comp_rel)
+   : ba.<span class="tk-fn">linear2db</span> : <span class="tk-fn">hbargraph</span>(<span class="tk-str">"redução [unit:dB]"</span>, -<span class="tk-num">24</span>, <span class="tk-num">0</span>);
+
+<span class="tk-cm">// ===== CHAIN =====</span>
+chain = co.<span class="tk-fn">gate_mono</span>(gate_thresh, <span class="tk-num">0.001</span>, gate_hold, gate_rel)
+      : co.<span class="tk-fn">compressor_mono</span>(comp_ratio, comp_thresh, comp_atk, comp_rel)
+      : *(makeup);
+
+<span class="tk-fn">process</span> = chain &lt;: _ , _;</code></pre>
+</div>
+
+<p>Os valores default (ratio 3, threshold -18, attack 5 ms, release 80 ms, makeup 6 dB) são um <strong>preset razoável pra voz falada</strong>. Funciona out-of-the-box pra pregador em mic dinâmico tipo SM58.</p>
+
+<div class="callout success">
+  <div class="callout-title">Por que esses defaults</div>
+  <p><strong>Ratio 3:1</strong> — compressão "musical", não é limit. <strong>Threshold -18 dB</strong> — começa a agir só nos picos. <strong>Attack 5 ms</strong> — pega o pico mas deixa o "transiente" passar (não fica chato). <strong>Release 80 ms</strong> — solta rápido pra naturalidade, mas não tão rápido a ponto de "respirar" o ruído de fundo. <strong>Makeup +6 dB</strong> — compensa a redução típica.</p>
+</div>
+
+</section>
+
+<section id="glossario">
+<div class="glossary">
+<div class="glossary-title">Glossário rápido</div>
+<dl>
+  <dt>co.compressor_mono(R, T, A, R)</dt>
+  <dd>Compressor pronto. Ratio, threshold dB, attack/release em segundos.</dd>
+  <dt>co.compressor_stereo</dt>
+  <dd>Versão stereo linkada (detecção comum).</dd>
+  <dt>co.gate_mono(T, A, H, R)</dt>
+  <dd>Gate. Threshold dB, attack, hold, release em segundos.</dd>
+  <dt>co.compression_gain_mono</dt>
+  <dd>Devolve só o ganho de redução (pra meter ou sidechain).</dd>
+  <dt>en.amp_follower(rel)</dt>
+  <dd>Envelope follower simples — extrai o "contorno" do sinal.</dd>
+  <dt>ba.if(cond, a, b)</dt>
+  <dd>Condicional. Se cond então a senão b.</dd>
+  <dt>ba.db2linear</dt>
+  <dd>Converte dB → ganho linear (10^(x/20)).</dd>
+  <dt>ba.linear2db</dt>
+  <dd>Converte ganho linear → dB.</dd>
+  <dt>attach(a, b)</dt>
+  <dd>Anexa b ao caminho de a sem afetar o áudio (pra meters).</dd>
+  <dt>hbargraph("L", min, max)</dt>
+  <dd>Level meter horizontal. Vira indicador visual no DAW.</dd>
+</dl>
+</div>
+</section>
+
+</article>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-next-label">Próximo módulo</div>
+    <div class="footer-next-title"><a href="05-delay-reverb.html">05 — Delay e <em>reverb</em></a></div>
+    <div class="footer-next-desc">de.delay com feedback, re.mono_freeverb pra ambiente da igreja, dub delay sincronizado.</div>
+  </div>
+  <div class="footer-meta">
+    <a href="03-filtros.html">← Módulo anterior</a>
+    <a href="index.html">↑ Curso FAUST</a>
+    <a href="../../index.html">← Church Audio Tech</a>
+  </div>
+</footer>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

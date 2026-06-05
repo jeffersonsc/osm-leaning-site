@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAUST — construir plugins de áudio | Áudio em Rust — BR</title>
+<meta name="description" content="Mini-trilha de FAUST dentro do curso de DSP: do hello-world ao plugin VST/LV2 rodando no DAW. Oito módulos práticos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0908;
+  --bg-elevated: #12100f;
+  --bg-code: #161413;
+  --border: #2a2624;
+  --border-strong: #3d3734;
+  --text: #e8e3dc;
+  --text-muted: #9a918a;
+  --text-dim: #6b635d;
+  --accent: #d4704a;
+  --accent-bright: #e8825a;
+  --accent-dim: #5c3120;
+  --warning: #c9a961;
+  --success: #7ea87e;
+  --faust: #7ab0c4;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter Tight', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  --max-width: 1100px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+::selection { background: var(--accent-dim); color: var(--text); }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 9, 8, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.crumb {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.crumb:hover { color: var(--accent); }
+
+.hero {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 96px 32px 60px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--faust);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-label::before {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--faust);
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(44px, 6.5vw, 80px);
+  line-height: 0.98;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin-bottom: 32px;
+  max-width: 900px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--faust);
+}
+
+.hero-subtitle {
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  max-width: 720px;
+  margin-bottom: 40px;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.meta-item { display: flex; flex-direction: column; gap: 4px; }
+.meta-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.meta-value {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--text);
+  font-style: italic;
+}
+
+section.intro, section.modules {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 32px;
+  position: relative;
+  z-index: 2;
+}
+
+section.intro { padding-bottom: 80px; }
+section.intro p {
+  font-size: 18px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  max-width: 720px;
+}
+section.intro p strong { color: var(--text); font-weight: 600; }
+
+.callout {
+  margin-top: 32px;
+  padding: 22px 26px;
+  background: var(--bg-elevated);
+  border-left: 3px solid var(--faust);
+  border-radius: 0 6px 6px 0;
+  max-width: 720px;
+}
+.callout-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--faust);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+}
+.callout p { color: var(--text-muted); font-size: 16px; margin: 0; }
+.callout p + p { margin-top: 8px; }
+.callout code {
+  font-family: var(--font-mono);
+  background: var(--bg-code);
+  color: var(--accent);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.92em;
+}
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-label .count { color: var(--faust); }
+
+.modules { padding-bottom: 80px; }
+.module-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.module-card {
+  background: var(--bg-elevated);
+  padding: 28px 32px;
+  text-decoration: none;
+  color: var(--text);
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 28px;
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.module-card:hover { background: #1a1716; }
+
+.module-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--faust);
+  letter-spacing: 0.1em;
+}
+
+.module-body h3 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+  color: var(--text);
+  line-height: 1.2;
+}
+.module-body h3 em {
+  font-style: italic;
+  color: var(--faust);
+  font-weight: 300;
+}
+
+.module-body p {
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.module-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 3px;
+  white-space: nowrap;
+  background: rgba(122, 176, 196, 0.10);
+  color: var(--faust);
+  border: 1px solid rgba(122, 176, 196, 0.30);
+}
+
+footer {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 48px 32px 64px;
+  border-top: 1px solid var(--border);
+  position: relative;
+  z-index: 2;
+}
+
+.footer-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-meta a { color: var(--text-muted); text-decoration: none; }
+.footer-meta a:hover { color: var(--accent); }
+
+@media (max-width: 800px) {
+  .module-card { grid-template-columns: 1fr; gap: 10px; padding: 24px; }
+  .module-tag { justify-self: start; }
+  .hero { padding: 64px 24px 40px; }
+  .hero-meta { gap: 28px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../index.html" class="brand">
+      <span class="brand-dot"></span>
+      Áudio em Rust — <em>BR</em>
+    </a>
+    <a href="../../index.html" class="crumb">← Church Audio Tech</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Curso de plugin com FAUST</div>
+  <h1>Construir <em>plugins</em> em poucas linhas — e exportar pro DAW.</h1>
+  <p class="hero-subtitle">Mini-trilha de FAUST dentro do curso de DSP. Oito módulos pra ir do hello-world (oscilador no editor web) ao <strong>VST/LV2</strong> rodando no Reaper, Ardour ou qualquer DAW. FAUST é a DSL que deixa você escrever um compressor em 4 linhas e exportar pra 10 formatos diferentes.</p>
+  <div class="hero-meta">
+    <div class="meta-item">
+      <span class="meta-label">Módulos</span>
+      <span class="meta-value">8 práticos</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Pré-requisito</span>
+      <span class="meta-value">Módulos 01–05 de DSP</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Ambiente</span>
+      <span class="meta-value">editor web · faust2vst</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Entrega final</span>
+      <span class="meta-value">plugin no DAW</span>
+    </div>
+  </div>
+</div>
+
+<section class="intro">
+  <p><strong>O que é FAUST:</strong> linguagem funcional pra DSP de áudio, criada no GRAME (França). Compila pra C++, Rust, Web Audio, VST3, LV2, AU, JUCE, mobile. Em vez de implementar biquad em 80 linhas de Rust, você escreve <code>fi.lowpass(1, freq)</code> e a FAUST gera o código otimizado pra você.</p>
+  <p><strong>Por que essa trilha existe:</strong> nos módulos 04–05 da Trilha DSP, FAUST aparece como caminho paralelo ao Rust. Aqui, vira o caminho principal — focado em <strong>produzir plugin que toca no teu DAW</strong>, não só em entender o conceito.</p>
+
+  <div class="callout">
+    <div class="callout-title">Workflow desta trilha</div>
+    <p>Módulos 01–07 trabalham no <code>editor.faust.grame.fr</code> (zero instalação, roda no navegador). Você ouve o plugin direto na página, ajusta sliders, exporta como <code>.dsp</code>. Módulo 08 leva pro local: <code>faust2vst meu_plugin.dsp</code> e o VST aparece no DAW.</p>
+  </div>
+</section>
+
+<section class="modules">
+  <div class="section-label">
+    <span>Os oito módulos</span>
+    <span class="count">8 / 8</span>
+  </div>
+
+  <div class="module-grid">
+
+    <a href="01-sintaxe.html" class="module-card">
+      <div class="module-num">01 / 08</div>
+      <div class="module-body">
+        <h3>Sintaxe e o <em>editor</em> web</h3>
+        <p>Estrutura de um arquivo .dsp, primitivas (`_`, `+`, `*`), composição sequencial (`:`) e paralela (`,`), routing (`<:` e `:>`). Tudo rodando no editor.faust.grame.fr.</p>
+      </div>
+      <div class="module-tag">Curso FAUST</div>
+    </a>
+
+    <a href="02-osciladores.html" class="module-card">
+      <div class="module-num">02 / 08</div>
+      <div class="module-body">
+        <h3>Osciladores e <em>geradores</em></h3>
+        <p>os.osc, os.sawtooth, os.square, os.noise. Slider de frequência (hslider) controlando a nota em tempo real. Primeiro "instrumento" simples — mas já com UI.</p>
+      </div>
+      <div class="module-tag">Curso FAUST</div>
+    </a>
+
+    <a href="03-filtros.html" class="module-card">
+      <div class="module-num">03 / 08</div>
+      <div class="module-body">
+        <h3>Filtros: <em>biquad</em> em 1 linha</h3>
+        <p>fi.lowpass, fi.highpass, fi.resonbp, fi.peak_eq. Comparação direta com a implementação manual em Rust do módulo 04 da trilha DSP. Q, frequência de corte, slope.</p>
+      </div>
+      <div class="module-tag">Curso FAUST</div>
+    </a>
+
+    <a href="04-dinamicas.html" class="module-card">
+      <div class="module-num">04 / 08</div>
+      <div class="module-body">
+        <h3>Dinâmicas: gate e <em>compressor</em></h3>
+        <p>co.compressor_mono, en.amp_follower, ba.if. Implementar um compressor com ratio, threshold, attack, release ajustáveis. Plugin pronto pra mixar voz no culto.</p>
+      </div>
+      <div class="module-tag">Curso FAUST</div>
+    </a>
+
+    <a href="05-delay-reverb.html" class="module-card">
+      <div class="module-num">05 / 08</div>
+      <div class="module-body">
+        <h3>Delay e <em>reverb</em></h3>
+        <p>de.delay com tempo variável, re.mono_freeverb, dub delay com feedback. Schroeder reverb desmontado. Plugin de reverb pra ambiente da igreja.</p>
+      </div>
+      <div class="module-tag">Curso FAUST</div>
+    </a>
+
+    <a href="06-ui-controles.html" class="module-card">
+      <div class="module-num">06 / 08</div>
+      <div class="module-body">
+        <h3>UI: <em>sliders</em>, grupos, meters</h3>
+        <p>hslider, vslider, hbargraph (level meter), checkbox, button, nentry. Agrupar controles com hgroup/vgroup. Como ficar legal no DAW depois do export.</p>
+      </div>
+      <div class="module-tag">Curso FAUST</div>
+    </a>
+
+    <a href="07-polifonia.html" class="module-card">
+      <div class="module-num">07 / 08</div>
+      <div class="module-body">
+        <h3>Polifonia e <em>MIDI</em></h3>
+        <p>process com freq/gain/gate, declare options, flag -nvoices. Construir um sintetizador polifônico que recebe MIDI do teclado. Plugin instrumento pronto.</p>
+      </div>
+      <div class="module-tag">Curso FAUST</div>
+    </a>
+
+    <a href="08-export-vst-lv2.html" class="module-card">
+      <div class="module-num">08 / 08</div>
+      <div class="module-body">
+        <h3>Export: <em>VST</em>, LV2, AU, Web</h3>
+        <p>faust2vst, faust2lv2, faust2au, faust2webaudio, faust2juce. Distribuição pro Reaper/Ardour/Logic. Empacotar o teu plugin pra outros operadores instalarem.</p>
+      </div>
+      <div class="module-tag">Curso FAUST</div>
+    </a>
+
+  </div>
+</section>
+
+<footer>
+  <div class="footer-meta">
+    <span><a href="../index.html">← Áudio em Rust — BR</a> · curso FAUST · material aberto</span>
+    <span><a href="../../index.html">Voltar para Church Audio Tech</a></span>
+  </div>
+</footer>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
