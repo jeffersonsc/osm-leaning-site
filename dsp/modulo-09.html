@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 09 — Roteamento: o Grafo do Mixer | Rust para Áudio</title>
+<meta name="description" content="Como modelar roteamento flexível de canais pra buses, com pre/post fader, send levels e mute groups, mantendo performance.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Áudio em Rust — BR
+   Estilos compartilhados entre todos os módulos
+   ============================================================ */
+
+:root {
+  --bg: #0a0908;
+  --bg-elevated: #12100f;
+  --bg-code: #161413;
+  --border: #2a2624;
+  --border-strong: #3d3734;
+  --text: #e8e3dc;
+  --text-muted: #9a918a;
+  --text-dim: #6b635d;
+  --accent: #d4704a;
+  --accent-bright: #e8825a;
+  --accent-dim: #5c3120;
+  --warning: #c9a961;
+  --success: #7ea87e;
+  --danger: #c46a5a;
+  --link: #d4704a;
+  --selection: #5c3120;
+
+  /* Trilhas (usado em módulos com comparação Rust/FAUST) */
+  --track-rust: #d4704a;
+  --track-rust-dim: #5c3120;
+  --track-faust: #7ab0c4;
+  --track-faust-dim: #2a4550;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter Tight', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  --max-width: 780px;
+  --wide-width: 1100px;
+  --tracks-width: 1240px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+::selection { background: var(--selection); color: var(--text); }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 17px;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+}
+
+/* === HEADER === */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 9, 8, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  max-width: var(--tracks-width);
+  margin: 0 auto;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.header-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* === HERO === */
+.hero {
+  max-width: var(--tracks-width);
+  margin: 0 auto;
+  padding: 80px 32px 60px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-label::before {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 96px);
+  line-height: 0.95;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin-bottom: 32px;
+  max-width: 1000px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+}
+
+.hero-subtitle {
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  max-width: 680px;
+  margin-bottom: 48px;
+  font-weight: 400;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.meta-value {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--text);
+  font-style: italic;
+}
+
+/* === TRACKS INDICATOR (módulos com trilhas paralelas) === */
+.tracks-indicator {
+  display: flex;
+  gap: 20px;
+  margin-top: 32px;
+  padding: 20px 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.track-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.track-badge.rust .track-dot { background: var(--track-rust); box-shadow: 0 0 10px var(--track-rust); }
+.track-badge.faust .track-dot { background: var(--track-faust); box-shadow: 0 0 10px var(--track-faust); }
+
+.track-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.track-badge.rust span:last-child { color: var(--track-rust); }
+.track-badge.faust span:last-child { color: var(--track-faust); }
+
+/* === TOC === */
+.toc {
+  max-width: var(--max-width);
+  margin: 60px auto 80px;
+  padding: 0 32px;
+  position: relative;
+  z-index: 2;
+}
+
+.toc-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.toc-list {
+  list-style: none;
+  counter-reset: toc-counter;
+}
+
+.toc-list li {
+  counter-increment: toc-counter;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+}
+
+.toc-list li:hover { border-bottom-color: var(--accent); }
+
+.toc-list li::before {
+  content: counter(toc-counter, decimal-leading-zero);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  min-width: 32px;
+}
+
+.toc-list a {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 17px;
+  flex: 1;
+  transition: color 0.2s;
+}
+
+.toc-list a:hover { color: var(--accent); }
+
+/* === ARTICLE === */
+article {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 32px;
+  position: relative;
+  z-index: 2;
+}
+
+.tracks-section { max-width: var(--tracks-width); }
+
+section {
+  padding: 80px 0;
+  border-top: 1px solid var(--border);
+}
+
+section:first-of-type { border-top: none; }
+
+.section-number {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+  display: block;
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1.05;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 32px;
+  color: var(--text);
+}
+
+h2 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin-top: 48px;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+h4 {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 32px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+p {
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+.lead {
+  font-size: 21px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-weight: 300;
+  margin-bottom: 40px;
+}
+
+.lead em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-dim);
+  transition: border-color 0.2s;
+}
+
+a:hover { border-bottom-color: var(--accent); }
+
+strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+em { font-style: italic; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--bg-code);
+  padding: 2px 7px;
+  border-radius: 3px;
+  color: var(--accent-bright);
+  border: 1px solid var(--border);
+}
+
+/* === CALLOUTS === */
+.callout {
+  margin: 32px 0;
+  padding: 24px 28px;
+  background: var(--bg-elevated);
+  border-left: 3px solid var(--accent);
+  position: relative;
+}
+
+.callout-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.callout p:last-child { margin-bottom: 0; }
+
+.callout.warning { border-left-color: var(--warning); }
+.callout.warning .callout-title { color: var(--warning); }
+.callout.success { border-left-color: var(--success); }
+.callout.success .callout-title { color: var(--success); }
+.callout.danger { border-left-color: var(--danger); }
+.callout.danger .callout-title { color: var(--danger); }
+
+/* === CODE BLOCKS === */
+.code-block {
+  margin: 28px 0;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.code-header {
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.code-lang { color: var(--accent); }
+
+pre {
+  padding: 20px 24px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Syntax highlighting tokens */
+.tk-kw { color: #d4704a; font-weight: 500; }
+.tk-fn { color: #c9a961; }
+.tk-str { color: #7ea87e; }
+.tk-num { color: #b08db0; }
+.tk-cmt { color: #6b635d; font-style: italic; }
+.tk-type { color: #7ab0c4; }
+.tk-op { color: #9a918a; }
+
+/* === LISTS === */
+ul, ol {
+  margin: 20px 0;
+  padding-left: 24px;
+}
+
+li {
+  margin-bottom: 10px;
+  padding-left: 8px;
+}
+
+ul li::marker { color: var(--accent); }
+ol li::marker {
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* === TABLES === */
+.table-wrap {
+  margin: 32px 0;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+th {
+  background: var(--bg-elevated);
+  padding: 12px 16px;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+tr:last-child td { border-bottom: none; }
+
+/* === FIGURES === */
+.figure {
+  margin: 40px 0;
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.figure-caption {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-dim);
+  font-style: italic;
+  font-family: var(--font-display);
+}
+
+.svg-figure, .waveform-svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* === FORMULAS === */
+.formula {
+  margin: 32px 0;
+  padding: 28px 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  text-align: center;
+  overflow-x: auto;
+  color: var(--text);
+  line-height: 2;
+}
+
+.formula-caption {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-dim);
+  margin-top: 12px;
+  text-align: center;
+}
+
+/* === TRACKS (Rust/FAUST lado a lado) === */
+.tracks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin: 40px 0;
+}
+
+.track {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+
+.track-header {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.track.rust .track-header {
+  background: rgba(212, 112, 74, 0.08);
+  border-bottom-color: var(--track-rust-dim);
+  color: var(--track-rust);
+}
+
+.track.faust .track-header {
+  background: rgba(122, 176, 196, 0.06);
+  border-bottom-color: var(--track-faust-dim);
+  color: var(--track-faust);
+}
+
+.track-header::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.track.rust .track-header::before {
+  background: var(--track-rust);
+  box-shadow: 0 0 8px var(--track-rust);
+}
+
+.track.faust .track-header::before {
+  background: var(--track-faust);
+  box-shadow: 0 0 8px var(--track-faust);
+}
+
+.track-body { padding: 24px 28px; }
+
+.track-body p { font-size: 16px; }
+.track-body p:last-child { margin-bottom: 0; }
+
+.track-body .code-block {
+  margin: 16px -28px;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+
+.track-body pre { font-size: 13px; }
+
+/* === EXPERIMENT === */
+.experiment {
+  margin: 48px 0;
+  padding: 32px;
+  background: linear-gradient(135deg, rgba(212, 112, 74, 0.04) 0%, rgba(212, 112, 74, 0) 100%);
+  border: 1px solid var(--accent-dim);
+  border-radius: 8px;
+}
+
+.experiment-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.experiment-label::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.experiment h3 {
+  margin-top: 0;
+  color: var(--text);
+}
+
+/* === GLOSSARY === */
+.glossary {
+  margin-top: 60px;
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.glossary-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-style: italic;
+  font-weight: 400;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.glossary dl dt {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  margin-top: 20px;
+  margin-bottom: 6px;
+  letter-spacing: 0.03em;
+}
+
+.glossary dl dt:first-child { margin-top: 0; }
+
+.glossary dl dd {
+  color: var(--text-muted);
+  font-size: 15px;
+  margin-bottom: 0;
+}
+
+/* === FOOTER === */
+footer {
+  max-width: var(--tracks-width);
+  margin: 120px auto 0;
+  padding: 60px 32px 60px;
+  border-top: 1px solid var(--border);
+  position: relative;
+  z-index: 2;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  margin-bottom: 48px;
+}
+
+.footer-next {
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  grid-column: span 2;
+}
+
+.footer-next-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.footer-next-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.footer-next-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.footer-next-desc {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.footer-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align: center;
+  letter-spacing: 0.05em;
+  padding-top: 40px;
+  border-top: 1px solid var(--border);
+}
+
+.footer-meta a {
+  color: var(--accent);
+  border-bottom: none;
+}
+
+/* === STACK DIAGRAM (específico do módulo 03 de arquiteturas) === */
+.stack-diagram {
+  margin: 40px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.stack-layer {
+  padding: 14px 20px;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.stack-layer:hover { border-color: var(--accent-dim); }
+
+.stack-layer-name {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.stack-layer-desc {
+  color: var(--text-dim);
+  font-size: 12px;
+  font-family: var(--font-body);
+}
+
+.stack-layer.app { background: rgba(212, 112, 74, 0.08); border-color: var(--accent-dim); }
+.stack-layer.app .stack-layer-name { color: var(--accent); }
+
+.stack-layer.abstraction { background: rgba(122, 176, 196, 0.06); border-color: var(--track-faust-dim); }
+.stack-layer.abstraction .stack-layer-name { color: var(--track-faust); }
+
+.stack-layer.hardware { background: rgba(126, 168, 126, 0.04); border-color: rgba(126, 168, 126, 0.2); }
+.stack-layer.hardware .stack-layer-name { color: var(--success); }
+
+/* === RESPONSIVE === */
+@media (max-width: 900px) {
+  .tracks {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 48px 24px 40px; }
+  .hero-meta { gap: 24px; }
+  .toc, article { padding: 0 24px; }
+  .header-inner { padding: 14px 24px; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-next { padding: 24px; }
+  footer { padding: 48px 24px; }
+  pre { padding: 16px; font-size: 13px; }
+  .code-block { margin: 20px -24px; border-radius: 0; border-left: none; border-right: none; }
+  .callout { padding: 20px; }
+  .experiment { padding: 24px; margin: 32px -24px; border-radius: 0; border-left: none; border-right: none; }
+  .track-body { padding: 20px 22px; }
+  .track-body .code-block { margin: 14px -22px; }
+  .formula { padding: 20px; font-size: 14px; margin: 24px -24px; border-radius: 0; border-left: none; border-right: none; }
+  .stack-layer { flex-direction: column; align-items: flex-start; gap: 4px; }
+}
+
+/* === ANIMATIONS === */
+@media (prefers-reduced-motion: no-preference) {
+  .hero > * {
+    opacity: 0;
+    animation: fadeUp 0.8s ease-out forwards;
+  }
+  .hero-label { animation-delay: 0.1s; }
+  .hero h1 { animation-delay: 0.2s; }
+  .hero-subtitle { animation-delay: 0.35s; }
+  .hero-meta { animation-delay: 0.5s; }
+  .tracks-indicator { animation-delay: 0.65s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <span class="brand-dot"></span>
+      Áudio em Rust — <em>BR</em>
+    </a>
+    <span class="header-meta">MÓDULO 09 / 11 · CONCEITUAL</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Módulo 09 — Modelo conceitual</div>
+  <h1>Roteamento: o <em>grafo</em> do mixer.</h1>
+  <p class="hero-subtitle">Tudo que vimos foi sobre processar canais e somar em buses. Agora vem a flexibilidade: como deixar qualquer canal ir pra qualquer destino, com qualquer nível, sem reconfiguração e sem glitch. É aqui que o mixer vira instrumento real, não demo.</p>
+
+  <div class="hero-meta">
+    <div class="meta-item">
+      <span class="meta-label">Status</span>
+      <span class="meta-value">Conceitual</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Leitura</span>
+      <span class="meta-value">≈ 45 min</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Pré-requisito</span>
+      <span class="meta-value">Módulos 01–08</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Implementação</span>
+      <span class="meta-value">Núcleo do V1</span>
+    </div>
+  </div>
+</div>
+
+<nav class="toc" aria-label="Sumário do módulo">
+  <div class="toc-title">Sumário</div>
+  <ol class="toc-list">
+    <li><a href="#problema">Por que o roteamento simples não basta</a></li>
+    <li><a href="#grafo">Mixer como grafo direcionado</a></li>
+    <li><a href="#estado">Estado de roteamento: matriz vs lista</a></li>
+    <li><a href="#mute">Mute groups e DCA</a></li>
+    <li><a href="#solo">Solo: complicado mais do que parece</a></li>
+    <li><a href="#patching">Patching ao vivo sem glitch</a></li>
+    <li><a href="#esqueleto">Esqueleto Rust</a></li>
+    <li><a href="#decisoes">Decisões arquiteturais</a></li>
+    <li><a href="#glossario">Glossário</a></li>
+  </ol>
+</nav>
+
+<article>
+
+<section id="problema">
+<span class="section-number">§ 01</span>
+<h2>Por que <em>simples</em> não basta.</h2>
+
+<p class="lead">No Módulo 07 montamos a estrutura básica: cada canal vai pro master e opcionalmente pra subgrupos. Pra mixer demo isso resolve. Pra mixer real de igreja com 4 cultos diferentes na semana, cada um com sua banda, seus pastores, seu setup, isso não basta.</p>
+
+<p>O operador precisa fazer coisas tipo:</p>
+
+<ul>
+  <li>"Hoje a banda de jovens vai usar back-vocais. Quero rotear três canais novos pro subgrupo Vocals e tirar do master direto."</li>
+  <li>"O baixista pediu pra ouvir mais reverb da voz do líder no in-ear dele. Aumenta o send do canal vocal pro aux do baixista."</li>
+  <li>"O streaming hoje precisa de mix diferente — sem aplausos da congregação, mais voz do pastor. Vou usar uma matrix dedicada."</li>
+  <li>"Mute desse canal de talkback antes do início do culto. Unmute na hora do anúncio. Mute de novo depois."</li>
+</ul>
+
+<p>Tudo isso é roteamento. E tudo isso precisa acontecer em tempo real, sem glitch, sem precisar parar o áudio, com UX previsível. Não é trivial.</p>
+
+</section>
+
+<section id="grafo">
+<span class="section-number">§ 02</span>
+<h2>Mixer como <em>grafo</em>.</h2>
+
+<p>Conceitualmente, um mixer é um grafo direcionado:</p>
+
+<ul>
+  <li><strong>Nós</strong>: canais de entrada, buses, saídas físicas, plugins de FX</li>
+  <li><strong>Arestas</strong>: conexões com peso (gain de send) e tipo (pre/post fader)</li>
+</ul>
+
+<p>Toda mesa digital — Yamaha, Allen & Heath, Behringer X32 — é internamente um grafo. A diferença está em quão flexível esse grafo é e como o usuário interage com ele.</p>
+
+<h3>Dois modelos de mesa digital</h3>
+
+<p><strong>Modelo fixo (legacy)</strong>: o grafo é hardcoded. Channel 1-32 vai pro master, e ponto. Pra mandar pra outro lugar, você usa "sends" que são caminhos paralelos extras. UI espelha isso: cada canal tem um conjunto fixo de sends, cada bus tem um conjunto fixo de inputs.</p>
+
+<p><strong>Modelo flexível (modern)</strong>: o grafo é configurável. Qualquer canal pode ir pra qualquer bus. Qualquer bus pode ir pra qualquer outro bus (com proteção contra ciclos). UX exige uma "matrix view" pra usuário visualizar e configurar.</p>
+
+<p>Exemplos:</p>
+
+<ul>
+  <li><strong>Modelo fixo</strong>: Yamaha 01V, Behringer X32, Allen & Heath SQ — todas têm sends fixos por canal</li>
+  <li><strong>Modelo flexível</strong>: Yamaha CL/QL, DiGiCo SD, Avid Venue — todas têm matrix view configurável</li>
+</ul>
+
+<h3>Pra V1, modelo fixo é o caminho</h3>
+
+<ul>
+  <li>UX mais simples — operador entende sem treinamento</li>
+  <li>Cobre 95% dos casos de igreja</li>
+  <li>Implementação mais simples e rápida</li>
+  <li>V2 pode adicionar matrix flex sem quebrar V1</li>
+</ul>
+
+</section>
+
+<section id="estado">
+<span class="section-number">§ 03</span>
+<h2>Estado de roteamento: <em>matriz</em> vs <em>lista</em>.</h2>
+
+<p>Como representar o roteamento na memória?</p>
+
+<h3>Opção A — Matriz dense (32×11)</h3>
+
+<p>Cada canal × cada bus tem um valor de send (gain em dB, ou -∞ se não roteado).</p>
+
+<div class="code-block">
+<div class="code-header"><span>matriz dense</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">pub struct</span> RoutingMatrix {
+    <span class="tk-cmt">// 32 canais × 11 buses</span>
+    sends: [[<span class="tk-type">f32</span>; <span class="tk-num">11</span>]; <span class="tk-num">32</span>],
+    pre_post: [[<span class="tk-type">bool</span>; <span class="tk-num">11</span>]; <span class="tk-num">32</span>],
+    enabled: [[<span class="tk-type">bool</span>; <span class="tk-num">11</span>]; <span class="tk-num">32</span>],
+}</code></pre>
+</div>
+
+<p><strong>Prós</strong>: estrutura previsível, lookup O(1), expressa naturalmente em UI como matriz.</p>
+<p><strong>Contras</strong>: sparse na prática (a maioria dos sends é -∞), itera todos os 11 buses pra cada canal mesmo quando só 2 estão ativos.</p>
+
+<h3>Opção B — Lista de sends ativos por canal</h3>
+
+<div class="code-block">
+<div class="code-header"><span>lista por canal</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">pub struct</span> ChannelRouting {
+    sends: Vec&lt;Send&gt;,
+}
+
+<span class="tk-kw">pub struct</span> Send {
+    bus_id: <span class="tk-type">u8</span>,
+    gain_linear: <span class="tk-type">f32</span>,
+    pre_fader: <span class="tk-type">bool</span>,
+}</code></pre>
+</div>
+
+<p><strong>Prós</strong>: itera só os sends ativos, sem desperdício.</p>
+<p><strong>Contras</strong>: <code>Vec</code> aloca, ordem indeterminada, mais complexo de validar.</p>
+
+<h3>Opção C — Híbrido (recomendada)</h3>
+
+<p>Array fixo de tamanho conhecido (8 sends por canal), com slot vazio = bus_id 255.</p>
+
+<div class="code-block">
+<div class="code-header"><span>híbrido</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">pub struct</span> ChannelRouting {
+    sends: [Send; <span class="tk-num">8</span>],  <span class="tk-cmt">// pre-alocado, slots vazios = bus_id == 255</span>
+    direct_master: <span class="tk-type">bool</span>,
+    direct_subgroups: [<span class="tk-type">bool</span>; <span class="tk-num">4</span>],
+}
+
+<span class="tk-kw">impl</span> ChannelRouting {
+    <span class="tk-kw">pub fn</span> <span class="tk-fn">active_sends</span>(&amp;<span class="tk-kw">self</span>) -&gt; <span class="tk-kw">impl</span> Iterator&lt;Item = &amp;Send&gt; {
+        <span class="tk-kw">self</span>.sends.<span class="tk-fn">iter</span>().<span class="tk-fn">filter</span>(|s| s.bus_id != <span class="tk-num">255</span>)
+    }
+}</code></pre>
+</div>
+
+<p>Sem alocação, iteração filtra slots vazios. Combina o melhor das duas opções pra V1 (32 canais × 8 sends = 256 entries, fácil de iterar e limpo).</p>
+
+</section>
+
+<section id="mute">
+<span class="section-number">§ 04</span>
+<h2>Mute groups e <em>DCA</em>.</h2>
+
+<p>Mute simples (um botão por canal) é trivial — multiplica por 0 em vez do fader. Mas em uso real, o operador precisa de <strong>mute groups</strong>: um botão que mutexa um conjunto de canais simultaneamente.</p>
+
+<p>Aplicações:</p>
+
+<ul>
+  <li>Mute group "Música" — mutexa todos os canais de instrumentos quando começa a pregação</li>
+  <li>Mute group "Coral" — mutexa o coral entre as partes do culto</li>
+  <li>Mute group "Bateria toda" — pra silenciar quando precisa</li>
+</ul>
+
+<h3>DCA (Digitally Controlled Attenuator)</h3>
+
+<p>Mute group é um caso particular de uma idéia mais geral: <strong>DCA</strong>. Um fader virtual que controla proporcionalmente o ganho de um grupo de canais, mas <em>sem</em> somar eles em um bus separado.</p>
+
+<p>Diferença pra subgrupo:</p>
+
+<ul>
+  <li><strong>Subgrupo</strong>: canais são somados no bus, processados juntos, depois vão pro master</li>
+  <li><strong>DCA</strong>: canais continuam indo pros mesmos destinos, mas o ganho deles é multiplicado por uma fonte comum</li>
+</ul>
+
+<p>Aplicações de DCA:</p>
+
+<ul>
+  <li>"Drum DCA" — fader que sobe/desce todos os canais de bateria juntos, preservando suas relações de mix interno</li>
+  <li>"Vocals DCA" — controle único pra mexer no nível geral de todos os vocais sem mudar o mix entre eles</li>
+  <li>"Mute the band" — DCA com -∞ dB, silencia todos sem mexer nos faders individuais</li>
+</ul>
+
+<h3>Implementação</h3>
+
+<p>Cada canal tem 0+ DCAs aos quais pertence. Ganho efetivo do canal é:</p>
+
+<div class="formula">
+gain_efetivo = gain_canal × ∏(gain_dca_i para cada DCA do canal)
+<div class="formula-caption">Multiplicação dos ganhos de todos os DCAs aos quais o canal pertence. Se algum DCA está com mute (gain=0), todo o canal silencia.</div>
+</div>
+
+<p>Em pseudocódigo:</p>
+
+<div class="code-block">
+<div class="code-header"><span>cálculo de gain efetivo</span><span class="code-lang">pseudocódigo</span></div>
+<pre><code>pra cada canal:
+    gain = canal.fader_gain × canal.mute_factor
+    pra cada dca em canal.dcas:
+        gain × = dca.gain × dca.mute_factor
+    aplicar gain ao sinal antes de roteamento</code></pre>
+</div>
+
+</section>
+
+<section id="solo">
+<span class="section-number">§ 05</span>
+<h2>Solo: complicado <em>mais do que parece</em>.</h2>
+
+<p>Botão "solo" parece simples: aperta, só esse canal toca, todos outros silenciam. Mas tem armadilhas.</p>
+
+<h3>Solo destrutivo vs não-destrutivo</h3>
+
+<p><strong>Destrutivo (PFL — Pre-Fader Listen)</strong>: solo silencia todos outros canais no master. O público no salão ouve só o canal solado. Útil pra debug em ensaio. Catastrófico se acionado durante culto.</p>
+
+<p><strong>Não-destrutivo (AFL — After-Fader Listen)</strong>: solo afeta só o caminho de monitor do operador (fones do operador). Público continua ouvindo a mix normal. <strong>Esse é o solo de produção</strong>.</p>
+
+<p>Engenheiro experiente sempre usa AFL. Mas pra programar isso direito, você precisa de um caminho de áudio extra: o "solo bus", que vai só pro fone do operador, separado do master.</p>
+
+<h3>Solo bus</h3>
+
+<div class="figure">
+<svg class="svg-figure" viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="40" width="100" height="160" rx="4" fill="#161413" stroke="#3d3734"/>
+  <text x="70" y="60" text-anchor="middle" font-family="Fraunces" font-size="11" fill="#e8e3dc" font-style="italic">canais</text>
+  <g font-family="JetBrains Mono" font-size="9" fill="#9a918a">
+    <text x="70" y="90" text-anchor="middle">ch 1</text>
+    <text x="70" y="110" text-anchor="middle">ch 2 (SOLO)</text>
+    <text x="70" y="130" text-anchor="middle">ch 3</text>
+    <text x="70" y="150" text-anchor="middle">ch 4</text>
+  </g>
+
+  <rect x="200" y="50" width="120" height="60" rx="4" fill="#161413" stroke="#7ea87e" stroke-width="1.5"/>
+  <text x="260" y="78" text-anchor="middle" font-family="Fraunces" font-size="13" fill="#7ea87e" font-style="italic">MASTER LR</text>
+  <text x="260" y="96" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#9a918a">vai pro PA</text>
+
+  <rect x="200" y="150" width="120" height="60" rx="4" fill="#161413" stroke="#c9a961" stroke-width="1.5"/>
+  <text x="260" y="178" text-anchor="middle" font-family="Fraunces" font-size="13" fill="#c9a961" font-style="italic">SOLO BUS</text>
+  <text x="260" y="196" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#9a918a">só pro fone</text>
+
+  <line x1="120" y1="90" x2="200" y2="80" stroke="#9a918a" stroke-width="1"/>
+  <line x1="120" y1="110" x2="200" y2="80" stroke="#9a918a" stroke-width="1"/>
+  <line x1="120" y1="130" x2="200" y2="80" stroke="#9a918a" stroke-width="1"/>
+  <line x1="120" y1="150" x2="200" y2="80" stroke="#9a918a" stroke-width="1"/>
+
+  <line x1="120" y1="110" x2="200" y2="180" stroke="#c9a961" stroke-width="2"/>
+  <text x="160" y="158" font-family="JetBrains Mono" font-size="9" fill="#c9a961">solo</text>
+
+  <rect x="400" y="50" width="100" height="60" rx="4" fill="#161413" stroke="#3d3734"/>
+  <text x="450" y="78" text-anchor="middle" font-family="Fraunces" font-size="11" fill="#e8e3dc" font-style="italic">PA</text>
+  <text x="450" y="94" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6b635d">público ouve</text>
+  <text x="450" y="106" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6b635d">a mix normal</text>
+
+  <rect x="400" y="150" width="100" height="60" rx="4" fill="#161413" stroke="#3d3734"/>
+  <text x="450" y="178" text-anchor="middle" font-family="Fraunces" font-size="11" fill="#e8e3dc" font-style="italic">fone do op</text>
+  <text x="450" y="196" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6b635d">só ch 2</text>
+
+  <line x1="320" y1="80" x2="400" y2="80" stroke="#7ea87e" stroke-width="2" marker-end="url(#solo1)"/>
+  <line x1="320" y1="180" x2="400" y2="180" stroke="#c9a961" stroke-width="2" marker-end="url(#solo2)"/>
+
+  <defs>
+    <marker id="solo1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0, 8 4, 0 8" fill="#7ea87e"/></marker>
+    <marker id="solo2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0, 8 4, 0 8" fill="#c9a961"/></marker>
+  </defs>
+</svg>
+<div class="figure-caption">Solo não-destrutivo: master continua tocando tudo pro PA. Solo bus paralelo recebe só os canais solados, manda pro fone do operador.</div>
+</div>
+
+<h3>Lógica de solo</h3>
+
+<ul>
+  <li>Quando algum canal está em solo: solo bus toca só os solados, fone do operador escuta solo bus</li>
+  <li>Quando nenhum canal está em solo: fone do operador escuta master (default)</li>
+  <li>Múltiplos solos são aditivos (canais 2 e 5 solados → fone toca canais 2 e 5)</li>
+</ul>
+
+<h3>Indicação visual</h3>
+
+<p>UI deve deixar muito claro quando solo está ativo (LED vermelho piscando, banner no topo, etc.). É fácil esquecer um canal em solo e gastar 5 minutos debugando "por que não tem áudio?".</p>
+
+</section>
+
+<section id="patching">
+<span class="section-number">§ 06</span>
+<h2>Patching ao vivo <em>sem glitch</em>.</h2>
+
+<p>Quando operador muda roteamento ao vivo (liga um send, desliga outro), tem riscos de glitch. Vamos passar por cada um e como mitigar.</p>
+
+<h3>Problema 1 — Click ao habilitar/desabilitar send</h3>
+
+<p>Send começa com gain 0, instantaneamente vai pra -10 dB (ou whatever). Mesmo que o gain final seja certo, a transição abrupta causa click.</p>
+
+<p><strong>Solução</strong>: Send tem smoothing igual ao fader. One-pole com tau de 30-50ms. Habilitar = animar de 0 a target. Desabilitar = animar de target a 0.</p>
+
+<h3>Problema 2 — Mudança de roteamento (mover send de bus A pra bus B)</h3>
+
+<p>Se for instantâneo, sinal aparece de repente em B e some de A. Audível.</p>
+
+<p><strong>Solução</strong>: <em>cross-fade</em>. Diminui smoothly em A enquanto aumenta em B simultaneamente. Por ~100ms, ambos têm sinal parcial. Total cross-fade.</p>
+
+<h3>Problema 3 — Reconfigurar muito (load preset, snapshot)</h3>
+
+<p>Operador carrega snapshot de show, dezenas de parâmetros mudam. Aplicar tudo no mesmo bloco causa avalanche de transições simultâneas — alguns clicks ainda escapam.</p>
+
+<p><strong>Solução</strong>: snapshot tem fade time configurable (1-3s). Todos os parâmetros vão pra seus novos valores em smoothing simultâneo, mas suave. Padrão profissional ("recall safe" e "fade time" são features de mesa pro).</p>
+
+<h3>Problema 4 — Solo de canal que não estava roteado</h3>
+
+<p>Edge case: usuário solos canal cujo roteamento está atualmente desabilitado. Solo deveria mostrar mesmo assim no fone? Sim — solo bypass roteamento normal e vai direto pro solo bus.</p>
+
+</section>
+
+<section id="esqueleto">
+<span class="section-number">§ 07</span>
+<h2>Esqueleto Rust.</h2>
+
+<div class="code-block">
+<div class="code-header"><span>routing.rs — estado</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">pub struct</span> Send {
+    bus_id: <span class="tk-type">u8</span>,
+    gain_smoother: OnePole,  <span class="tk-cmt">// smoothing built-in</span>
+    enabled: <span class="tk-type">bool</span>,
+    pre_fader: <span class="tk-type">bool</span>,
+}
+
+<span class="tk-kw">impl</span> Send {
+    <span class="tk-kw">pub fn</span> <span class="tk-fn">target_gain</span>(&amp;<span class="tk-kw">self</span>) -&gt; <span class="tk-type">f32</span> {
+        <span class="tk-kw">if</span> <span class="tk-kw">self</span>.enabled { <span class="tk-cmt">/* gain configurado */</span> } <span class="tk-kw">else</span> { <span class="tk-num">0.0</span> }
+    }
+
+    <span class="tk-kw">pub fn</span> <span class="tk-fn">apply</span>(&amp;<span class="tk-kw">mut</span> <span class="tk-kw">self</span>, signal: <span class="tk-type">f32</span>) -&gt; (<span class="tk-type">u8</span>, <span class="tk-type">f32</span>) {
+        <span class="tk-kw">self</span>.gain_smoother.<span class="tk-fn">set_target</span>(<span class="tk-fn">self</span>.<span class="tk-fn">target_gain</span>());
+        <span class="tk-kw">let</span> g = <span class="tk-kw">self</span>.gain_smoother.<span class="tk-fn">next</span>();
+        (<span class="tk-kw">self</span>.bus_id, signal * g)
+    }
+}
+
+<span class="tk-kw">pub struct</span> ChannelRouting {
+    sends: [Send; <span class="tk-num">8</span>],
+    direct_master: <span class="tk-type">bool</span>,
+    direct_subgroups: [<span class="tk-type">bool</span>; <span class="tk-num">4</span>],
+    mute: <span class="tk-type">bool</span>,
+    solo: <span class="tk-type">bool</span>,
+    dca_membership: [<span class="tk-type">bool</span>; <span class="tk-num">8</span>],  <span class="tk-cmt">// até 8 DCAs</span>
+}</code></pre>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>routing.rs — DCAs</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">pub struct</span> Dca {
+    name: String,
+    gain_smoother: OnePole,
+    mute: <span class="tk-type">bool</span>,
+}
+
+<span class="tk-kw">impl</span> Dca {
+    <span class="tk-kw">pub fn</span> <span class="tk-fn">effective_gain</span>(&amp;<span class="tk-kw">mut</span> <span class="tk-kw">self</span>) -&gt; <span class="tk-type">f32</span> {
+        <span class="tk-kw">let</span> target = <span class="tk-kw">if</span> <span class="tk-kw">self</span>.mute { <span class="tk-num">0.0</span> } <span class="tk-kw">else</span> { <span class="tk-cmt">/* gain config */</span> };
+        <span class="tk-kw">self</span>.gain_smoother.<span class="tk-fn">set_target</span>(target);
+        <span class="tk-kw">self</span>.gain_smoother.<span class="tk-fn">next</span>()
+    }
+}</code></pre>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>routing.rs — solo state</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">pub struct</span> SoloState {
+    <span class="tk-cmt">// Bitfield: quais canais estão em solo</span>
+    channels_solod: <span class="tk-type">u32</span>,
+    <span class="tk-cmt">// Modo: AFL (after-fader, default) ou PFL</span>
+    mode: SoloMode,
+}
+
+<span class="tk-kw">impl</span> SoloState {
+    <span class="tk-kw">pub fn</span> <span class="tk-fn">any_solo</span>(&amp;<span class="tk-kw">self</span>) -&gt; <span class="tk-type">bool</span> {
+        <span class="tk-kw">self</span>.channels_solod != <span class="tk-num">0</span>
+    }
+
+    <span class="tk-kw">pub fn</span> <span class="tk-fn">is_solod</span>(&amp;<span class="tk-kw">self</span>, channel: <span class="tk-type">u8</span>) -&gt; <span class="tk-type">bool</span> {
+        <span class="tk-kw">self</span>.channels_solod &amp; (<span class="tk-num">1</span> &lt;&lt; channel) != <span class="tk-num">0</span>
+    }
+}</code></pre>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>process_block do mixer (atualizado)</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">impl</span> Mixer {
+    <span class="tk-kw">pub fn</span> <span class="tk-fn">process_block</span>(&amp;<span class="tk-kw">mut</span> <span class="tk-kw">self</span>, ...) {
+        <span class="tk-kw">let</span> any_solo = <span class="tk-kw">self</span>.solo_state.<span class="tk-fn">any_solo</span>();
+
+        <span class="tk-kw">for</span> (idx, channel) <span class="tk-kw">in</span> <span class="tk-kw">self</span>.channels.<span class="tk-fn">iter_mut</span>().<span class="tk-fn">enumerate</span>() {
+            <span class="tk-cmt">// Calcular gain efetivo (incluindo DCAs)</span>
+            <span class="tk-kw">let</span> <span class="tk-kw">mut</span> dca_gain = <span class="tk-num">1.0</span>;
+            <span class="tk-kw">for</span> (dca_idx, member) <span class="tk-kw">in</span> channel.routing.dca_membership.<span class="tk-fn">iter</span>().<span class="tk-fn">enumerate</span>() {
+                <span class="tk-kw">if</span> *member {
+                    dca_gain *= <span class="tk-kw">self</span>.dcas[dca_idx].<span class="tk-fn">effective_gain</span>();
+                }
+            }
+
+            <span class="tk-cmt">// Processa sinal do canal</span>
+            <span class="tk-kw">let</span> processed = channel.<span class="tk-fn">process</span>(input, dca_gain);
+
+            <span class="tk-cmt">// Roteia pra solo bus se solado (pre-fader pra PFL, post pra AFL)</span>
+            <span class="tk-kw">if</span> <span class="tk-kw">self</span>.solo_state.<span class="tk-fn">is_solod</span>(idx <span class="tk-kw">as</span> <span class="tk-type">u8</span>) {
+                <span class="tk-fn">self</span>.solo_bus.<span class="tk-fn">add</span>(processed);
+            }
+
+            <span class="tk-cmt">// Roteia pros buses normais</span>
+            <span class="tk-kw">for</span> send <span class="tk-kw">in</span> &amp;<span class="tk-kw">mut</span> channel.routing.sends {
+                <span class="tk-kw">if</span> send.bus_id != <span class="tk-num">255</span> {
+                    <span class="tk-kw">let</span> (bus_id, signal) = send.<span class="tk-fn">apply</span>(processed);
+                    <span class="tk-fn">self</span>.<span class="tk-fn">bus_mut</span>(bus_id).<span class="tk-fn">add_sample</span>(signal);
+                }
+            }
+        }
+
+        <span class="tk-cmt">// ... process buses, master, etc.</span>
+    }
+}</code></pre>
+</div>
+
+</section>
+
+<section id="decisoes">
+<span class="section-number">§ 08</span>
+<h2>Decisões <em>arquiteturais</em>.</h2>
+
+<h3>Modelo do grafo</h3>
+<ul>
+  <li><strong>V1</strong>: modelo fixo. Channels têm sends pre-definidos pra subgrupos, master, aux.</li>
+  <li><strong>V2</strong>: matrix view configurável.</li>
+</ul>
+
+<h3>DCAs</h3>
+<ul>
+  <li><strong>V1</strong>: 8 DCAs disponíveis. Canal pode pertencer a 0 ou mais DCAs.</li>
+  <li><strong>UI</strong>: lista de DCAs como faders extra ao lado do master.</li>
+</ul>
+
+<h3>Mute groups</h3>
+<ul>
+  <li><strong>V1</strong>: 4 mute groups (separado de DCAs). Botões dedicados na UI.</li>
+  <li>Mute groups são DCAs com fader sempre em -∞ (só liga/desliga).</li>
+  <li>Tecnicamente poderiam ser implementados com DCAs, mas separar simplifica UX.</li>
+</ul>
+
+<h3>Solo</h3>
+<ul>
+  <li><strong>V1</strong>: AFL only (mais seguro). PFL como toggle de configuração.</li>
+  <li>Solo bus dedicado, vai pra saída de monitor do operador.</li>
+  <li>UI: indicador visual prominent quando algum solo está ativo.</li>
+</ul>
+
+<h3>Snapshots e recall</h3>
+<ul>
+  <li><strong>V1</strong>: snapshots básicos (todos parâmetros). Recall instantâneo.</li>
+  <li><strong>V2</strong>: recall safe (excluir certos parâmetros), fade time configurable.</li>
+</ul>
+
+<h3>Smoothing universal</h3>
+<ul>
+  <li>Toda mudança de gain (faders, sends, DCAs) passa por smoothing.</li>
+  <li>Tau padrão: 20-30ms pra fader, 50ms pra sends, 100ms pra mute.</li>
+  <li>Snapshot recall: tau ajustável de 0 (instant) a 3s.</li>
+</ul>
+
+</section>
+
+<section id="glossario">
+<div class="glossary">
+<div class="glossary-title">Glossário</div>
+<dl>
+  <dt>ROTEAMENTO</dt>
+  <dd>Conjunto de regras que definem onde o sinal de cada canal vai. Em mesa moderna, é configurável em tempo real.</dd>
+  <dt>GRAFO</dt>
+  <dd>Modelo matemático com nós (canais, buses) e arestas direcionadas (sends). Mixer é grafo direcionado acíclico.</dd>
+  <dt>SEND</dt>
+  <dd>Aresta do grafo: caminho do canal pra um bus, com gain e tipo (pre/post fader).</dd>
+  <dt>DCA</dt>
+  <dd>Digitally Controlled Attenuator. Fader virtual que controla proporcionalmente o gain de um conjunto de canais.</dd>
+  <dt>MUTE GROUP</dt>
+  <dd>DCA simplificado: liga/desliga um conjunto de canais. Botão único.</dd>
+  <dt>SOLO</dt>
+  <dd>Função que isola um ou mais canais pra audição. Pode ser destrutivo (PFL) ou não-destrutivo (AFL).</dd>
+  <dt>PFL</dt>
+  <dd>Pre-Fader Listen. Solo destrutivo — afeta o master. Não usar ao vivo.</dd>
+  <dt>AFL</dt>
+  <dd>After-Fader Listen. Solo não-destrutivo — afeta só o monitor do operador.</dd>
+  <dt>SOLO BUS</dt>
+  <dd>Bus paralelo dedicado pra solo. Vai pra saída do fone do operador.</dd>
+  <dt>SNAPSHOT</dt>
+  <dd>Conjunto salvo de todos os parâmetros do mixer. Pode ser recallado durante o show.</dd>
+  <dt>RECALL SAFE</dt>
+  <dd>Mecanismo que permite excluir certos parâmetros de um snapshot recall (ex: "nunca mude o fader do mic do pastor ao recallar").</dd>
+  <dt>CROSS-FADE</dt>
+  <dd>Transição suave entre dois sinais — um diminui enquanto o outro aumenta. Usado em patching ao vivo.</dd>
+  <dt>MATRIX VIEW</dt>
+  <dd>Interface que mostra todas as conexões possíveis entre canais e buses como uma matriz. Permite roteamento totalmente flexível.</dd>
+</dl>
+</div>
+</section>
+
+</article>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-next">
+      <div class="footer-next-label">Próximo módulo</div>
+      <div class="footer-next-title">10 — RTP e <em>AES67</em></div>
+      <div class="footer-next-desc">Como mandar áudio pela rede com qualidade profissional. Pacotes RTP, payload L24, multicast, padrão AES67. O que separa um mixer pessoal de um mixer integrado a sistemas pro-audio existentes.</div>
+    </div>
+  </div>
+  <div class="footer-meta">
+    Áudio em Rust — BR · material de estudo aberto · mantido por Jefferson · <a href="#">github.com/jeffersonsc</a>
+  </div>
+</footer>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

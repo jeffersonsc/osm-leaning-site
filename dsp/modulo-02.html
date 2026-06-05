@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 02 — O Bloco e o Callback | Rust para Áudio</title>
+<meta name="description" content="Como o áudio realmente chega no seu código: callbacks, blocos, latência e o primeiro programa Rust que processa áudio ao vivo com a crate cpal.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Áudio em Rust — BR
+   Estilos compartilhados entre todos os módulos
+   ============================================================ */
+
+:root {
+  --bg: #0a0908;
+  --bg-elevated: #12100f;
+  --bg-code: #161413;
+  --border: #2a2624;
+  --border-strong: #3d3734;
+  --text: #e8e3dc;
+  --text-muted: #9a918a;
+  --text-dim: #6b635d;
+  --accent: #d4704a;
+  --accent-bright: #e8825a;
+  --accent-dim: #5c3120;
+  --warning: #c9a961;
+  --success: #7ea87e;
+  --danger: #c46a5a;
+  --link: #d4704a;
+  --selection: #5c3120;
+
+  /* Trilhas (usado em módulos com comparação Rust/FAUST) */
+  --track-rust: #d4704a;
+  --track-rust-dim: #5c3120;
+  --track-faust: #7ab0c4;
+  --track-faust-dim: #2a4550;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter Tight', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  --max-width: 780px;
+  --wide-width: 1100px;
+  --tracks-width: 1240px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+::selection { background: var(--selection); color: var(--text); }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 17px;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+}
+
+/* === HEADER === */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 9, 8, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  max-width: var(--tracks-width);
+  margin: 0 auto;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.header-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* === HERO === */
+.hero {
+  max-width: var(--tracks-width);
+  margin: 0 auto;
+  padding: 80px 32px 60px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-label::before {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 96px);
+  line-height: 0.95;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin-bottom: 32px;
+  max-width: 1000px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+}
+
+.hero-subtitle {
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  max-width: 680px;
+  margin-bottom: 48px;
+  font-weight: 400;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.meta-value {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--text);
+  font-style: italic;
+}
+
+/* === TRACKS INDICATOR (módulos com trilhas paralelas) === */
+.tracks-indicator {
+  display: flex;
+  gap: 20px;
+  margin-top: 32px;
+  padding: 20px 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.track-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.track-badge.rust .track-dot { background: var(--track-rust); box-shadow: 0 0 10px var(--track-rust); }
+.track-badge.faust .track-dot { background: var(--track-faust); box-shadow: 0 0 10px var(--track-faust); }
+
+.track-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.track-badge.rust span:last-child { color: var(--track-rust); }
+.track-badge.faust span:last-child { color: var(--track-faust); }
+
+/* === TOC === */
+.toc {
+  max-width: var(--max-width);
+  margin: 60px auto 80px;
+  padding: 0 32px;
+  position: relative;
+  z-index: 2;
+}
+
+.toc-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.toc-list {
+  list-style: none;
+  counter-reset: toc-counter;
+}
+
+.toc-list li {
+  counter-increment: toc-counter;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+}
+
+.toc-list li:hover { border-bottom-color: var(--accent); }
+
+.toc-list li::before {
+  content: counter(toc-counter, decimal-leading-zero);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  min-width: 32px;
+}
+
+.toc-list a {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 17px;
+  flex: 1;
+  transition: color 0.2s;
+}
+
+.toc-list a:hover { color: var(--accent); }
+
+/* === ARTICLE === */
+article {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 32px;
+  position: relative;
+  z-index: 2;
+}
+
+.tracks-section { max-width: var(--tracks-width); }
+
+section {
+  padding: 80px 0;
+  border-top: 1px solid var(--border);
+}
+
+section:first-of-type { border-top: none; }
+
+.section-number {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+  display: block;
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1.05;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 32px;
+  color: var(--text);
+}
+
+h2 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin-top: 48px;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+h4 {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 32px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+p {
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+.lead {
+  font-size: 21px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-weight: 300;
+  margin-bottom: 40px;
+}
+
+.lead em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-dim);
+  transition: border-color 0.2s;
+}
+
+a:hover { border-bottom-color: var(--accent); }
+
+strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+em { font-style: italic; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--bg-code);
+  padding: 2px 7px;
+  border-radius: 3px;
+  color: var(--accent-bright);
+  border: 1px solid var(--border);
+}
+
+/* === CALLOUTS === */
+.callout {
+  margin: 32px 0;
+  padding: 24px 28px;
+  background: var(--bg-elevated);
+  border-left: 3px solid var(--accent);
+  position: relative;
+}
+
+.callout-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.callout p:last-child { margin-bottom: 0; }
+
+.callout.warning { border-left-color: var(--warning); }
+.callout.warning .callout-title { color: var(--warning); }
+.callout.success { border-left-color: var(--success); }
+.callout.success .callout-title { color: var(--success); }
+.callout.danger { border-left-color: var(--danger); }
+.callout.danger .callout-title { color: var(--danger); }
+
+/* === CODE BLOCKS === */
+.code-block {
+  margin: 28px 0;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.code-header {
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.code-lang { color: var(--accent); }
+
+pre {
+  padding: 20px 24px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Syntax highlighting tokens */
+.tk-kw { color: #d4704a; font-weight: 500; }
+.tk-fn { color: #c9a961; }
+.tk-str { color: #7ea87e; }
+.tk-num { color: #b08db0; }
+.tk-cmt { color: #6b635d; font-style: italic; }
+.tk-type { color: #7ab0c4; }
+.tk-op { color: #9a918a; }
+
+/* === LISTS === */
+ul, ol {
+  margin: 20px 0;
+  padding-left: 24px;
+}
+
+li {
+  margin-bottom: 10px;
+  padding-left: 8px;
+}
+
+ul li::marker { color: var(--accent); }
+ol li::marker {
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* === TABLES === */
+.table-wrap {
+  margin: 32px 0;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+th {
+  background: var(--bg-elevated);
+  padding: 12px 16px;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+tr:last-child td { border-bottom: none; }
+
+/* === FIGURES === */
+.figure {
+  margin: 40px 0;
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.figure-caption {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-dim);
+  font-style: italic;
+  font-family: var(--font-display);
+}
+
+.svg-figure, .waveform-svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* === FORMULAS === */
+.formula {
+  margin: 32px 0;
+  padding: 28px 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  text-align: center;
+  overflow-x: auto;
+  color: var(--text);
+  line-height: 2;
+}
+
+.formula-caption {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-dim);
+  margin-top: 12px;
+  text-align: center;
+}
+
+/* === TRACKS (Rust/FAUST lado a lado) === */
+.tracks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin: 40px 0;
+}
+
+.track {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+
+.track-header {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.track.rust .track-header {
+  background: rgba(212, 112, 74, 0.08);
+  border-bottom-color: var(--track-rust-dim);
+  color: var(--track-rust);
+}
+
+.track.faust .track-header {
+  background: rgba(122, 176, 196, 0.06);
+  border-bottom-color: var(--track-faust-dim);
+  color: var(--track-faust);
+}
+
+.track-header::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.track.rust .track-header::before {
+  background: var(--track-rust);
+  box-shadow: 0 0 8px var(--track-rust);
+}
+
+.track.faust .track-header::before {
+  background: var(--track-faust);
+  box-shadow: 0 0 8px var(--track-faust);
+}
+
+.track-body { padding: 24px 28px; }
+
+.track-body p { font-size: 16px; }
+.track-body p:last-child { margin-bottom: 0; }
+
+.track-body .code-block {
+  margin: 16px -28px;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+
+.track-body pre { font-size: 13px; }
+
+/* === EXPERIMENT === */
+.experiment {
+  margin: 48px 0;
+  padding: 32px;
+  background: linear-gradient(135deg, rgba(212, 112, 74, 0.04) 0%, rgba(212, 112, 74, 0) 100%);
+  border: 1px solid var(--accent-dim);
+  border-radius: 8px;
+}
+
+.experiment-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.experiment-label::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.experiment h3 {
+  margin-top: 0;
+  color: var(--text);
+}
+
+/* === GLOSSARY === */
+.glossary {
+  margin-top: 60px;
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.glossary-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-style: italic;
+  font-weight: 400;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.glossary dl dt {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  margin-top: 20px;
+  margin-bottom: 6px;
+  letter-spacing: 0.03em;
+}
+
+.glossary dl dt:first-child { margin-top: 0; }
+
+.glossary dl dd {
+  color: var(--text-muted);
+  font-size: 15px;
+  margin-bottom: 0;
+}
+
+/* === FOOTER === */
+footer {
+  max-width: var(--tracks-width);
+  margin: 120px auto 0;
+  padding: 60px 32px 60px;
+  border-top: 1px solid var(--border);
+  position: relative;
+  z-index: 2;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  margin-bottom: 48px;
+}
+
+.footer-next {
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  grid-column: span 2;
+}
+
+.footer-next-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.footer-next-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.footer-next-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.footer-next-desc {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.footer-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align: center;
+  letter-spacing: 0.05em;
+  padding-top: 40px;
+  border-top: 1px solid var(--border);
+}
+
+.footer-meta a {
+  color: var(--accent);
+  border-bottom: none;
+}
+
+/* === STACK DIAGRAM (específico do módulo 03 de arquiteturas) === */
+.stack-diagram {
+  margin: 40px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.stack-layer {
+  padding: 14px 20px;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.stack-layer:hover { border-color: var(--accent-dim); }
+
+.stack-layer-name {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.stack-layer-desc {
+  color: var(--text-dim);
+  font-size: 12px;
+  font-family: var(--font-body);
+}
+
+.stack-layer.app { background: rgba(212, 112, 74, 0.08); border-color: var(--accent-dim); }
+.stack-layer.app .stack-layer-name { color: var(--accent); }
+
+.stack-layer.abstraction { background: rgba(122, 176, 196, 0.06); border-color: var(--track-faust-dim); }
+.stack-layer.abstraction .stack-layer-name { color: var(--track-faust); }
+
+.stack-layer.hardware { background: rgba(126, 168, 126, 0.04); border-color: rgba(126, 168, 126, 0.2); }
+.stack-layer.hardware .stack-layer-name { color: var(--success); }
+
+/* === RESPONSIVE === */
+@media (max-width: 900px) {
+  .tracks {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 48px 24px 40px; }
+  .hero-meta { gap: 24px; }
+  .toc, article { padding: 0 24px; }
+  .header-inner { padding: 14px 24px; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-next { padding: 24px; }
+  footer { padding: 48px 24px; }
+  pre { padding: 16px; font-size: 13px; }
+  .code-block { margin: 20px -24px; border-radius: 0; border-left: none; border-right: none; }
+  .callout { padding: 20px; }
+  .experiment { padding: 24px; margin: 32px -24px; border-radius: 0; border-left: none; border-right: none; }
+  .track-body { padding: 20px 22px; }
+  .track-body .code-block { margin: 14px -22px; }
+  .formula { padding: 20px; font-size: 14px; margin: 24px -24px; border-radius: 0; border-left: none; border-right: none; }
+  .stack-layer { flex-direction: column; align-items: flex-start; gap: 4px; }
+}
+
+/* === ANIMATIONS === */
+@media (prefers-reduced-motion: no-preference) {
+  .hero > * {
+    opacity: 0;
+    animation: fadeUp 0.8s ease-out forwards;
+  }
+  .hero-label { animation-delay: 0.1s; }
+  .hero h1 { animation-delay: 0.2s; }
+  .hero-subtitle { animation-delay: 0.35s; }
+  .hero-meta { animation-delay: 0.5s; }
+  .tracks-indicator { animation-delay: 0.65s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <span class="brand-dot"></span>
+      Áudio em Rust — <em>BR</em>
+    </a>
+    <span class="header-meta">MÓDULO 02 / 11</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Módulo 02 — Tempo real</div>
+  <h1>O bloco e o <em>callback</em>: como o áudio chega no teu código.</h1>
+  <p class="hero-subtitle">No módulo anterior você gerou áudio e salvou em arquivo. Agora o áudio entra em tempo real pela interface, passa pelo teu código, e sai pela mesma interface. É onde "processar áudio" vira concreto — e onde a maioria dos projetos morre se ignorar as regras.</p>
+  <div class="hero-meta">
+    <div class="meta-item">
+      <span class="meta-label">Leitura</span>
+      <span class="meta-value">≈ 40 min</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Experimento</span>
+      <span class="meta-value">≈ 3 h</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Pré-requisito</span>
+      <span class="meta-value">Módulo 01 feito</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Entregável</span>
+      <span class="meta-value">Passthrough ao vivo</span>
+    </div>
+  </div>
+</div>
+
+<nav class="toc" aria-label="Sumário do módulo">
+  <div class="toc-title">Sumário</div>
+  <ol class="toc-list">
+    <li><a href="#problema">O problema real: processamento ao vivo é outro mundo</a></li>
+    <li><a href="#callback">O audio callback: a função que não pode falhar</a></li>
+    <li><a href="#bloco">Block size: o compromisso fundamental</a></li>
+    <li><a href="#latencia">Latência: onde cada milissegundo aparece</a></li>
+    <li><a href="#regras">As regras de ouro do código de áudio em tempo real</a></li>
+    <li><a href="#cpal">cpal: a ponte entre Rust e tua interface</a></li>
+    <li><a href="#experimento">Experimento: passthrough ao vivo com medição de latência</a></li>
+    <li><a href="#glossario">Glossário</a></li>
+  </ol>
+</nav>
+
+<article>
+
+<section id="problema">
+<span class="section-number">§ 01</span>
+<h2>Processamento ao vivo é <em>outro</em> mundo.</h2>
+
+<p class="lead">No Módulo 01 você gerou áudio e salvou em arquivo. Tranquilo: se o código demorasse 30 segundos pra gerar 2 segundos de áudio, ninguém percebia. O arquivo saiu certo.</p>
+
+<p>Agora você quer processar áudio <strong>ao vivo</strong>: microfone entra na interface, o som da tua voz passa pelo teu código Rust, e sai imediatamente no fone. Isso muda tudo.</p>
+
+<p>A nova regra é: se teu código demora <em>um microssegundo a mais</em> do que o orçamento disponível, o áudio glitcha. Click. Pop. Silêncio. O pastor vai ouvir. A live vai falhar. A conversa acaba.</p>
+
+<p>Esse orçamento apertado é a <strong>constraint mais importante</strong> de áudio em tempo real. Tudo nesse módulo existe pra você entender e respeitar esse orçamento.</p>
+
+<div class="callout">
+<div class="callout-title">Atalho mental</div>
+<p>Processar arquivo = correr maratona. Você tem tempo, só não pode parar. Processar ao vivo = dança de tango. Cada passo tem tempo exato pra acontecer. Atrasar um passo derruba o baile inteiro.</p>
+</div>
+
+</section>
+
+<section id="callback">
+<span class="section-number">§ 02</span>
+<h2>O <em>audio callback</em>.</h2>
+
+<p>Quando você conecta a interface USB e o programa abre acesso ao áudio, o sistema operacional (ou o driver da interface) faz um acordo com teu programa:</p>
+
+<blockquote style="margin: 24px 0; padding: 20px 28px; border-left: 3px solid var(--border-strong); color: var(--text-muted); font-family: var(--font-display); font-size: 18px; font-style: italic;">
+"Eu vou te chamar repetidamente, em intervalos precisos. Cada vez que te chamar, vou te entregar um pedacinho de áudio que acabou de chegar e vou precisar que você me devolva outro pedacinho pra mandar pra saída. Essa chamada tem que durar menos que X microssegundos. Se você demorar mais, eu não vou te esperar — eu vou mandar silêncio ou o buffer antigo pra saída, e quem tá ouvindo vai perceber."
+</blockquote>
+
+<p>Essa função que o sistema chama repetidamente é o <strong>audio callback</strong>. É o coração de todo software de áudio em tempo real. E é uma função que roda sob regras especiais.</p>
+
+<div class="figure">
+<svg class="svg-figure" viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="100" width="120" height="60" rx="4" fill="#12100f" stroke="#3d3734" stroke-width="1.5"/>
+  <text x="80" y="128" text-anchor="middle" font-family="Fraunces" font-size="13" fill="#e8e3dc" font-style="italic">interface</text>
+  <text x="80" y="146" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#6b635d">USB / driver</text>
+  <line x1="145" y1="115" x2="285" y2="115" stroke="#d4704a" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="215" y="108" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#d4704a">input buffer</text>
+  <rect x="290" y="80" width="180" height="100" rx="4" fill="#161413" stroke="#d4704a" stroke-width="2"/>
+  <text x="380" y="108" text-anchor="middle" font-family="Fraunces" font-size="15" fill="#e8e3dc" font-style="italic">audio callback</text>
+  <text x="380" y="128" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#9a918a">seu código Rust</text>
+  <text x="380" y="148" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#9a918a">processa N amostras</text>
+  <text x="380" y="165" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6b635d">em &lt; X ms</text>
+  <line x1="475" y1="145" x2="615" y2="145" stroke="#7ea87e" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+  <text x="545" y="138" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#7ea87e">output buffer</text>
+  <rect x="620" y="100" width="60" height="60" rx="4" fill="#12100f" stroke="#3d3734" stroke-width="1.5"/>
+  <text x="650" y="135" text-anchor="middle" font-family="Fraunces" font-size="12" fill="#e8e3dc" font-style="italic">fone</text>
+  <line x1="290" y1="210" x2="470" y2="210" stroke="#3d3734" stroke-width="1" stroke-dasharray="2,3"/>
+  <text x="380" y="228" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#6b635d">tempo disponível fixo</text>
+  <text x="380" y="243" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#6b635d">(block size ÷ sample rate)</text>
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <polygon points="0 0, 8 4, 0 8" fill="#d4704a"/>
+    </marker>
+    <marker id="arrowhead-green" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <polygon points="0 0, 8 4, 0 8" fill="#7ea87e"/>
+    </marker>
+  </defs>
+</svg>
+<div class="figure-caption">Fluxo do audio callback. Sistema entrega N amostras de entrada, espera N amostras de saída, dentro de um tempo fixo.</div>
+</div>
+
+<h3>Como seu código parece em Rust (simplificado)</h3>
+
+<div class="code-block">
+<div class="code-header"><span>estrutura conceitual</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-cmt">// Isto é chamado pelo sistema, repetidamente, em intervalos fixos</span>
+<span class="tk-kw">fn</span> <span class="tk-fn">audio_callback</span>(input: &amp;[<span class="tk-type">f32</span>], output: &amp;<span class="tk-kw">mut</span> [<span class="tk-type">f32</span>]) {
+    <span class="tk-cmt">// 1. Ler amostras de entrada</span>
+    <span class="tk-cmt">// 2. Processar (filtros, ganho, etc.)</span>
+    <span class="tk-cmt">// 3. Escrever amostras de saída</span>
+    <span class="tk-kw">for</span> i <span class="tk-kw">in</span> <span class="tk-num">0</span>..input.<span class="tk-fn">len</span>() {
+        output[i] = input[i] * <span class="tk-num">0.5</span>; <span class="tk-cmt">// exemplo: ganho de -6dB</span>
+    }
+}</code></pre>
+</div>
+
+</section>
+
+<section id="bloco">
+<span class="section-number">§ 03</span>
+<h2>Block size: o <em>compromisso</em>.</h2>
+
+<p>Toda vez que o sistema chama teu callback, ele te entrega <strong>N amostras de cada vez</strong>, não uma por uma. Esse N é o <strong>block size</strong> (também chamado <em>buffer size</em>, <em>period size</em>, <em>frames per buffer</em> — é tudo a mesma coisa).</p>
+
+<p>Por que em blocos e não amostra por amostra? Porque chamar tua função 48 mil vezes por segundo é absurdamente caro (overhead de chamada de função, context switch, etc.). Mas chamar 750 vezes por segundo entregando 64 amostras por vez é tranquilo. Bloco é eficiência.</p>
+
+<h3>Quanto tempo cada bloco tem de orçamento?</h3>
+
+<div class="code-block">
+<div class="code-header"><span>fórmula</span><span class="code-lang">aritmética</span></div>
+<pre><code>orçamento = block_size / sample_rate
+
+<span class="tk-cmt">// Exemplos a 48 kHz:</span>
+block = 32   → 0.67 ms  (super baixa latência, CPU alta)
+block = 64   → 1.33 ms  (baixa latência, equilibrado)
+block = 128  → 2.67 ms  (razoável)
+block = 256  → 5.33 ms  (confortável)
+block = 512  → 10.67 ms (streaming, música não-crítica)
+block = 1024 → 21.33 ms (arquivo, rendering)</code></pre>
+</div>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>Uso</th>
+      <th>Block size</th>
+      <th>Por quê</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Tocar guitarra com amp sim</td><td>32-64</td><td>Músico percebe &gt; 5ms como atraso</td></tr>
+    <tr><td>Mixer live ao vivo</td><td>32-128</td><td>Depende da CPU e tolerância</td></tr>
+    <tr><td>Live streaming (OBS)</td><td>256-512</td><td>Latência não importa, estabilidade importa</td></tr>
+    <tr><td>Mixing em DAW</td><td>512-2048</td><td>Offline, pode ser grande</td></tr>
+    <tr><td>Seus primeiros testes</td><td><strong>512</strong></td><td>Folga pra experimentar sem glitch</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout">
+<div class="callout-title">Regra prática</div>
+<p>Comece com <strong>block size 512 ou 256</strong>. Depois que o código funcionar estável, reduza pra 128, 64. Cada redução cobra mais CPU e mais disciplina no código.</p>
+</div>
+
+</section>
+
+<section id="latencia">
+<span class="section-number">§ 04</span>
+<h2>Latência: onde cada <em>milissegundo</em> aparece.</h2>
+
+<p>Quando alguém fala "latência de 5ms", isso é raramente um número único. É a soma de várias parcelas que se acumulam.</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>Fase</th><th>Latência típica</th><th>Onde mora</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Microfone → capsula</td><td>~0 ms</td><td>Físico, desprezível</td></tr>
+    <tr><td>Conversor A/D (ADC)</td><td>0.5–2 ms</td><td>Hardware da interface</td></tr>
+    <tr><td>Driver / USB transfer</td><td>1–3 ms</td><td>OS + driver da interface</td></tr>
+    <tr><td>Input buffer</td><td>block_size / sr</td><td>Sistema operacional</td></tr>
+    <tr><td><strong>Seu callback processa</strong></td><td><strong>&lt; block_size / sr</strong></td><td><strong>Seu código</strong></td></tr>
+    <tr><td>Output buffer</td><td>block_size / sr</td><td>Sistema operacional</td></tr>
+    <tr><td>Driver / USB transfer</td><td>1–3 ms</td><td>OS + driver</td></tr>
+    <tr><td>Conversor D/A (DAC)</td><td>0.5–2 ms</td><td>Hardware da interface</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>Round-trip típico numa interface USB decente, block 128 @ 48kHz:</p>
+
+<div class="code-block">
+<div class="code-header"><span>exemplo real</span><span class="code-lang">aritmética</span></div>
+<pre><code>ADC:        1.0 ms
+USB in:     1.5 ms
+input buf:  2.67 ms (128/48000)
+processing: 0.5 ms (seu código)
+output buf: 2.67 ms
+USB out:    1.5 ms
+DAC:        1.0 ms
+──────────────────
+TOTAL:      ~10.8 ms round-trip</code></pre>
+</div>
+
+<div class="callout warning">
+<div class="callout-title">Na prática para teus projetos</div>
+<p>Pra live streaming (OBS), 10-30 ms é perfeitamente aceitável — ninguém percebe. Pra mixer live em igreja, até 7-8 ms é aceitável. Pra guitarrista tocando com amp sim, precisa &lt; 5 ms ou o músico reclama.</p>
+</div>
+
+</section>
+
+<section id="regras">
+<span class="section-number">§ 05</span>
+<h2>As <em>regras de ouro</em> do código de áudio.</h2>
+
+<p>Dentro do audio callback, certas operações são proibidas. Não porque dão erro de compilação, mas porque podem demorar milissegundos ou mais em situações de estresse, e isso quebra o áudio.</p>
+
+<div class="callout danger">
+<div class="callout-title">Proibições absolutas</div>
+<ul>
+  <li><strong>Alocar memória</strong> (<code>Box::new</code>, <code>Vec::new</code>, <code>String::from</code>). Alocação pode bloquear se o heap estiver fragmentado.</li>
+  <li><strong>Desalocar memória</strong> (drop de qualquer coisa com heap).</li>
+  <li><strong>Pegar mutex / lock</strong> que pode bloquear.</li>
+  <li><strong>Fazer I/O</strong> — ler arquivo, escrever log, chamar rede.</li>
+  <li><strong>Dormir</strong> (<code>thread::sleep</code>, <code>await</code> em async code).</li>
+  <li><strong>println!</strong> em produção. É I/O em stdout, tem lock interno.</li>
+</ul>
+</div>
+
+<div class="callout success">
+<div class="callout-title">Operações seguras</div>
+<ul>
+  <li><strong>Matemática</strong> com tipos primitivos: <code>f32</code>, <code>f64</code>, <code>i32</code>.</li>
+  <li><strong>Ler e escrever em buffers pré-alocados</strong>: <code>Vec&lt;f32&gt;</code> já criado, arrays fixos, slices.</li>
+  <li><strong>Atomics</strong> (<code>AtomicBool</code>, <code>AtomicU32</code>) pra comunicar com outras threads sem lock.</li>
+  <li><strong>Lock-free queues</strong>: thread de controle empurra eventos, thread de áudio consome.</li>
+</ul>
+</div>
+
+<h3>Então como a UI muda parâmetros?</h3>
+
+<p>A resposta é: <strong>comunicação assíncrona via atomics ou lock-free queues</strong>. A UI (em outra thread) escreve num atomic. O callback lê esse atomic no início do próximo bloco.</p>
+
+<div class="code-block">
+<div class="code-header"><span>padrão básico</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">use</span> std::sync::atomic::{AtomicU32, Ordering};
+<span class="tk-kw">use</span> std::sync::Arc;
+
+<span class="tk-cmt">// Thread da UI escreve:</span>
+<span class="tk-kw">let</span> gain_atomic = Arc::new(AtomicU32::new(<span class="tk-num">0</span>));
+<span class="tk-kw">let</span> gain_value: <span class="tk-type">f32</span> = <span class="tk-num">0.5</span>;
+gain_atomic.<span class="tk-fn">store</span>(gain_value.<span class="tk-fn">to_bits</span>(), Ordering::Relaxed);
+
+<span class="tk-cmt">// Thread do áudio lê (dentro do callback):</span>
+<span class="tk-kw">let</span> gain_bits = gain_atomic.<span class="tk-fn">load</span>(Ordering::Relaxed);
+<span class="tk-kw">let</span> gain = <span class="tk-type">f32</span>::<span class="tk-fn">from_bits</span>(gain_bits);</code></pre>
+</div>
+
+</section>
+
+<section id="cpal">
+<span class="section-number">§ 06</span>
+<h2><em>cpal</em>: Rust conversa com tua interface.</h2>
+
+<p>Pra teu código Rust conversar com a interface USB, você precisa de uma biblioteca que abstraia o sistema operacional. Cada OS tem uma API diferente: CoreAudio no macOS, WASAPI/ASIO no Windows, ALSA/JACK/PipeWire no Linux.</p>
+
+<p><a href="https://github.com/RustAudio/cpal">cpal</a> (Cross-Platform Audio Library) é a crate padrão do ecossistema Rust pra isso. Ela te dá uma API única que funciona nos três sistemas.</p>
+
+<div class="callout">
+<div class="callout-title">No próximo módulo</div>
+<p>O Módulo 03 mergulha na stack de áudio do sistema operacional — PortAudio, JACK, PipeWire, ALSA — e explica o que cpal está fazendo por baixo. Se você quiser entender a fundo em qual camada tua aplicação vive, esse próximo módulo é leitura obrigatória antes de começar a debugar problemas de latência.</p>
+</div>
+
+</section>
+
+<section id="experimento">
+<span class="section-number">§ 07</span>
+
+<div class="experiment">
+<div class="experiment-label">Experimento prático</div>
+<h3>Passthrough ao vivo com medição de latência.</h3>
+
+<p>Objetivo: áudio entra pela tua interface, passa pelo teu código Rust, sai pela mesma interface. Com três variações progressivas: (1) passthrough puro, (2) passthrough com ganho, (3) medição de latência real via loopback de cabo.</p>
+
+<h4>Pré-requisito</h4>
+<ul>
+  <li>Interface USB class-compliant (Scarlett, Audient, MOTU, etc.) — ou a built-in do notebook</li>
+  <li>Fone (não use alto-falantes — feedback é feio)</li>
+</ul>
+
+<h4>Passo 1 — Criar o projeto</h4>
+
+<div class="code-block">
+<div class="code-header"><span>terminal</span><span class="code-lang">bash</span></div>
+<pre><code>cargo new modulo02-passthrough
+cd modulo02-passthrough</code></pre>
+</div>
+
+<h4>Passo 2 — Dependências</h4>
+
+<div class="code-block">
+<div class="code-header"><span>Cargo.toml</span><span class="code-lang">toml</span></div>
+<pre><code>[dependencies]
+cpal = "0.15"
+anyhow = "1.0"
+ringbuf = "0.4"</code></pre>
+</div>
+
+<h4>Passo 3 — Listar dispositivos</h4>
+
+<div class="code-block">
+<div class="code-header"><span>src/main.rs — listar</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">use</span> cpal::traits::{DeviceTrait, HostTrait};
+
+<span class="tk-kw">fn</span> <span class="tk-fn">main</span>() -&gt; anyhow::Result&lt;()&gt; {
+    <span class="tk-kw">let</span> host = cpal::<span class="tk-fn">default_host</span>();
+
+    <span class="tk-fn">println!</span>(<span class="tk-str">"=== DISPOSITIVOS DE ENTRADA ==="</span>);
+    <span class="tk-kw">for</span> device <span class="tk-kw">in</span> host.<span class="tk-fn">input_devices</span>()? {
+        <span class="tk-kw">let</span> name = device.<span class="tk-fn">name</span>().<span class="tk-fn">unwrap_or_else</span>(|_| <span class="tk-str">"?"</span>.<span class="tk-fn">into</span>());
+        <span class="tk-fn">println!</span>(<span class="tk-str">"  → {}"</span>, name);
+        <span class="tk-kw">if</span> <span class="tk-kw">let</span> <span class="tk-kw">Ok</span>(config) = device.<span class="tk-fn">default_input_config</span>() {
+            <span class="tk-fn">println!</span>(<span class="tk-str">"    {} canais, {} Hz, {:?}"</span>,
+                config.<span class="tk-fn">channels</span>(),
+                config.<span class="tk-fn">sample_rate</span>().<span class="tk-num">0</span>,
+                config.<span class="tk-fn">sample_format</span>());
+        }
+    }
+
+    <span class="tk-fn">println!</span>(<span class="tk-str">"\n=== DISPOSITIVOS DE SAÍDA ==="</span>);
+    <span class="tk-kw">for</span> device <span class="tk-kw">in</span> host.<span class="tk-fn">output_devices</span>()? {
+        <span class="tk-kw">let</span> name = device.<span class="tk-fn">name</span>().<span class="tk-fn">unwrap_or_else</span>(|_| <span class="tk-str">"?"</span>.<span class="tk-fn">into</span>());
+        <span class="tk-fn">println!</span>(<span class="tk-str">"  → {}"</span>, name);
+    }
+
+    <span class="tk-kw">Ok</span>(())
+}</code></pre>
+</div>
+
+<p>Rode <code>cargo run</code> e anote o nome da tua interface.</p>
+
+<h4>Passo 4 — Passthrough</h4>
+
+<div class="code-block">
+<div class="code-header"><span>src/main.rs — passthrough</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">use</span> cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+<span class="tk-kw">use</span> ringbuf::{HeapRb, traits::{Producer, Consumer, Split}};
+
+<span class="tk-kw">fn</span> <span class="tk-fn">main</span>() -&gt; anyhow::Result&lt;()&gt; {
+    <span class="tk-kw">let</span> host = cpal::<span class="tk-fn">default_host</span>();
+    <span class="tk-kw">let</span> input_device = host.<span class="tk-fn">default_input_device</span>()
+        .<span class="tk-fn">ok_or_else</span>(|| anyhow::<span class="tk-fn">anyhow!</span>(<span class="tk-str">"sem entrada"</span>))?;
+    <span class="tk-kw">let</span> output_device = host.<span class="tk-fn">default_output_device</span>()
+        .<span class="tk-fn">ok_or_else</span>(|| anyhow::<span class="tk-fn">anyhow!</span>(<span class="tk-str">"sem saída"</span>))?;
+
+    <span class="tk-fn">println!</span>(<span class="tk-str">"In:  {}"</span>, input_device.<span class="tk-fn">name</span>()?);
+    <span class="tk-fn">println!</span>(<span class="tk-str">"Out: {}"</span>, output_device.<span class="tk-fn">name</span>()?);
+
+    <span class="tk-kw">let</span> config: cpal::StreamConfig = input_device.<span class="tk-fn">default_input_config</span>()?.<span class="tk-fn">into</span>();
+
+    <span class="tk-kw">let</span> ring = HeapRb::&lt;<span class="tk-type">f32</span>&gt;::<span class="tk-fn">new</span>(<span class="tk-num">9600</span>);
+    <span class="tk-kw">let</span> (<span class="tk-kw">mut</span> producer, <span class="tk-kw">mut</span> consumer) = ring.<span class="tk-fn">split</span>();
+
+    <span class="tk-kw">let</span> input_stream = input_device.<span class="tk-fn">build_input_stream</span>(
+        &amp;config,
+        <span class="tk-kw">move</span> |data: &amp;[<span class="tk-type">f32</span>], _| {
+            <span class="tk-kw">for</span> &amp;sample <span class="tk-kw">in</span> data {
+                <span class="tk-kw">let</span> _ = producer.<span class="tk-fn">try_push</span>(sample);
+            }
+        },
+        |err| <span class="tk-fn">eprintln!</span>(<span class="tk-str">"erro input: {}"</span>, err),
+        <span class="tk-kw">None</span>,
+    )?;
+
+    <span class="tk-kw">let</span> output_stream = output_device.<span class="tk-fn">build_output_stream</span>(
+        &amp;config,
+        <span class="tk-kw">move</span> |data: &amp;<span class="tk-kw">mut</span> [<span class="tk-type">f32</span>], _| {
+            <span class="tk-kw">for</span> sample <span class="tk-kw">in</span> data.<span class="tk-fn">iter_mut</span>() {
+                *sample = consumer.<span class="tk-fn">try_pop</span>().<span class="tk-fn">unwrap_or</span>(<span class="tk-num">0.0</span>);
+            }
+        },
+        |err| <span class="tk-fn">eprintln!</span>(<span class="tk-str">"erro output: {}"</span>, err),
+        <span class="tk-kw">None</span>,
+    )?;
+
+    input_stream.<span class="tk-fn">play</span>()?;
+    output_stream.<span class="tk-fn">play</span>()?;
+
+    <span class="tk-fn">println!</span>(<span class="tk-str">"Passsthrough rodando. Ctrl+C pra parar."</span>);
+    std::thread::<span class="tk-fn">park</span>();
+    <span class="tk-kw">Ok</span>(())
+}</code></pre>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>terminal</span><span class="code-lang">bash</span></div>
+<pre><code>cargo run --release</code></pre>
+</div>
+
+<p><strong>Sempre</strong> <code>--release</code> pra áudio. Debug glitcha.</p>
+
+<div class="callout success">
+<div class="callout-title">Se funcionou</div>
+<p>Você ouve o mic no fone com pequena latência. Parabéns — você acabou de fazer áudio em tempo real em Rust.</p>
+</div>
+
+<h4>Passo 5 — Medir latência (com cabo loopback)</h4>
+
+<p>Conecte um cabo físico do headphone out direto pro mic in. O código abaixo gera clicks e mede quanto tempo demoram pra voltar.</p>
+
+<div class="code-block">
+<div class="code-header"><span>src/main.rs — medidor</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">use</span> cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+<span class="tk-kw">use</span> std::sync::atomic::{AtomicU64, Ordering};
+<span class="tk-kw">use</span> std::sync::Arc;
+<span class="tk-kw">use</span> std::time::Instant;
+
+<span class="tk-kw">fn</span> <span class="tk-fn">main</span>() -&gt; anyhow::Result&lt;()&gt; {
+    <span class="tk-kw">let</span> host = cpal::<span class="tk-fn">default_host</span>();
+    <span class="tk-kw">let</span> input_device = host.<span class="tk-fn">default_input_device</span>().<span class="tk-fn">unwrap</span>();
+    <span class="tk-kw">let</span> output_device = host.<span class="tk-fn">default_output_device</span>().<span class="tk-fn">unwrap</span>();
+    <span class="tk-kw">let</span> config: cpal::StreamConfig = input_device.<span class="tk-fn">default_input_config</span>()?.<span class="tk-fn">into</span>();
+
+    <span class="tk-kw">let</span> start = Instant::<span class="tk-fn">now</span>();
+    <span class="tk-kw">let</span> click_time_us = Arc::new(AtomicU64::new(<span class="tk-num">0</span>));
+
+    <span class="tk-kw">let</span> sample_rate = config.sample_rate.<span class="tk-num">0</span> <span class="tk-kw">as</span> <span class="tk-type">u64</span>;
+    <span class="tk-kw">let</span> <span class="tk-kw">mut</span> sample_count: <span class="tk-type">u64</span> = <span class="tk-num">0</span>;
+    <span class="tk-kw">let</span> click_interval = sample_rate * <span class="tk-num">2</span>;
+
+    <span class="tk-kw">let</span> click_time_out = Arc::<span class="tk-fn">clone</span>(&amp;click_time_us);
+    <span class="tk-kw">let</span> output_stream = output_device.<span class="tk-fn">build_output_stream</span>(
+        &amp;config,
+        <span class="tk-kw">move</span> |data: &amp;<span class="tk-kw">mut</span> [<span class="tk-type">f32</span>], _| {
+            <span class="tk-kw">for</span> sample <span class="tk-kw">in</span> data.<span class="tk-fn">iter_mut</span>() {
+                <span class="tk-kw">let</span> is_click = sample_count % click_interval &lt; <span class="tk-num">24</span>;
+                <span class="tk-kw">if</span> is_click &amp;&amp; sample_count % click_interval == <span class="tk-num">0</span> {
+                    <span class="tk-kw">let</span> now = start.<span class="tk-fn">elapsed</span>().<span class="tk-fn">as_micros</span>() <span class="tk-kw">as</span> <span class="tk-type">u64</span>;
+                    click_time_out.<span class="tk-fn">store</span>(now, Ordering::Relaxed);
+                }
+                *sample = <span class="tk-kw">if</span> is_click { <span class="tk-num">0.8</span> } <span class="tk-kw">else</span> { <span class="tk-num">0.0</span> };
+                sample_count += <span class="tk-num">1</span>;
+            }
+        },
+        |err| <span class="tk-fn">eprintln!</span>(<span class="tk-str">"{}"</span>, err),
+        <span class="tk-kw">None</span>,
+    )?;
+
+    <span class="tk-kw">let</span> click_time_in = Arc::<span class="tk-fn">clone</span>(&amp;click_time_us);
+    <span class="tk-kw">let</span> input_stream = input_device.<span class="tk-fn">build_input_stream</span>(
+        &amp;config,
+        <span class="tk-kw">move</span> |data: &amp;[<span class="tk-type">f32</span>], _| {
+            <span class="tk-kw">for</span> &amp;sample <span class="tk-kw">in</span> data {
+                <span class="tk-kw">if</span> sample.<span class="tk-fn">abs</span>() &gt; <span class="tk-num">0.3</span> {
+                    <span class="tk-kw">let</span> now = start.<span class="tk-fn">elapsed</span>().<span class="tk-fn">as_micros</span>() <span class="tk-kw">as</span> <span class="tk-type">u64</span>;
+                    <span class="tk-kw">let</span> sent = click_time_in.<span class="tk-fn">load</span>(Ordering::Relaxed);
+                    <span class="tk-kw">if</span> sent &gt; <span class="tk-num">0</span> &amp;&amp; now &gt; sent {
+                        <span class="tk-fn">println!</span>(<span class="tk-str">"Latência: {:.2} ms"</span>,
+                            (now - sent) <span class="tk-kw">as</span> <span class="tk-type">f64</span> / <span class="tk-num">1000.0</span>);
+                        click_time_in.<span class="tk-fn">store</span>(<span class="tk-num">0</span>, Ordering::Relaxed);
+                    }
+                    <span class="tk-kw">break</span>;
+                }
+            }
+        },
+        |err| <span class="tk-fn">eprintln!</span>(<span class="tk-str">"{}"</span>, err),
+        <span class="tk-kw">None</span>,
+    )?;
+
+    input_stream.<span class="tk-fn">play</span>()?;
+    output_stream.<span class="tk-fn">play</span>()?;
+    std::thread::<span class="tk-fn">park</span>();
+    <span class="tk-kw">Ok</span>(())
+}</code></pre>
+</div>
+
+<p>A cada 2 segundos você vê a latência real medida. Anote — esse é o número que te interessa pro projeto.</p>
+
+</div>
+
+</section>
+
+<section id="glossario">
+<div class="glossary">
+<div class="glossary-title">Glossário</div>
+<dl>
+  <dt>AUDIO CALLBACK</dt>
+  <dd>Função que o sistema de áudio chama repetidamente pra entregar amostras de entrada e pedir amostras de saída.</dd>
+  <dt>BLOCK SIZE</dt>
+  <dd>Quantas amostras são processadas por chamada de callback. Também chamado buffer size, period size, frames per buffer.</dd>
+  <dt>ROUND-TRIP LATENCY</dt>
+  <dd>Tempo total entre o som entrar na interface e sair de volta.</dd>
+  <dt>LOCK-FREE</dt>
+  <dd>Algoritmo que não usa mutex/lock, funciona com atomics. Essencial pra callback de áudio.</dd>
+  <dt>RING BUFFER</dt>
+  <dd>Buffer circular onde uma thread escreve e outra lê, sem precisar de lock.</dd>
+  <dt>XRUN</dt>
+  <dd>Quando o callback demora demais e o áudio glitcha. Sempre ruim.</dd>
+  <dt>cpal</dt>
+  <dd>Crate Rust cross-platform pra acesso a dispositivos de áudio.</dd>
+</dl>
+</div>
+</section>
+
+</article>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-next">
+      <div class="footer-next-label">Próximo módulo</div>
+      <div class="footer-next-title">03 — Arquiteturas de áudio do <em>sistema operacional</em></div>
+      <div class="footer-next-desc">O que tá rolando debaixo do cpal: PortAudio, JACK, PipeWire, ALSA, WASAPI, CoreAudio. Foco em Linux porque é onde você desenvolve, com exemplos de código Rust acessando JACK e PipeWire direto quando faz sentido.</div>
+    </div>
+  </div>
+  <div class="footer-meta">
+    Áudio em Rust — BR · material de estudo aberto · mantido por Jefferson · <a href="#">github.com/jeffersonsc</a>
+  </div>
+</footer>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

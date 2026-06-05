@@ -4,10 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-**Church Audio Tech** — static bilingual-ish site for church audio operators. Two parallel content tracks, both deployed from the same Vercel project:
+**Church Audio Tech** — static bilingual-ish site for church audio operators. Three parallel content tracks, all deployed from the same Vercel project:
 
 - **Trilha 1 / Iniciante (`/curso/`)** — beginner course based on `apostila_curso_audio.pdf`. 6 blocos: como o som funciona, níveis de sinal, cabos, impedância, mesa de som, equipamentos além. PT-only.
-- **Trilha 2 / Intermediário (`/pt/`, `/en/`)** — visual guide on Open Sound Meter (measurement and alignment). 15 infographics planned, first 5 are complete in both PT and EN.
+- **Trilha 2 / Intermediário (`/pt/`, `/en/`)** — visual guide on Open Sound Meter (measurement and alignment). 15 infographics + posicionamento físico (16). PT complete, EN only first 5.
+- **Trilha 3 / DSP avançado (`/dsp/`)** — "Áudio em Rust — BR": 11 módulos pra construir plugins/DSPs em Rust, com trilhas paralelas Rust + FAUST a partir do módulo 4. Plus `eq-cookbook-pt.html` (RBJ Cookbook em PT) e `referencias.html`. **Estilo visual próprio** (warm-dark `#0a0908`/`#d4704a`, Fraunces + Inter Tight + JetBrains Mono) — não usa `style.css` raiz. Cada HTML é autocontido com `<style>` inline; o `styles.css` da pasta existe como referência mas não é carregado.
 
 Plus `/materiais/` for PDF downloads (apostila + checklist for the in-person consult visits).
 

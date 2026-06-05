@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 03 — Arquiteturas de Áudio do SO | Rust para Áudio</title>
+<meta name="description" content="O que tá rolando debaixo do cpal. PortAudio, JACK, PipeWire, ALSA, WASAPI, CoreAudio explicados com foco prático em Linux.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Áudio em Rust — BR
+   Estilos compartilhados entre todos os módulos
+   ============================================================ */
+
+:root {
+  --bg: #0a0908;
+  --bg-elevated: #12100f;
+  --bg-code: #161413;
+  --border: #2a2624;
+  --border-strong: #3d3734;
+  --text: #e8e3dc;
+  --text-muted: #9a918a;
+  --text-dim: #6b635d;
+  --accent: #d4704a;
+  --accent-bright: #e8825a;
+  --accent-dim: #5c3120;
+  --warning: #c9a961;
+  --success: #7ea87e;
+  --danger: #c46a5a;
+  --link: #d4704a;
+  --selection: #5c3120;
+
+  /* Trilhas (usado em módulos com comparação Rust/FAUST) */
+  --track-rust: #d4704a;
+  --track-rust-dim: #5c3120;
+  --track-faust: #7ab0c4;
+  --track-faust-dim: #2a4550;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter Tight', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  --max-width: 780px;
+  --wide-width: 1100px;
+  --tracks-width: 1240px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+::selection { background: var(--selection); color: var(--text); }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 17px;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+}
+
+/* === HEADER === */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 9, 8, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  max-width: var(--tracks-width);
+  margin: 0 auto;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.header-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* === HERO === */
+.hero {
+  max-width: var(--tracks-width);
+  margin: 0 auto;
+  padding: 80px 32px 60px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-label::before {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 96px);
+  line-height: 0.95;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin-bottom: 32px;
+  max-width: 1000px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+}
+
+.hero-subtitle {
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  max-width: 680px;
+  margin-bottom: 48px;
+  font-weight: 400;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.meta-value {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--text);
+  font-style: italic;
+}
+
+/* === TRACKS INDICATOR (módulos com trilhas paralelas) === */
+.tracks-indicator {
+  display: flex;
+  gap: 20px;
+  margin-top: 32px;
+  padding: 20px 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.track-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.track-badge.rust .track-dot { background: var(--track-rust); box-shadow: 0 0 10px var(--track-rust); }
+.track-badge.faust .track-dot { background: var(--track-faust); box-shadow: 0 0 10px var(--track-faust); }
+
+.track-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.track-badge.rust span:last-child { color: var(--track-rust); }
+.track-badge.faust span:last-child { color: var(--track-faust); }
+
+/* === TOC === */
+.toc {
+  max-width: var(--max-width);
+  margin: 60px auto 80px;
+  padding: 0 32px;
+  position: relative;
+  z-index: 2;
+}
+
+.toc-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.toc-list {
+  list-style: none;
+  counter-reset: toc-counter;
+}
+
+.toc-list li {
+  counter-increment: toc-counter;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+}
+
+.toc-list li:hover { border-bottom-color: var(--accent); }
+
+.toc-list li::before {
+  content: counter(toc-counter, decimal-leading-zero);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  min-width: 32px;
+}
+
+.toc-list a {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 17px;
+  flex: 1;
+  transition: color 0.2s;
+}
+
+.toc-list a:hover { color: var(--accent); }
+
+/* === ARTICLE === */
+article {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 32px;
+  position: relative;
+  z-index: 2;
+}
+
+.tracks-section { max-width: var(--tracks-width); }
+
+section {
+  padding: 80px 0;
+  border-top: 1px solid var(--border);
+}
+
+section:first-of-type { border-top: none; }
+
+.section-number {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+  display: block;
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1.05;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 32px;
+  color: var(--text);
+}
+
+h2 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin-top: 48px;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+h4 {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 32px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+p {
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+.lead {
+  font-size: 21px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-weight: 300;
+  margin-bottom: 40px;
+}
+
+.lead em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-dim);
+  transition: border-color 0.2s;
+}
+
+a:hover { border-bottom-color: var(--accent); }
+
+strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+em { font-style: italic; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--bg-code);
+  padding: 2px 7px;
+  border-radius: 3px;
+  color: var(--accent-bright);
+  border: 1px solid var(--border);
+}
+
+/* === CALLOUTS === */
+.callout {
+  margin: 32px 0;
+  padding: 24px 28px;
+  background: var(--bg-elevated);
+  border-left: 3px solid var(--accent);
+  position: relative;
+}
+
+.callout-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.callout p:last-child { margin-bottom: 0; }
+
+.callout.warning { border-left-color: var(--warning); }
+.callout.warning .callout-title { color: var(--warning); }
+.callout.success { border-left-color: var(--success); }
+.callout.success .callout-title { color: var(--success); }
+.callout.danger { border-left-color: var(--danger); }
+.callout.danger .callout-title { color: var(--danger); }
+
+/* === CODE BLOCKS === */
+.code-block {
+  margin: 28px 0;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.code-header {
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.code-lang { color: var(--accent); }
+
+pre {
+  padding: 20px 24px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Syntax highlighting tokens */
+.tk-kw { color: #d4704a; font-weight: 500; }
+.tk-fn { color: #c9a961; }
+.tk-str { color: #7ea87e; }
+.tk-num { color: #b08db0; }
+.tk-cmt { color: #6b635d; font-style: italic; }
+.tk-type { color: #7ab0c4; }
+.tk-op { color: #9a918a; }
+
+/* === LISTS === */
+ul, ol {
+  margin: 20px 0;
+  padding-left: 24px;
+}
+
+li {
+  margin-bottom: 10px;
+  padding-left: 8px;
+}
+
+ul li::marker { color: var(--accent); }
+ol li::marker {
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* === TABLES === */
+.table-wrap {
+  margin: 32px 0;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+th {
+  background: var(--bg-elevated);
+  padding: 12px 16px;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+tr:last-child td { border-bottom: none; }
+
+/* === FIGURES === */
+.figure {
+  margin: 40px 0;
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.figure-caption {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-dim);
+  font-style: italic;
+  font-family: var(--font-display);
+}
+
+.svg-figure, .waveform-svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* === FORMULAS === */
+.formula {
+  margin: 32px 0;
+  padding: 28px 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  text-align: center;
+  overflow-x: auto;
+  color: var(--text);
+  line-height: 2;
+}
+
+.formula-caption {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-dim);
+  margin-top: 12px;
+  text-align: center;
+}
+
+/* === TRACKS (Rust/FAUST lado a lado) === */
+.tracks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin: 40px 0;
+}
+
+.track {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+
+.track-header {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.track.rust .track-header {
+  background: rgba(212, 112, 74, 0.08);
+  border-bottom-color: var(--track-rust-dim);
+  color: var(--track-rust);
+}
+
+.track.faust .track-header {
+  background: rgba(122, 176, 196, 0.06);
+  border-bottom-color: var(--track-faust-dim);
+  color: var(--track-faust);
+}
+
+.track-header::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.track.rust .track-header::before {
+  background: var(--track-rust);
+  box-shadow: 0 0 8px var(--track-rust);
+}
+
+.track.faust .track-header::before {
+  background: var(--track-faust);
+  box-shadow: 0 0 8px var(--track-faust);
+}
+
+.track-body { padding: 24px 28px; }
+
+.track-body p { font-size: 16px; }
+.track-body p:last-child { margin-bottom: 0; }
+
+.track-body .code-block {
+  margin: 16px -28px;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+
+.track-body pre { font-size: 13px; }
+
+/* === EXPERIMENT === */
+.experiment {
+  margin: 48px 0;
+  padding: 32px;
+  background: linear-gradient(135deg, rgba(212, 112, 74, 0.04) 0%, rgba(212, 112, 74, 0) 100%);
+  border: 1px solid var(--accent-dim);
+  border-radius: 8px;
+}
+
+.experiment-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.experiment-label::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.experiment h3 {
+  margin-top: 0;
+  color: var(--text);
+}
+
+/* === GLOSSARY === */
+.glossary {
+  margin-top: 60px;
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.glossary-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-style: italic;
+  font-weight: 400;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.glossary dl dt {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  margin-top: 20px;
+  margin-bottom: 6px;
+  letter-spacing: 0.03em;
+}
+
+.glossary dl dt:first-child { margin-top: 0; }
+
+.glossary dl dd {
+  color: var(--text-muted);
+  font-size: 15px;
+  margin-bottom: 0;
+}
+
+/* === FOOTER === */
+footer {
+  max-width: var(--tracks-width);
+  margin: 120px auto 0;
+  padding: 60px 32px 60px;
+  border-top: 1px solid var(--border);
+  position: relative;
+  z-index: 2;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  margin-bottom: 48px;
+}
+
+.footer-next {
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  grid-column: span 2;
+}
+
+.footer-next-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.footer-next-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.footer-next-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.footer-next-desc {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.footer-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align: center;
+  letter-spacing: 0.05em;
+  padding-top: 40px;
+  border-top: 1px solid var(--border);
+}
+
+.footer-meta a {
+  color: var(--accent);
+  border-bottom: none;
+}
+
+/* === STACK DIAGRAM (específico do módulo 03 de arquiteturas) === */
+.stack-diagram {
+  margin: 40px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.stack-layer {
+  padding: 14px 20px;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.stack-layer:hover { border-color: var(--accent-dim); }
+
+.stack-layer-name {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.stack-layer-desc {
+  color: var(--text-dim);
+  font-size: 12px;
+  font-family: var(--font-body);
+}
+
+.stack-layer.app { background: rgba(212, 112, 74, 0.08); border-color: var(--accent-dim); }
+.stack-layer.app .stack-layer-name { color: var(--accent); }
+
+.stack-layer.abstraction { background: rgba(122, 176, 196, 0.06); border-color: var(--track-faust-dim); }
+.stack-layer.abstraction .stack-layer-name { color: var(--track-faust); }
+
+.stack-layer.hardware { background: rgba(126, 168, 126, 0.04); border-color: rgba(126, 168, 126, 0.2); }
+.stack-layer.hardware .stack-layer-name { color: var(--success); }
+
+/* === RESPONSIVE === */
+@media (max-width: 900px) {
+  .tracks {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 48px 24px 40px; }
+  .hero-meta { gap: 24px; }
+  .toc, article { padding: 0 24px; }
+  .header-inner { padding: 14px 24px; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-next { padding: 24px; }
+  footer { padding: 48px 24px; }
+  pre { padding: 16px; font-size: 13px; }
+  .code-block { margin: 20px -24px; border-radius: 0; border-left: none; border-right: none; }
+  .callout { padding: 20px; }
+  .experiment { padding: 24px; margin: 32px -24px; border-radius: 0; border-left: none; border-right: none; }
+  .track-body { padding: 20px 22px; }
+  .track-body .code-block { margin: 14px -22px; }
+  .formula { padding: 20px; font-size: 14px; margin: 24px -24px; border-radius: 0; border-left: none; border-right: none; }
+  .stack-layer { flex-direction: column; align-items: flex-start; gap: 4px; }
+}
+
+/* === ANIMATIONS === */
+@media (prefers-reduced-motion: no-preference) {
+  .hero > * {
+    opacity: 0;
+    animation: fadeUp 0.8s ease-out forwards;
+  }
+  .hero-label { animation-delay: 0.1s; }
+  .hero h1 { animation-delay: 0.2s; }
+  .hero-subtitle { animation-delay: 0.35s; }
+  .hero-meta { animation-delay: 0.5s; }
+  .tracks-indicator { animation-delay: 0.65s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <span class="brand-dot"></span>
+      Áudio em Rust — <em>BR</em>
+    </a>
+    <span class="header-meta">MÓDULO 03 / 11</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Módulo 03 — Stack do sistema</div>
+  <h1>Arquiteturas de áudio: o que <em>mora debaixo</em> do cpal.</h1>
+  <p class="hero-subtitle">Todo áudio que passa pelo teu programa atravessa várias camadas de software antes de chegar no hardware. Quem já usou PortAudio em C ou JACK no Linux sabe disso. Este módulo abre a caixa preta: do kernel até a tua aplicação, o que cada peça faz e quando você mexe em qual.</p>
+  <div class="hero-meta">
+    <div class="meta-item">
+      <span class="meta-label">Leitura</span>
+      <span class="meta-value">≈ 45 min</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Experimento</span>
+      <span class="meta-value">≈ 2 h</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Pré-requisito</span>
+      <span class="meta-value">Módulo 02 feito</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Entregável</span>
+      <span class="meta-value">Mapa mental da stack</span>
+    </div>
+  </div>
+</div>
+
+<nav class="toc" aria-label="Sumário do módulo">
+  <div class="toc-title">Sumário</div>
+  <ol class="toc-list">
+    <li><a href="#problema">Por que isso importa na prática</a></li>
+    <li><a href="#pilha">A pilha de áudio do Linux, da base ao topo</a></li>
+    <li><a href="#alsa">ALSA: o chão de fábrica</a></li>
+    <li><a href="#jack">JACK: o servidor pro-audio clássico</a></li>
+    <li><a href="#pipewire">PipeWire: o sucessor moderno</a></li>
+    <li><a href="#portaudio">PortAudio: a abstração cross-platform em C</a></li>
+    <li><a href="#outras">Windows e macOS: o que esperar</a></li>
+    <li><a href="#cpal">Onde o cpal se encaixa</a></li>
+    <li><a href="#exemplos">Rust direto em JACK e PipeWire</a></li>
+    <li><a href="#experimento">Experimento: mesmo app, três backends</a></li>
+    <li><a href="#glossario">Glossário</a></li>
+  </ol>
+</nav>
+
+<article>
+
+<section id="problema">
+<span class="section-number">§ 01</span>
+<h2>Por que isso <em>importa</em>.</h2>
+
+<p class="lead">No Módulo 02 você usou cpal como se fosse mágica. Programa roda, áudio flui. Mas quando algo dá errado — xrun inesperado, latência que não baixa, dispositivo que não aparece — você precisa saber <em>em que camada</em> o problema mora.</p>
+
+<p>Três exemplos concretos de quando esse conhecimento vira diferença prática:</p>
+
+<ul>
+  <li><strong>Sua aplicação Rust funciona bem no notebook, mas no mini-PC que vai virar produto final trava toda vez que alguém abre o browser.</strong> Provavelmente é conflito de clock entre PipeWire e sua app — se você souber, resolve em 5 minutos configurando sample rate fixo.</li>
+  <li><strong>Latência mínima que você consegue é 20ms por mais que diminua o block size.</strong> Provavelmente tem uma camada intermediária (PulseAudio emulation) adicionando buffer. Se você souber, pula essa camada indo direto no ALSA ou JACK.</li>
+  <li><strong>Você quer que teu plugin apareça como source no OBS sem precisar de cabo virtual.</strong> Isso é uma feature do JACK/PipeWire, não do cpal. Sabendo, você usa a API certa.</li>
+</ul>
+
+<p>Este módulo é o mapa. Quando terminar, você vai saber ler erros de áudio e escolher a camada certa pra cada problema.</p>
+
+<div class="callout">
+<div class="callout-title">Contexto: o que PortAudio resolve</div>
+<p>Se você já usou PortAudio em C (ou via bindings Python/Go), entende a necessidade: cada sistema operacional tem APIs de áudio diferentes, e escrever o mesmo programa pra Windows/Mac/Linux sem abstração é reescrever 3 vezes. PortAudio é uma biblioteca C que uniformiza isso desde 1999. cpal em Rust é o equivalente moderno, com a mesma ideia: <em>um callback, vários backends</em>.</p>
+</div>
+
+</section>
+
+<section id="pilha">
+<span class="section-number">§ 02</span>
+<h2>A <em>pilha</em> do Linux.</h2>
+
+<p>No Linux, áudio atravessa várias camadas, do hardware até a tua aplicação. Cada camada faz uma coisa específica. Entender a pilha é entender por que tanta coisa diferente existe.</p>
+
+<div class="stack-diagram">
+  <div class="stack-layer app">
+    <span class="stack-layer-name">Sua aplicação Rust (cpal / pipewire-rs / jack-rs)</span>
+    <span class="stack-layer-desc">onde você vive</span>
+  </div>
+  <div class="stack-layer abstraction">
+    <span class="stack-layer-name">PipeWire  /  JACK  /  PulseAudio</span>
+    <span class="stack-layer-desc">servidores de áudio</span>
+  </div>
+  <div class="stack-layer abstraction">
+    <span class="stack-layer-name">ALSA (biblioteca userspace + ioctl)</span>
+    <span class="stack-layer-desc">API padrão de áudio do Linux</span>
+  </div>
+  <div class="stack-layer hardware">
+    <span class="stack-layer-name">Kernel (driver snd_* + subsistema ALSA)</span>
+    <span class="stack-layer-desc">módulos do kernel</span>
+  </div>
+  <div class="stack-layer hardware">
+    <span class="stack-layer-name">Hardware (chip de áudio, interface USB)</span>
+    <span class="stack-layer-desc">o metal</span>
+  </div>
+</div>
+
+<p>O fluxo é de cima pra baixo quando você <em>toca</em> áudio, e de baixo pra cima quando <em>grava</em>. A camada de "servidores de áudio" é opcional no papel — você pode falar direto com ALSA — mas na prática todo sistema Linux moderno roda PipeWire ou PulseAudio, porque <strong>ALSA sozinha não permite múltiplas aplicações usarem o áudio ao mesmo tempo</strong>.</p>
+
+<h3>Por que tanta camada?</h3>
+
+<p>Historicamente o Linux teve várias soluções tentando resolver "múltiplos apps usando o áudio":</p>
+
+<ul>
+  <li><strong>OSS (Open Sound System)</strong> — primeira tentativa, anos 90. Limitado.</li>
+  <li><strong>ALSA (Advanced Linux Sound Architecture)</strong> — substituiu OSS, kernel 2.6 em diante. É a base hoje.</li>
+  <li><strong>aRts, ESD</strong> — servidores de som antigos do KDE e GNOME. Mortos.</li>
+  <li><strong>JACK (Jack Audio Connection Kit)</strong> — foco em pro-audio e baixa latência, mainstream desde ~2003. Ainda vivo.</li>
+  <li><strong>PulseAudio</strong> — padrão desktop de 2008 a ~2022. Facilidade sobre performance.</li>
+  <li><strong>PipeWire</strong> — unifica JACK + PulseAudio + ALSA num servidor só. Padrão atual.</li>
+</ul>
+
+<p>No Arch moderno (e distros derivadas) você roda <strong>PipeWire</strong> com plugins que emulam PulseAudio e JACK simultaneamente. Qualquer app escrito pra qualquer um dos três funciona sem mudança. É um feito técnico notável.</p>
+
+</section>
+
+<section id="alsa">
+<span class="section-number">§ 03</span>
+<h2>ALSA: o <em>chão</em> de fábrica.</h2>
+
+<p>ALSA é a API base de áudio do Linux. Vem duas partes:</p>
+
+<ul>
+  <li><strong>Módulos de kernel</strong> (<code>snd_usb_audio</code>, <code>snd_hda_intel</code>, etc.) — drivers que conversam com o hardware</li>
+  <li><strong>Biblioteca userspace</strong> (<code>libasound</code>) — API C que programas usam pra falar com os drivers</li>
+</ul>
+
+<p>ALSA expõe dispositivos como arquivos em <code>/dev/snd/</code>:</p>
+
+<div class="code-block">
+<div class="code-header"><span>terminal</span><span class="code-lang">bash</span></div>
+<pre><code>ls /dev/snd/
+<span class="tk-cmt"># controlC0  pcmC0D0c  pcmC0D0p  seq  timer</span>
+
+<span class="tk-cmt"># listar hardware</span>
+cat /proc/asound/cards
+aplay -l
+arecord -l</code></pre>
+</div>
+
+<p>Cada interface de áudio vira um "card" com "devices" dentro. USB Scarlett vira card 1, built-in do notebook vira card 0, e assim por diante.</p>
+
+<h3>Quando falar direto com ALSA</h3>
+
+<ul>
+  <li>Baixa latência extrema, pulando qualquer servidor de áudio</li>
+  <li>Sistema embarcado sem PipeWire/JACK rodando</li>
+  <li>Aplicações que precisam ter controle total do hardware (exclusive mode)</li>
+</ul>
+
+<h3>Problemas práticos de ALSA puro</h3>
+
+<ul>
+  <li><strong>Só uma aplicação por vez.</strong> Se Firefox tá tocando som, sua app não abre o dispositivo. (Tem o plugin <code>dmix</code> que resolve parcialmente, mas é limitado.)</li>
+  <li><strong>Configuração por arquivo texto confuso.</strong> <code>~/.asoundrc</code> tem sintaxe próprio, documentação obscura.</li>
+  <li><strong>Sem conceito de "patching" entre apps.</strong> Não dá pra pegar a saída de um app e mandar pra entrada de outro.</li>
+</ul>
+
+<p>Por isso, 99% das aplicações de áudio no Linux moderno passam por JACK ou PipeWire acima do ALSA.</p>
+
+</section>
+
+<section id="jack">
+<span class="section-number">§ 04</span>
+<h2>JACK: o servidor <em>pro-audio</em>.</h2>
+
+<p>JACK nasceu em 2002 com uma missão clara: baixa latência determinística e capacidade de "patchear" áudio entre aplicações como se fosse um mixer virtual.</p>
+
+<h3>O que JACK te dá</h3>
+
+<ul>
+  <li><strong>Clock único pra todas as apps.</strong> Todas tocam no mesmo sample rate, no mesmo block size, sincronizadas sample-accurate.</li>
+  <li><strong>Patching visual.</strong> Ferramentas como <code>qjackctl</code>, <code>patchage</code>, <code>qpwgraph</code> deixam você ligar saída de uma app na entrada de outra arrastando fios.</li>
+  <li><strong>Baixa latência previsível.</strong> Block sizes de 32, 64, 128 samples são normais.</li>
+  <li><strong>Protocolo aberto.</strong> Documentado, estável desde 2005.</li>
+</ul>
+
+<h3>Anatomia de um JACK client</h3>
+
+<p>Uma aplicação JACK chama-se <strong>client</strong>. Ela se conecta ao JACK server (daemon separado) e recebe:</p>
+
+<ul>
+  <li>Um callback chamado a cada bloco (mesmo conceito do cpal, mas mais rígido com as regras)</li>
+  <li>Portas de entrada e saída virtuais, que podem ser conectadas a outras portas na rede JACK</li>
+</ul>
+
+<div class="code-block">
+<div class="code-header"><span>conceito visual</span><span class="code-lang">diagrama</span></div>
+<pre><code>[ Microfone físico ] → ALSA → JACK "system:capture_1"
+                                        │
+                                        ↓ (você conecta)
+                              [ Sua app JACK ]
+                              porta_in → processa → porta_out
+                                                      │
+                                                      ↓ (você conecta)
+                                          JACK "system:playback_1" → ALSA → [ Fone ]</code></pre>
+</div>
+
+<p>Isso é poderoso. Você pode ter sua app Rust + Ardour (DAW) + OBS + Carla (host de plugins) todos rodando simultaneamente, patchados entre si, compartilhando o mesmo clock. Ferramenta fundamental pra produção de áudio no Linux.</p>
+
+<div class="callout">
+<div class="callout-title">Se você já usou JACK</div>
+<p>Provavelmente com <code>qjackctl</code>. A interface velha mas funcional pra configurar sample rate, block size, iniciar/parar o daemon e ver status. Hoje no PipeWire você nem precisa mais — o daemon já tá rodando, e você só usa <code>qpwgraph</code> pra patching.</p>
+</div>
+
+</section>
+
+<section id="pipewire">
+<span class="section-number">§ 05</span>
+<h2>PipeWire: o <em>sucessor</em>.</h2>
+
+<p>PipeWire apareceu em 2017 com uma ideia ambiciosa: substituir PulseAudio <em>e</em> JACK ao mesmo tempo, com um servidor só. Desde 2021-2022 é o padrão das principais distribuições (Fedora, Ubuntu 22.10+, Arch).</p>
+
+<h3>O que o PipeWire entrega</h3>
+
+<ul>
+  <li><strong>Compatibilidade com PulseAudio.</strong> Apps escritos pra PulseAudio (Firefox, Spotify, Discord) funcionam sem mudança.</li>
+  <li><strong>Compatibilidade com JACK.</strong> Apps escritos pra JACK (Ardour, Carla, REAPER via Wine) funcionam sem mudança.</li>
+  <li><strong>API nativa própria.</strong> Performance melhor que os dois modos de compat.</li>
+  <li><strong>Roteamento unificado.</strong> Patching no <code>qpwgraph</code> ou <code>helvum</code>, com apps PulseAudio e JACK aparecendo no mesmo grafo.</li>
+  <li><strong>Sessão por usuário.</strong> Não precisa ser root, não precisa iniciar daemon manualmente. Systemd user unit cuida de tudo.</li>
+  <li><strong>Áudio e vídeo.</strong> PipeWire também lida com captura de webcam e screencast — antes eram sistemas separados.</li>
+</ul>
+
+<h3>Checando seu PipeWire</h3>
+
+<div class="code-block">
+<div class="code-header"><span>terminal</span><span class="code-lang">bash</span></div>
+<pre><code><span class="tk-cmt"># Versão instalada</span>
+pipewire --version
+
+<span class="tk-cmt"># Módulos carregados (deve ter pulse e jack pra compat)</span>
+pw-cli ls Module | grep -E <span class="tk-str">"pulse|jack"</span>
+
+<span class="tk-cmt"># Sample rate e block size atuais</span>
+pw-metadata -n settings
+
+<span class="tk-cmt"># Listar todos os dispositivos e nodes</span>
+pw-cli ls Node</code></pre>
+</div>
+
+<h3>Ajustando pra baixa latência</h3>
+
+<p>Por padrão PipeWire usa block size de 1024 samples (21ms @ 48kHz) — bom pra navegação. Pra áudio pro, você quer 128 ou 64. Configuração persistente em <code>~/.config/pipewire/pipewire.conf.d/10-low-latency.conf</code>:</p>
+
+<div class="code-block">
+<div class="code-header"><span>~/.config/pipewire/pipewire.conf.d/10-low-latency.conf</span><span class="code-lang">conf</span></div>
+<pre><code>context.properties = {
+    default.clock.rate          = 48000
+    default.clock.allowed-rates = [ 44100 48000 96000 ]
+    default.clock.quantum       = 128
+    default.clock.min-quantum   = 32
+    default.clock.max-quantum   = 512
+}</code></pre>
+</div>
+
+<p>Restart do serviço:</p>
+
+<div class="code-block">
+<div class="code-header"><span>terminal</span><span class="code-lang">bash</span></div>
+<pre><code>systemctl --user restart pipewire pipewire-pulse wireplumber</code></pre>
+</div>
+
+<div class="callout warning">
+<div class="callout-title">Cuidado com a configuração persistente</div>
+<p>Quantum muito baixo (32, 48) cobra muito da CPU e pode causar xruns sistêmicos — não só na tua app, mas em Firefox, Discord, tudo que tá tocando áudio. Pra desenvolvimento, configure só quando for testar e volte ao normal depois.</p>
+</div>
+
+</section>
+
+<section id="portaudio">
+<span class="section-number">§ 06</span>
+<h2>PortAudio: a <em>ponte</em> cross-platform.</h2>
+
+<p>PortAudio é uma biblioteca C criada em 1999 pra resolver o problema: "como escrever um programa de áudio que rode em Windows, Mac e Linux sem reescrever 3 vezes?". Ela abstrai as APIs nativas de cada sistema atrás de uma interface única.</p>
+
+<h3>Como PortAudio funciona</h3>
+
+<p>Você escreve um callback em C. PortAudio garante que o callback é chamado:</p>
+
+<ul>
+  <li>Via <strong>WASAPI, ASIO, WDM/KS ou DirectSound</strong> no Windows</li>
+  <li>Via <strong>CoreAudio</strong> no macOS</li>
+  <li>Via <strong>ALSA, JACK ou OSS</strong> no Linux</li>
+</ul>
+
+<p>Mesma assinatura de callback, mesmo padrão de código, três sistemas. Foi revolucionário na época e ainda é muito usado. Muitas aplicações bem conhecidas usam PortAudio por baixo — Audacity, por exemplo.</p>
+
+<div class="callout success">
+<div class="callout-title">Se você já usou PortAudio</div>
+<p>Parabéns — você já tem 80% do modelo mental do cpal. A diferença é que cpal é Rust idiomático (ownership explícito, error handling com Result), não C com callbacks por ponteiro. A filosofia é idêntica: "um callback, vários backends escolhidos em tempo de execução."</p>
+</div>
+
+<h3>PortAudio ainda faz sentido hoje?</h3>
+
+<p>Em Rust, cpal é a escolha natural. Em C/C++, PortAudio segue relevante, especialmente pra projetos que precisam rodar em sistemas antigos ou embarcados onde cpal não compila. Se você mantém código legado em Go, C ou Python, vai continuar vendo PortAudio bastante.</p>
+
+<p>Comparação direta:</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>Aspecto</th><th>PortAudio (C)</th><th>cpal (Rust)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Lançamento</td><td>1999</td><td>2016</td></tr>
+    <tr><td>Cross-platform</td><td>Win/Mac/Linux</td><td>Win/Mac/Linux/Web/Android/iOS</td></tr>
+    <tr><td>Backends Linux</td><td>ALSA, JACK, OSS</td><td>ALSA, JACK (via feature)</td></tr>
+    <tr><td>API</td><td>Callbacks C, ponteiros</td><td>Closures Rust, ownership</td></tr>
+    <tr><td>Gestão de erro</td><td>Códigos de retorno</td><td>Result/Error</td></tr>
+    <tr><td>Popularidade</td><td>Massiva em C/C++</td><td>Crescente em Rust</td></tr>
+  </tbody>
+</table>
+</div>
+
+</section>
+
+<section id="outras">
+<span class="section-number">§ 07</span>
+<h2>Windows e macOS, <em>brevemente</em>.</h2>
+
+<p>Foco do módulo é Linux, mas vale saber o essencial das outras plataformas pra quando teu produto for distribuído.</p>
+
+<h3>Windows</h3>
+
+<ul>
+  <li><strong>WASAPI (Windows Audio Session API)</strong> — API padrão desde Vista. Razoável latência em exclusive mode (~5-10ms).</li>
+  <li><strong>ASIO (Audio Stream Input/Output)</strong> — API da Steinberg, baixíssima latência (&lt; 3ms). Driver por fabricante (Focusrite ASIO, RME ASIO). Licenciamento restritivo — pra incluir no teu produto precisa SDK.</li>
+  <li><strong>WDM/KS (Kernel Streaming)</strong> — mais direto ao driver. Performance boa, API complicada.</li>
+  <li><strong>DirectSound, MME</strong> — APIs antigas, ainda suportadas por compatibilidade. Latência ruim. Não use.</li>
+</ul>
+
+<p>cpal no Windows usa WASAPI por padrão. ASIO exige feature flag e o ASIO SDK da Steinberg baixado separadamente.</p>
+
+<h3>macOS</h3>
+
+<ul>
+  <li><strong>CoreAudio</strong> — a melhor stack de áudio comercial. Latência consistente, API bem desenhada, uma única coisa pra aprender.</li>
+  <li><strong>Audio Units (AU)</strong> — formato de plugin específico do macOS.</li>
+</ul>
+
+<p>cpal no macOS usa CoreAudio. Nada pra configurar na maioria dos casos — "funciona e ponto". Desenvolvedores de áudio adoram macOS por isso.</p>
+
+<div class="callout">
+<div class="callout-title">Pro teu projeto</div>
+<p>Desenvolvimento no Linux (PipeWire), distribuição pra Windows (WASAPI via cpal) e macOS (CoreAudio via cpal) é caminho viável. Os três sistemas hoje entregam latência razoável pra live streaming. Se um dia quiser competir em baixa latência extrema, aí entra ASIO no Windows e JACK direto no Linux.</p>
+</div>
+
+</section>
+
+<section id="cpal">
+<span class="section-number">§ 08</span>
+<h2>Onde o <em>cpal</em> se encaixa.</h2>
+
+<p>Agora a visão completa. cpal é uma camada de abstração Rust que roda em cima das APIs nativas:</p>
+
+<div class="stack-diagram">
+  <div class="stack-layer app">
+    <span class="stack-layer-name">Sua aplicação Rust</span>
+    <span class="stack-layer-desc">callback + lógica</span>
+  </div>
+  <div class="stack-layer app">
+    <span class="stack-layer-name">cpal (Cross-Platform Audio Library)</span>
+    <span class="stack-layer-desc">abstração Rust</span>
+  </div>
+  <div class="stack-layer abstraction">
+    <span class="stack-layer-name">ALSA (Linux)  |  CoreAudio (macOS)  |  WASAPI (Windows)</span>
+    <span class="stack-layer-desc">APIs nativas do SO</span>
+  </div>
+  <div class="stack-layer hardware">
+    <span class="stack-layer-name">Kernel + Driver + Hardware</span>
+    <span class="stack-layer-desc">o metal</span>
+  </div>
+</div>
+
+<p>Por padrão, cpal no Linux usa ALSA direto. Mas num sistema com PipeWire rodando, ALSA fala com PipeWire automaticamente (via plugin <code>pcm_pipewire</code>), então tua app cpal se comporta como client PipeWire sem saber.</p>
+
+<h3>Feature flags do cpal</h3>
+
+<p>Você pode ativar backends opcionais via Cargo:</p>
+
+<div class="code-block">
+<div class="code-header"><span>Cargo.toml</span><span class="code-lang">toml</span></div>
+<pre><code>[dependencies]
+<span class="tk-cmt"># cpal padrão (usa o default do sistema)</span>
+cpal = "0.15"
+
+<span class="tk-cmt"># cpal com JACK explícito (Linux)</span>
+cpal = { version = "0.15", features = [<span class="tk-str">"jack"</span>] }
+
+<span class="tk-cmt"># cpal com ASIO (Windows, precisa ASIO SDK)</span>
+cpal = { version = "0.15", features = [<span class="tk-str">"asio"</span>] }</code></pre>
+</div>
+
+<p>No código, você seleciona o host:</p>
+
+<div class="code-block">
+<div class="code-header"><span>selecionando backend</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">use</span> cpal::traits::HostTrait;
+<span class="tk-kw">use</span> cpal::HostId;
+
+<span class="tk-cmt">// Lista todos os hosts disponíveis no sistema</span>
+<span class="tk-kw">let</span> available = cpal::<span class="tk-fn">available_hosts</span>();
+<span class="tk-fn">println!</span>(<span class="tk-str">"{:?}"</span>, available);
+<span class="tk-cmt">// Linux típico: [Alsa, Jack]</span>
+
+<span class="tk-cmt">// Força usar JACK em vez do default</span>
+<span class="tk-kw">let</span> jack_host = cpal::<span class="tk-fn">host_from_id</span>(HostId::Jack)?;
+<span class="tk-kw">let</span> device = jack_host.<span class="tk-fn">default_input_device</span>().<span class="tk-fn">unwrap</span>();</code></pre>
+</div>
+
+</section>
+
+<section id="exemplos">
+<span class="section-number">§ 09</span>
+<h2>Rust direto em <em>JACK</em> e <em>PipeWire</em>.</h2>
+
+<p>Quando cpal não é suficiente, você pode ir direto na API. Isso vale quando você precisa de recursos específicos — patching programático, transport control no JACK, nodes customizados no PipeWire.</p>
+
+<h3>Trilha JACK: crate <code>jack</code></h3>
+
+<p>A crate <a href="https://crates.io/crates/jack"><code>jack</code></a> é o binding Rust pra libjack. API bem próxima do C original, mas com tipos Rust.</p>
+
+<div class="code-block">
+<div class="code-header"><span>Cargo.toml</span><span class="code-lang">toml</span></div>
+<pre><code>[dependencies]
+jack = "0.13"</code></pre>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>src/main.rs — JACK passthrough</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">use</span> jack::{Client, ClientOptions, ClosureProcessHandler,
+           Control, ProcessScope, AudioIn, AudioOut};
+
+<span class="tk-kw">fn</span> <span class="tk-fn">main</span>() -&gt; Result&lt;(), Box&lt;<span class="tk-kw">dyn</span> std::error::Error&gt;&gt; {
+    <span class="tk-cmt">// Conecta ao JACK server</span>
+    <span class="tk-kw">let</span> (client, _status) = Client::<span class="tk-fn">new</span>(
+        <span class="tk-str">"rust-passthrough"</span>,
+        ClientOptions::NO_START_SERVER,
+    )?;
+
+    <span class="tk-fn">println!</span>(<span class="tk-str">"Sample rate: {}"</span>, client.<span class="tk-fn">sample_rate</span>());
+    <span class="tk-fn">println!</span>(<span class="tk-str">"Buffer size: {}"</span>, client.<span class="tk-fn">buffer_size</span>());
+
+    <span class="tk-cmt">// Cria portas de entrada e saída</span>
+    <span class="tk-kw">let</span> in_port = client.<span class="tk-fn">register_port</span>(<span class="tk-str">"in_1"</span>, AudioIn::<span class="tk-fn">default</span>())?;
+    <span class="tk-kw">let</span> <span class="tk-kw">mut</span> out_port = client.<span class="tk-fn">register_port</span>(<span class="tk-str">"out_1"</span>, AudioOut::<span class="tk-fn">default</span>())?;
+
+    <span class="tk-cmt">// Callback</span>
+    <span class="tk-kw">let</span> process = <span class="tk-kw">move</span> |_: &amp;Client, ps: &amp;ProcessScope| -&gt; Control {
+        <span class="tk-kw">let</span> in_slice = in_port.<span class="tk-fn">as_slice</span>(ps);
+        <span class="tk-kw">let</span> out_slice = out_port.<span class="tk-fn">as_mut_slice</span>(ps);
+
+        <span class="tk-kw">for</span> (i, o) <span class="tk-kw">in</span> in_slice.<span class="tk-fn">iter</span>().<span class="tk-fn">zip</span>(out_slice.<span class="tk-fn">iter_mut</span>()) {
+            *o = *i * <span class="tk-num">0.5</span>; <span class="tk-cmt">// passthrough com -6dB</span>
+        }
+        Control::Continue
+    };
+
+    <span class="tk-kw">let</span> active_client = client.<span class="tk-fn">activate_async</span>(
+        (),
+        ClosureProcessHandler::<span class="tk-fn">new</span>(process),
+    )?;
+
+    <span class="tk-fn">println!</span>(<span class="tk-str">"Rodando. Conecte 'rust-passthrough:in_1' a algo via qpwgraph."</span>);
+    std::thread::<span class="tk-fn">park</span>();
+
+    active_client.<span class="tk-fn">deactivate</span>()?;
+    <span class="tk-kw">Ok</span>(())
+}</code></pre>
+</div>
+
+<p>Rode com <code>cargo run --release</code>. Abra <code>qpwgraph</code> e você vai ver "rust-passthrough" com portas <code>in_1</code> e <code>out_1</code> patchable. Conecta a saída do sistema na entrada do teu app, e a saída do teu app no sistema — áudio flui.</p>
+
+<h3>Trilha PipeWire: crate <code>pipewire-rs</code></h3>
+
+<p>A crate <a href="https://crates.io/crates/pipewire"><code>pipewire</code></a> é o binding oficial Rust. API mais baixo nível que a do JACK, mais poderosa, mas mais verbosa.</p>
+
+<div class="code-block">
+<div class="code-header"><span>Cargo.toml</span><span class="code-lang">toml</span></div>
+<pre><code>[dependencies]
+pipewire = "0.8"</code></pre>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>src/main.rs — listar nodes do PipeWire</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">use</span> pipewire::{main_loop::MainLoop, context::Context};
+
+<span class="tk-kw">fn</span> <span class="tk-fn">main</span>() -&gt; Result&lt;(), Box&lt;<span class="tk-kw">dyn</span> std::error::Error&gt;&gt; {
+    pipewire::<span class="tk-fn">init</span>();
+
+    <span class="tk-kw">let</span> main_loop = MainLoop::<span class="tk-fn">new</span>(<span class="tk-kw">None</span>)?;
+    <span class="tk-kw">let</span> context = Context::<span class="tk-fn">new</span>(&amp;main_loop)?;
+    <span class="tk-kw">let</span> core = context.<span class="tk-fn">connect</span>(<span class="tk-kw">None</span>)?;
+    <span class="tk-kw">let</span> registry = core.<span class="tk-fn">get_registry</span>()?;
+
+    <span class="tk-kw">let</span> _listener = registry
+        .<span class="tk-fn">add_listener_local</span>()
+        .<span class="tk-fn">global</span>(|global| {
+            <span class="tk-fn">println!</span>(
+                <span class="tk-str">"id={} type={} version={}"</span>,
+                global.id,
+                global.type_,
+                global.version,
+            );
+        })
+        .<span class="tk-fn">register</span>();
+
+    main_loop.<span class="tk-fn">run</span>();
+    <span class="tk-kw">Ok</span>(())
+}</code></pre>
+</div>
+
+<p>Esse exemplo lista todos os nodes do PipeWire rodando no sistema — sources, sinks, apps conectados. É o ponto de entrada pra qualquer coisa mais avançada: criar filter-nodes customizados, criar source virtual que seu app expõe como "microfone" pra outros apps, etc.</p>
+
+<div class="callout">
+<div class="callout-title">Quando usar JACK direto vs PipeWire direto vs cpal</div>
+<p><strong>cpal</strong>: a maior parte do tempo. Cross-platform, simples, suficiente. <strong>JACK</strong>: quando você quer teu app patchável com outros, visível no qpwgraph, e ainda ser Linux-compatível com sistemas que rodam JACK nativo (sem PipeWire). <strong>PipeWire direto</strong>: quando você precisa criar virtual devices, filter-nodes, ou qualquer coisa específica do ecossistema PipeWire.</p>
+</div>
+
+</section>
+
+<section id="experimento">
+<span class="section-number">§ 10</span>
+
+<div class="experiment">
+<div class="experiment-label">Experimento prático</div>
+<h3>Mesmo app, três backends.</h3>
+
+<p>Objetivo: rodar o passthrough do Módulo 02 com três configurações diferentes e medir a latência de cada. Sente na pele a diferença entre as camadas.</p>
+
+<h4>Configuração A — cpal default (ALSA via PipeWire)</h4>
+
+<p>É o que você já tem. Anote a latência medida no experimento do Módulo 02.</p>
+
+<h4>Configuração B — cpal com feature JACK explícita</h4>
+
+<p>Adicione a feature no <code>Cargo.toml</code> do teu projeto do Módulo 02:</p>
+
+<div class="code-block">
+<div class="code-header"><span>Cargo.toml</span><span class="code-lang">toml</span></div>
+<pre><code>[dependencies]
+cpal = { version = "0.15", features = [<span class="tk-str">"jack"</span>] }</code></pre>
+</div>
+
+<p>E modifique o início do <code>main()</code> pra forçar host JACK:</p>
+
+<div class="code-block">
+<div class="code-header"><span>mudança no main()</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">let</span> host = cpal::<span class="tk-fn">host_from_id</span>(cpal::HostId::Jack)?;
+<span class="tk-cmt">// resto do código igual</span></code></pre>
+</div>
+
+<p>Rode e meça a latência. Compare com a Configuração A. Deve ser similar no Arch moderno (PipeWire fornece os dois backends), mas em Ubuntu padrão ou outras distros a diferença pode ser grande.</p>
+
+<h4>Configuração C — JACK direto (crate jack)</h4>
+
+<p>Use o exemplo do passthrough JACK direto da Seção 9. Compile, rode, meça latência com o cabo loopback.</p>
+
+<h4>Tabela de resultados</h4>
+
+<p>Anote os valores encontrados. Algo assim:</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>Backend</th><th>Latência round-trip</th><th>Observações</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>A. cpal default</td><td>__ ms</td><td>quantum do PipeWire: __</td></tr>
+    <tr><td>B. cpal + feature jack</td><td>__ ms</td><td>via JACK emulation</td></tr>
+    <tr><td>C. crate jack direto</td><td>__ ms</td><td>JACK nativo</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>Em teoria, as três deveriam dar latências parecidas no PipeWire moderno — ele unifica tudo bem. Se houver diferenças grandes, algum ajuste está diferente (sample rate, quantum, exclusive mode). Isso é aprendizado: você está sentindo na prática onde a latência mora.</p>
+
+<div class="callout success">
+<div class="callout-title">O que você aprendeu ao fazer isso</div>
+<p>Agora você <em>sente</em> a stack. Sabe que cpal é abstração, não mágica. Sabe trocar entre ALSA, JACK e PipeWire conforme a necessidade. E quando teu código der problema de latência no futuro, você tem o mapa mental pra debugar em qual camada olhar primeiro.</p>
+</div>
+
+</div>
+
+</section>
+
+<section id="glossario">
+<div class="glossary">
+<div class="glossary-title">Glossário</div>
+<dl>
+  <dt>ALSA</dt>
+  <dd>Advanced Linux Sound Architecture. API base de áudio do Linux, kernel + biblioteca userspace.</dd>
+
+  <dt>JACK</dt>
+  <dd>Jack Audio Connection Kit. Servidor de áudio focado em baixa latência e patching entre aplicações.</dd>
+
+  <dt>PulseAudio</dt>
+  <dd>Servidor de áudio desktop padrão de 2008 a ~2022. Facilidade sobre performance. Substituído por PipeWire.</dd>
+
+  <dt>PipeWire</dt>
+  <dd>Servidor moderno que substitui PulseAudio + JACK num produto só. Padrão atual nas principais distros Linux.</dd>
+
+  <dt>WASAPI</dt>
+  <dd>Windows Audio Session API. API padrão de áudio no Windows desde Vista.</dd>
+
+  <dt>ASIO</dt>
+  <dd>Audio Stream Input/Output. API da Steinberg, baixíssima latência, exige driver específico do fabricante.</dd>
+
+  <dt>CoreAudio</dt>
+  <dd>Stack de áudio do macOS. Bem desenhada, latência boa por default, usada também em iOS.</dd>
+
+  <dt>PortAudio</dt>
+  <dd>Biblioteca C cross-platform, precursora conceitual do cpal. Presente desde 1999.</dd>
+
+  <dt>NODE (PipeWire)</dt>
+  <dd>Unidade fundamental do PipeWire. Um node pode ser source, sink, ou filter. Aplicações criam nodes.</dd>
+
+  <dt>CLIENT (JACK)</dt>
+  <dd>Aplicação conectada ao JACK server. Tem portas que podem ser patchadas.</dd>
+
+  <dt>QUANTUM (PipeWire)</dt>
+  <dd>Block size do PipeWire. Padrão 1024, baixo pra pro-audio: 128 ou 256.</dd>
+
+  <dt>qpwgraph / helvum</dt>
+  <dd>Ferramentas gráficas pra patching visual no PipeWire. Substituem o qjackctl do mundo JACK.</dd>
+
+  <dt>FEATURE FLAG (Cargo)</dt>
+  <dd>Mecanismo de Cargo pra ativar funcionalidades opcionais em crates. No cpal: jack, asio.</dd>
+</dl>
+</div>
+</section>
+
+</article>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-next">
+      <div class="footer-next-label">Próximo módulo</div>
+      <div class="footer-next-title">04 — Filtros: o <em>biquad</em> e seus filhos</div>
+      <div class="footer-next-desc">Agora sim, DSP. A matemática mínima do biquad implementada em duas trilhas paralelas — Rust do zero e FAUST — pra você escolher a ferramenta certa pra cada situação.</div>
+    </div>
+  </div>
+  <div class="footer-meta">
+    Áudio em Rust — BR · material de estudo aberto · mantido por Jefferson · <a href="#">github.com/jeffersonsc</a>
+  </div>
+</footer>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

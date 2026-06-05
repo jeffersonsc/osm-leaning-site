@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Áudio em Rust — BR | Trilha DSP avançado · Church Audio Tech</title>
+<meta name="description" content="Material de estudo brasileiro sobre áudio digital em Rust. Onze módulos do som à amostra, biquad, dinâmicas, threading lock-free, grafo do mixer, RTP/AES67 e PTP.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0908;
+  --bg-elevated: #12100f;
+  --bg-code: #161413;
+  --border: #2a2624;
+  --border-strong: #3d3734;
+  --text: #e8e3dc;
+  --text-muted: #9a918a;
+  --text-dim: #6b635d;
+  --accent: #d4704a;
+  --accent-bright: #e8825a;
+  --accent-dim: #5c3120;
+  --warning: #c9a961;
+  --success: #7ea87e;
+  --danger: #c46a5a;
+  --link: #d4704a;
+  --track-rust: #d4704a;
+  --track-faust: #7ab0c4;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter Tight', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  --max-width: 1100px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+::selection { background: var(--accent-dim); color: var(--text); }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 17px;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 9, 8, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.crumb {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.crumb:hover { color: var(--accent); }
+
+.hero {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 96px 32px 60px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-label::before {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 88px);
+  line-height: 0.96;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin-bottom: 32px;
+  max-width: 900px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+}
+
+.hero-subtitle {
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  max-width: 720px;
+  margin-bottom: 40px;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.meta-item { display: flex; flex-direction: column; gap: 4px; }
+
+.meta-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.meta-value {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--text);
+  font-style: italic;
+}
+
+section.intro,
+section.modules,
+section.extras {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 32px;
+  position: relative;
+  z-index: 2;
+}
+
+section.intro { padding-bottom: 80px; }
+
+section.intro p {
+  font-size: 18px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  max-width: 720px;
+}
+
+section.intro p strong { color: var(--text); font-weight: 600; }
+
+.callout {
+  margin-top: 32px;
+  padding: 22px 26px;
+  background: var(--bg-elevated);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  max-width: 720px;
+}
+
+.callout-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+}
+
+.callout p { color: var(--text-muted); font-size: 16px; margin: 0; }
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-label .count { color: var(--accent); }
+
+.modules { padding-bottom: 80px; }
+
+.module-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.module-card {
+  background: var(--bg-elevated);
+  padding: 28px 32px;
+  text-decoration: none;
+  color: var(--text);
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 28px;
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.module-card:hover { background: #1a1716; }
+
+.module-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+
+.module-body h3 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.module-body h3 em {
+  font-style: italic;
+  color: var(--accent);
+  font-weight: 300;
+}
+
+.module-body p {
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.module-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.module-tag.implementado {
+  background: rgba(126, 168, 126, 0.12);
+  color: var(--success);
+  border: 1px solid rgba(126, 168, 126, 0.3);
+}
+
+.module-tag.conceitual {
+  background: rgba(201, 169, 97, 0.10);
+  color: var(--warning);
+  border: 1px solid rgba(201, 169, 97, 0.25);
+}
+
+.extras { padding-bottom: 80px; }
+
+.extras-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.extra-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 28px;
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.15s, transform 0.15s;
+  display: block;
+}
+
+.extra-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+.extra-card .tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 12px;
+}
+
+.extra-card h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.extra-card h3 em { font-style: italic; color: var(--accent); font-weight: 300; }
+
+.extra-card p {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin: 0;
+}
+
+footer {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 48px 32px 64px;
+  border-top: 1px solid var(--border);
+  position: relative;
+  z-index: 2;
+}
+
+.footer-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-meta a { color: var(--text-muted); text-decoration: none; }
+.footer-meta a:hover { color: var(--accent); }
+
+@media (max-width: 800px) {
+  .module-card { grid-template-columns: 1fr; gap: 10px; padding: 24px; }
+  .module-num { font-size: 11px; }
+  .module-tag { justify-self: start; }
+  .extras-grid { grid-template-columns: 1fr; }
+  .hero { padding: 64px 24px 40px; }
+  .hero-meta { gap: 28px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <span class="brand-dot"></span>
+      Áudio em Rust — <em>BR</em>
+    </a>
+    <a href="../index.html" class="crumb">← Church Audio Tech</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Trilha 3 · DSP avançado</div>
+  <h1>Construir <em>plugins</em> e DSPs em Rust, do som à amostra.</h1>
+  <p class="hero-subtitle">Onze módulos em português brasileiro pra quem quer ir além de operar e ajustar — pra quem quer <em>construir</em>. Biquad, fader, dinâmicas, threading lock-free, grafo do mixer, RTP/AES67 e PTP. Linguagem direta, código que roda.</p>
+  <div class="hero-meta">
+    <div class="meta-item">
+      <span class="meta-label">Módulos</span>
+      <span class="meta-value">11 + cookbook + referências</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Trilhas paralelas</span>
+      <span class="meta-value">Rust + FAUST</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Pré-requisito</span>
+      <span class="meta-value">Rust instalado</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Licença</span>
+      <span class="meta-value">CC-BY-SA · código MIT</span>
+    </div>
+  </div>
+</div>
+
+<section class="intro">
+  <p><strong>Quem é isso pra:</strong> operador que já entende mesa e sistema (Trilhas 1 e 2) e quer começar a escrever DSP de verdade. Quem quer construir EQ, gate, compressor, crossover — em Rust, com base sólida.</p>
+  <p>A partir do <strong>Módulo 04</strong>, conteúdos de DSP aparecem em duas trilhas simultâneas: <strong style="color: var(--track-rust);">Rust</strong> (implementação manual, controle total) e <strong style="color: var(--track-faust);">FAUST</strong> (DSL pra DSP, prototipagem rápida, gera Rust otimizado). Ambas complementares. Rust é o motor, FAUST é o acelerador.</p>
+
+  <div class="callout">
+    <div class="callout-title">Status do material</div>
+    <p><strong style="color: var(--success);">Módulos 01–05</strong>: implementados, com código rodável (cargo run). <strong style="color: var(--warning);">Módulos 06–11</strong>: modelo conceitual completo (esqueleto Rust + decisões arquiteturais), implementação pendente.</p>
+  </div>
+</section>
+
+<section class="modules">
+  <div class="section-label">
+    <span>Os onze módulos</span>
+    <span class="count">11 / 11</span>
+  </div>
+
+  <div class="module-grid">
+
+    <a href="modulo-01.html" class="module-card">
+      <div class="module-num">01 / 11</div>
+      <div class="module-body">
+        <h3>Áudio digital: do som à <em>amostra</em></h3>
+        <p>Sample rate, Nyquist, aliasing, quantização, PCM, float vs int. Experimento: gerar e salvar WAV em Rust com hound.</p>
+      </div>
+      <div class="module-tag implementado">Implementado</div>
+    </a>
+
+    <a href="modulo-02.html" class="module-card">
+      <div class="module-num">02 / 11</div>
+      <div class="module-body">
+        <h3>O bloco e o <em>callback</em></h3>
+        <p>Por que áudio é processado em blocos, audio callback, latência round-trip. Crate cpal na prática, medindo latência no seu setup.</p>
+      </div>
+      <div class="module-tag implementado">Implementado</div>
+    </a>
+
+    <a href="modulo-03.html" class="module-card">
+      <div class="module-num">03 / 11</div>
+      <div class="module-body">
+        <h3>Arquiteturas de áudio do <em>SO</em></h3>
+        <p>O que mora debaixo do cpal: ALSA, JACK, PipeWire, WASAPI, CoreAudio. Foco em Linux porque é onde o áudio profissional vive hoje.</p>
+      </div>
+      <div class="module-tag implementado">Implementado</div>
+    </a>
+
+    <a href="modulo-04.html" class="module-card">
+      <div class="module-num">04 / 11</div>
+      <div class="module-body">
+        <h3>Filtros: o <em>biquad</em> e seus filhos</h3>
+        <p>O bloco universal de EQ, crossover, síntese. Coeficientes RBJ Cookbook, formas direta I/II, estabilidade. Trilhas Rust + FAUST.</p>
+      </div>
+      <div class="module-tag implementado">Implementado</div>
+    </a>
+
+    <a href="modulo-05.html" class="module-card">
+      <div class="module-num">05 / 11</div>
+      <div class="module-body">
+        <h3>Fader, <em>smoothing</em> e pan</h3>
+        <p>Smoothing exponencial pra evitar zippers, leis de pan (linear/constant power), gain staging. Trilhas Rust + FAUST.</p>
+      </div>
+      <div class="module-tag implementado">Implementado</div>
+    </a>
+
+    <a href="modulo-06.html" class="module-card">
+      <div class="module-num">06 / 11</div>
+      <div class="module-body">
+        <h3>Dinâmicas: <em>gate</em> e compressor</h3>
+        <p>Threshold, ratio, attack, release, knee, makeup gain. Como gate cala o baixo e compressor amassa o alto. Modelo conceitual completo.</p>
+      </div>
+      <div class="module-tag conceitual">Conceitual</div>
+    </a>
+
+    <a href="modulo-07.html" class="module-card">
+      <div class="module-num">07 / 11</div>
+      <div class="module-body">
+        <h3>Buses, summing e <em>headroom</em></h3>
+        <p>32 canais entram, 2 canais saem — somar com graça. Gain staging, arquitetura de roteamento, float headroom no caminho do somatório.</p>
+      </div>
+      <div class="module-tag conceitual">Conceitual</div>
+    </a>
+
+    <a href="modulo-08.html" class="module-card">
+      <div class="module-num">08 / 11</div>
+      <div class="module-body">
+        <h3>Threading e <em>lock-free</em></h3>
+        <p>Thread de áudio nunca pode esperar. Atomics, ring buffers, padrões de mensagem entre UI e RT. Base arquitetural de tudo no mixer.</p>
+      </div>
+      <div class="module-tag conceitual">Conceitual</div>
+    </a>
+
+    <a href="modulo-09.html" class="module-card">
+      <div class="module-num">09 / 11</div>
+      <div class="module-body">
+        <h3>Roteamento: o <em>grafo</em> do mixer</h3>
+        <p>Qualquer canal pra qualquer destino, sem reconfiguração e sem glitch. Topologia do mixer como DAG, ordenação topológica, slots.</p>
+      </div>
+      <div class="module-tag conceitual">Conceitual</div>
+    </a>
+
+    <a href="modulo-10.html" class="module-card">
+      <div class="module-num">10 / 11</div>
+      <div class="module-body">
+        <h3>RTP e <em>AES67</em></h3>
+        <p>Áudio pela rede ethernet. Dante, RAVENNA, Livewire — tudo é RTP em multicast. AES67 como o padrão que faz todo mundo se entender.</p>
+      </div>
+      <div class="module-tag conceitual">Conceitual</div>
+    </a>
+
+    <a href="modulo-11.html" class="module-card">
+      <div class="module-num">11 / 11</div>
+      <div class="module-body">
+        <h3>PTP: o <em>relógio</em> que importa</h3>
+        <p>Sample-accurate sync entre dispositivos pela LAN. PTP IEEE 1588, accuracy de microsegundos, master clock, slave clock, boundary clock.</p>
+      </div>
+      <div class="module-tag conceitual">Conceitual</div>
+    </a>
+
+  </div>
+</section>
+
+<section class="extras">
+  <div class="section-label">
+    <span>Material complementar</span>
+    <span class="count">02</span>
+  </div>
+
+  <div class="extras-grid">
+
+    <a href="eq-cookbook-pt.html" class="extra-card">
+      <div class="tag">Tradução pedagógica</div>
+      <h3>EQ <em>Cookbook</em> em português</h3>
+      <p>Fórmulas-receita para coeficientes biquad (low-pass, high-pass, peak, shelf, notch, all-pass). RBJ Cookbook em PT, com derivações comentadas.</p>
+    </a>
+
+    <a href="referencias.html" class="extra-card">
+      <div class="tag">Catálogo vivo</div>
+      <h3>Referências &amp; <em>benchmarks</em></h3>
+      <p>Mapa do que existe lá fora: concorrentes, inspirações de produto e UX, tecnologias pra adotar. O que copiar, o que evitar, o que diferencia.</p>
+    </a>
+
+  </div>
+</section>
+
+<footer>
+  <div class="footer-meta">
+    <span>Áudio em Rust — BR · material de estudo aberto</span>
+    <span>Mantido por Jefferson · <a href="../index.html">voltar ao hub</a></span>
+  </div>
+</footer>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

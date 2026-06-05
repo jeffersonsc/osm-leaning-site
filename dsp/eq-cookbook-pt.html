@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EQ Cookbook em Português | Áudio em Rust — BR</title>
+<meta name="description" content="Tradução comentada do clássico Audio EQ Cookbook de Robert Bristow-Johnson — fórmulas canônicas de filtros biquad para áudio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Áudio em Rust — BR
+   Estilos compartilhados entre todos os módulos
+   ============================================================ */
+
+:root {
+  --bg: #0a0908;
+  --bg-elevated: #12100f;
+  --bg-code: #161413;
+  --border: #2a2624;
+  --border-strong: #3d3734;
+  --text: #e8e3dc;
+  --text-muted: #9a918a;
+  --text-dim: #6b635d;
+  --accent: #d4704a;
+  --accent-bright: #e8825a;
+  --accent-dim: #5c3120;
+  --warning: #c9a961;
+  --success: #7ea87e;
+  --danger: #c46a5a;
+  --link: #d4704a;
+  --selection: #5c3120;
+
+  /* Trilhas (usado em módulos com comparação Rust/FAUST) */
+  --track-rust: #d4704a;
+  --track-rust-dim: #5c3120;
+  --track-faust: #7ab0c4;
+  --track-faust-dim: #2a4550;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter Tight', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  --max-width: 780px;
+  --wide-width: 1100px;
+  --tracks-width: 1240px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+::selection { background: var(--selection); color: var(--text); }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 17px;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+}
+
+/* === HEADER === */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 9, 8, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  max-width: var(--tracks-width);
+  margin: 0 auto;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.header-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* === HERO === */
+.hero {
+  max-width: var(--tracks-width);
+  margin: 0 auto;
+  padding: 80px 32px 60px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-label::before {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 96px);
+  line-height: 0.95;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin-bottom: 32px;
+  max-width: 1000px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+}
+
+.hero-subtitle {
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  max-width: 680px;
+  margin-bottom: 48px;
+  font-weight: 400;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.meta-value {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--text);
+  font-style: italic;
+}
+
+/* === TRACKS INDICATOR (módulos com trilhas paralelas) === */
+.tracks-indicator {
+  display: flex;
+  gap: 20px;
+  margin-top: 32px;
+  padding: 20px 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.track-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.track-badge.rust .track-dot { background: var(--track-rust); box-shadow: 0 0 10px var(--track-rust); }
+.track-badge.faust .track-dot { background: var(--track-faust); box-shadow: 0 0 10px var(--track-faust); }
+
+.track-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.track-badge.rust span:last-child { color: var(--track-rust); }
+.track-badge.faust span:last-child { color: var(--track-faust); }
+
+/* === TOC === */
+.toc {
+  max-width: var(--max-width);
+  margin: 60px auto 80px;
+  padding: 0 32px;
+  position: relative;
+  z-index: 2;
+}
+
+.toc-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.toc-list {
+  list-style: none;
+  counter-reset: toc-counter;
+}
+
+.toc-list li {
+  counter-increment: toc-counter;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+}
+
+.toc-list li:hover { border-bottom-color: var(--accent); }
+
+.toc-list li::before {
+  content: counter(toc-counter, decimal-leading-zero);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  min-width: 32px;
+}
+
+.toc-list a {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 17px;
+  flex: 1;
+  transition: color 0.2s;
+}
+
+.toc-list a:hover { color: var(--accent); }
+
+/* === ARTICLE === */
+article {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 32px;
+  position: relative;
+  z-index: 2;
+}
+
+.tracks-section { max-width: var(--tracks-width); }
+
+section {
+  padding: 80px 0;
+  border-top: 1px solid var(--border);
+}
+
+section:first-of-type { border-top: none; }
+
+.section-number {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+  display: block;
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1.05;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 32px;
+  color: var(--text);
+}
+
+h2 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin-top: 48px;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+h4 {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 32px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+p {
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+.lead {
+  font-size: 21px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-weight: 300;
+  margin-bottom: 40px;
+}
+
+.lead em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-dim);
+  transition: border-color 0.2s;
+}
+
+a:hover { border-bottom-color: var(--accent); }
+
+strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+em { font-style: italic; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--bg-code);
+  padding: 2px 7px;
+  border-radius: 3px;
+  color: var(--accent-bright);
+  border: 1px solid var(--border);
+}
+
+/* === CALLOUTS === */
+.callout {
+  margin: 32px 0;
+  padding: 24px 28px;
+  background: var(--bg-elevated);
+  border-left: 3px solid var(--accent);
+  position: relative;
+}
+
+.callout-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.callout p:last-child { margin-bottom: 0; }
+
+.callout.warning { border-left-color: var(--warning); }
+.callout.warning .callout-title { color: var(--warning); }
+.callout.success { border-left-color: var(--success); }
+.callout.success .callout-title { color: var(--success); }
+.callout.danger { border-left-color: var(--danger); }
+.callout.danger .callout-title { color: var(--danger); }
+
+/* === CODE BLOCKS === */
+.code-block {
+  margin: 28px 0;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.code-header {
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.code-lang { color: var(--accent); }
+
+pre {
+  padding: 20px 24px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Syntax highlighting tokens */
+.tk-kw { color: #d4704a; font-weight: 500; }
+.tk-fn { color: #c9a961; }
+.tk-str { color: #7ea87e; }
+.tk-num { color: #b08db0; }
+.tk-cmt { color: #6b635d; font-style: italic; }
+.tk-type { color: #7ab0c4; }
+.tk-op { color: #9a918a; }
+
+/* === LISTS === */
+ul, ol {
+  margin: 20px 0;
+  padding-left: 24px;
+}
+
+li {
+  margin-bottom: 10px;
+  padding-left: 8px;
+}
+
+ul li::marker { color: var(--accent); }
+ol li::marker {
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* === TABLES === */
+.table-wrap {
+  margin: 32px 0;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+th {
+  background: var(--bg-elevated);
+  padding: 12px 16px;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+tr:last-child td { border-bottom: none; }
+
+/* === FIGURES === */
+.figure {
+  margin: 40px 0;
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.figure-caption {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-dim);
+  font-style: italic;
+  font-family: var(--font-display);
+}
+
+.svg-figure, .waveform-svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* === FORMULAS === */
+.formula {
+  margin: 32px 0;
+  padding: 28px 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  text-align: center;
+  overflow-x: auto;
+  color: var(--text);
+  line-height: 2;
+}
+
+.formula-caption {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-dim);
+  margin-top: 12px;
+  text-align: center;
+}
+
+/* === TRACKS (Rust/FAUST lado a lado) === */
+.tracks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin: 40px 0;
+}
+
+.track {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+
+.track-header {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.track.rust .track-header {
+  background: rgba(212, 112, 74, 0.08);
+  border-bottom-color: var(--track-rust-dim);
+  color: var(--track-rust);
+}
+
+.track.faust .track-header {
+  background: rgba(122, 176, 196, 0.06);
+  border-bottom-color: var(--track-faust-dim);
+  color: var(--track-faust);
+}
+
+.track-header::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.track.rust .track-header::before {
+  background: var(--track-rust);
+  box-shadow: 0 0 8px var(--track-rust);
+}
+
+.track.faust .track-header::before {
+  background: var(--track-faust);
+  box-shadow: 0 0 8px var(--track-faust);
+}
+
+.track-body { padding: 24px 28px; }
+
+.track-body p { font-size: 16px; }
+.track-body p:last-child { margin-bottom: 0; }
+
+.track-body .code-block {
+  margin: 16px -28px;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+
+.track-body pre { font-size: 13px; }
+
+/* === EXPERIMENT === */
+.experiment {
+  margin: 48px 0;
+  padding: 32px;
+  background: linear-gradient(135deg, rgba(212, 112, 74, 0.04) 0%, rgba(212, 112, 74, 0) 100%);
+  border: 1px solid var(--accent-dim);
+  border-radius: 8px;
+}
+
+.experiment-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.experiment-label::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.experiment h3 {
+  margin-top: 0;
+  color: var(--text);
+}
+
+/* === GLOSSARY === */
+.glossary {
+  margin-top: 60px;
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.glossary-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-style: italic;
+  font-weight: 400;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.glossary dl dt {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  margin-top: 20px;
+  margin-bottom: 6px;
+  letter-spacing: 0.03em;
+}
+
+.glossary dl dt:first-child { margin-top: 0; }
+
+.glossary dl dd {
+  color: var(--text-muted);
+  font-size: 15px;
+  margin-bottom: 0;
+}
+
+/* === FOOTER === */
+footer {
+  max-width: var(--tracks-width);
+  margin: 120px auto 0;
+  padding: 60px 32px 60px;
+  border-top: 1px solid var(--border);
+  position: relative;
+  z-index: 2;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  margin-bottom: 48px;
+}
+
+.footer-next {
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  grid-column: span 2;
+}
+
+.footer-next-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.footer-next-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.footer-next-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.footer-next-desc {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.footer-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align: center;
+  letter-spacing: 0.05em;
+  padding-top: 40px;
+  border-top: 1px solid var(--border);
+}
+
+.footer-meta a {
+  color: var(--accent);
+  border-bottom: none;
+}
+
+/* === STACK DIAGRAM (específico do módulo 03 de arquiteturas) === */
+.stack-diagram {
+  margin: 40px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.stack-layer {
+  padding: 14px 20px;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.stack-layer:hover { border-color: var(--accent-dim); }
+
+.stack-layer-name {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.stack-layer-desc {
+  color: var(--text-dim);
+  font-size: 12px;
+  font-family: var(--font-body);
+}
+
+.stack-layer.app { background: rgba(212, 112, 74, 0.08); border-color: var(--accent-dim); }
+.stack-layer.app .stack-layer-name { color: var(--accent); }
+
+.stack-layer.abstraction { background: rgba(122, 176, 196, 0.06); border-color: var(--track-faust-dim); }
+.stack-layer.abstraction .stack-layer-name { color: var(--track-faust); }
+
+.stack-layer.hardware { background: rgba(126, 168, 126, 0.04); border-color: rgba(126, 168, 126, 0.2); }
+.stack-layer.hardware .stack-layer-name { color: var(--success); }
+
+/* === RESPONSIVE === */
+@media (max-width: 900px) {
+  .tracks {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 48px 24px 40px; }
+  .hero-meta { gap: 24px; }
+  .toc, article { padding: 0 24px; }
+  .header-inner { padding: 14px 24px; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-next { padding: 24px; }
+  footer { padding: 48px 24px; }
+  pre { padding: 16px; font-size: 13px; }
+  .code-block { margin: 20px -24px; border-radius: 0; border-left: none; border-right: none; }
+  .callout { padding: 20px; }
+  .experiment { padding: 24px; margin: 32px -24px; border-radius: 0; border-left: none; border-right: none; }
+  .track-body { padding: 20px 22px; }
+  .track-body .code-block { margin: 14px -22px; }
+  .formula { padding: 20px; font-size: 14px; margin: 24px -24px; border-radius: 0; border-left: none; border-right: none; }
+  .stack-layer { flex-direction: column; align-items: flex-start; gap: 4px; }
+}
+
+/* === ANIMATIONS === */
+@media (prefers-reduced-motion: no-preference) {
+  .hero > * {
+    opacity: 0;
+    animation: fadeUp 0.8s ease-out forwards;
+  }
+  .hero-label { animation-delay: 0.1s; }
+  .hero h1 { animation-delay: 0.2s; }
+  .hero-subtitle { animation-delay: 0.35s; }
+  .hero-meta { animation-delay: 0.5s; }
+  .tracks-indicator { animation-delay: 0.65s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+</style>
+
+<script>
+  MathJax = {
+    tex: {
+      inlineMath: [['\\(', '\\)']],
+      displayMath: [['$$', '$$']]
+    }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+<style>
+.translator-note {
+  background: rgba(122, 176, 196, 0.06);
+  border-left: 3px solid #7ab0c4;
+  padding: 14px 20px;
+  margin: 20px 0;
+  border-radius: 0 4px 4px 0;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #c4bdb5;
+}
+
+.translator-note-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #7ab0c4;
+  margin-bottom: 8px;
+}
+
+.attribution-card {
+  background: #161413;
+  border: 1px solid #2a2624;
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin: 28px 0;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 13px;
+  color: #9a918a;
+  line-height: 1.7;
+}
+
+.attribution-card strong {
+  color: #e8e3dc;
+  font-weight: 500;
+}
+
+.attribution-card a {
+  color: #7ab0c4;
+  text-decoration: none;
+  border-bottom: 1px dotted #7ab0c4;
+}
+
+.formula-display {
+  background: #0e0c0b;
+  border: 1px solid #2a2624;
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin: 16px 0;
+  overflow-x: auto;
+  font-size: 16px;
+  text-align: center;
+}
+
+.formula-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #c9a961;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.filter-card {
+  background: linear-gradient(180deg, #161413 0%, #1a1815 100%);
+  border: 1px solid #2a2624;
+  border-radius: 8px;
+  padding: 28px;
+  margin: 24px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.filter-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--filter-color, #d4704a);
+}
+
+.filter-card[data-filter="lpf"] { --filter-color: #7ab0c4; }
+.filter-card[data-filter="hpf"] { --filter-color: #d4704a; }
+.filter-card[data-filter="bpf1"], .filter-card[data-filter="bpf2"] { --filter-color: #c9a961; }
+.filter-card[data-filter="notch"] { --filter-color: #9a4a4a; }
+.filter-card[data-filter="apf"] { --filter-color: #7ea87e; }
+.filter-card[data-filter="peakeq"] { --filter-color: #d4704a; }
+.filter-card[data-filter="lowshelf"] { --filter-color: #b07a4a; }
+.filter-card[data-filter="highshelf"] { --filter-color: #4a7ab0; }
+
+.filter-card h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: #e8e3dc;
+  margin: 0 0 6px 0;
+}
+
+.filter-card h3 em {
+  font-style: italic;
+  color: var(--filter-color);
+}
+
+.filter-card-subtitle {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 13px;
+  color: #9a918a;
+  margin-bottom: 18px;
+}
+
+.filter-card-section {
+  margin-top: 18px;
+}
+
+.filter-card-section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #6b635d;
+  margin-bottom: 8px;
+}
+
+.filter-card-use {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: #c9a961;
+  margin: 12px 0;
+  line-height: 1.5;
+}
+
+.param-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+
+.param-list li {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #c4bdb5;
+  padding: 8px 0 8px 16px;
+  border-left: 2px solid #2a2624;
+  margin-bottom: 4px;
+}
+
+.param-list li code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #d4704a;
+  background: #0e0c0b;
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.param-name {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: #d4704a;
+  margin-right: 8px;
+}
+
+.toc-link-original {
+  display: inline-block;
+  margin-top: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #9a918a;
+  text-decoration: none;
+  border-bottom: 1px dotted #3d3734;
+  padding-bottom: 1px;
+}
+
+.toc-link-original:hover {
+  color: #7ab0c4;
+  border-bottom-color: #7ab0c4;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <span class="brand-dot"></span>
+      Áudio em Rust — <em>BR</em>
+    </a>
+    <span class="header-meta">EQ COOKBOOK · TRADUÇÃO COMENTADA</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Tradução pedagógica</div>
+  <h1>Audio EQ <em>Cookbook</em>.</h1>
+  <p class="hero-subtitle">Fórmulas-receita para coeficientes de filtros biquad de equalização. O texto canônico de Robert Bristow-Johnson, traduzido para português brasileiro com notas de contexto. Toda mesa digital, todo plugin de EQ, toda biblioteca de DSP do mundo usa essas fórmulas.</p>
+
+  <div class="hero-meta">
+    <div class="meta-item">
+      <span class="meta-label">Autor original</span>
+      <span class="meta-value">Robert Bristow-Johnson</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Tipo</span>
+      <span class="meta-value">Tradução comentada</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Pré-requisito</span>
+      <span class="meta-value">Módulo 04</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Fórmulas</span>
+      <span class="meta-value">9 tipos de filtro</span>
+    </div>
+  </div>
+</div>
+
+<article>
+
+<div class="attribution-card">
+<strong>Sobre este documento.</strong> Este é uma tradução para português brasileiro do "Cookbook formulae for audio equalizer biquad filter coefficients" de Robert Bristow-Johnson, mantido pela equipe da W3C Web Audio API. As fórmulas matemáticas são preservadas em sua forma original. Notas em <span style="color: #7ab0c4;">azul</span> são adições do tradutor para contextualizar conceitos. O texto técnico original em si (sem as notas) é tradução fiel.<br><br>
+<strong>Original em inglês:</strong> <a href="https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html" target="_blank">webaudio.github.io/Audio-EQ-Cookbook</a><br>
+<strong>Autor:</strong> Robert Bristow-Johnson · <strong>Editores:</strong> Raymond Toy, Doug Schepers
+</div>
+
+<div class="translator-note">
+<div class="translator-note-title">Nota do tradutor — por que esse documento importa</div>
+Esse cookbook é a referência mais usada do mundo para implementação prática de filtros biquad em áudio digital. Foi escrito originalmente por volta de 1995, distribuído inicialmente em arquivo de texto puro (Audio-EQ-Cookbook.txt) e desde então é citado em milhares de bibliotecas de DSP — incluindo a Web Audio API do navegador, plugins VST, motores de mesa de som, sintetizadores, e bibliotecas como JUCE, FAUST, e SciPy.<br><br>
+Antes do Bristow-Johnson, cada engenheiro tinha que derivar essas fórmulas a partir de protótipos analógicos e da Bilinear Transform. Ele simplesmente entregou o trabalho pronto. Por isso a comunidade de áudio agradece tanto.<br><br>
+Pra implementar EQ no seu mixer, você não precisa entender a derivação. Mas pra <em>entender por que funciona</em> e <em>customizar quando necessário</em>, é importante absorver pelo menos a estrutura geral.
+</div>
+
+<h2>Fórmulas para filtros biquad</h2>
+
+<p>Todas as funções de transferência foram derivadas a partir de protótipos analógicos (mostrados abaixo para cada tipo de filtro EQ) e foram digitalizadas usando a Transformada Bilinear (BLT). A distorção de frequência da BLT (frequency warping) foi compensada tanto para o reposicionamento de frequência significativa (o "prewarping" normal e necessário ao usar a BLT) quanto para o reajuste de largura de banda (já que a largura de banda é comprimida quando mapeada do analógico para o digital usando a BLT).</p>
+
+<div class="translator-note">
+<div class="translator-note-title">O que é a Transformada Bilinear, em uma frase</div>
+Filtros analógicos são descritos no domínio <code>s</code> (Laplace). Filtros digitais são descritos no domínio <code>z</code>. A Bilinear Transform é a fórmula matemática que converte um filtro analógico em digital, preservando estabilidade e características gerais — com o efeito colateral de "espremer" frequências altas, que é compensado pelo prewarping. Resultado prático: dá pra pegar qualquer circuito analógico clássico e ter um equivalente digital funcional.
+</div>
+
+<p>Primeiro, dada uma função de transferência biquad definida como:</p>
+
+<div class="formula-display">
+<div class="formula-label">Função de transferência biquad — forma geral</div>
+$$ H(z) = \frac{b_0 + b_1z^{-1}+b_2z^{-2}}{a_0 + a_1z^{-1}+a_2z^{-2}} $$
+</div>
+
+<p>Isso mostra 6 coeficientes em vez de 5 — então, dependendo da sua arquitetura, você provavelmente vai normalizar \(a_0\) para 1 e talvez também \(b_0\) para 1 (e absorver isso em um coeficiente de ganho geral). Sua função de transferência então ficaria assim:</p>
+
+<div class="formula-display">
+<div class="formula-label">Forma normalizada (a₀ = 1)</div>
+$$ H(z) = \frac{\left(\displaystyle\frac{b_0}{a_0}\right) + \left(\displaystyle\frac{b_1}{a_0}\right)z^{-1}+\left(\displaystyle\frac{b_2}{a_0}\right)z^{-2}}{1 + \left(\displaystyle\frac{a_1}{a_0}\right)z^{-1}+\left(\displaystyle\frac{a_2}{a_0}\right)z^{-2}} $$
+</div>
+
+<p>ou:</p>
+
+<div class="formula-display">
+<div class="formula-label">Forma normalizada com ganho separado</div>
+$$ H(z) = \left(\frac{b_0}{a_0}\right) \frac{1 + \left(\displaystyle\frac{b_1}{b_0}\right)z^{-1}+\left(\displaystyle\frac{b_2}{b_0}\right)z^{-2}}{1 + \left(\displaystyle\frac{a_1}{a_0}\right)z^{-1}+\left(\displaystyle\frac{a_2}{a_0}\right)z^{-2}} $$
+</div>
+
+<p>A implementação mais direta seria a "Direct Form 1":</p>
+
+<div class="formula-display">
+<div class="formula-label">Direct Form 1 — equação de diferenças</div>
+$$ \begin{align}
+y[n] = \left(\frac{b_0}{a_0}\right)x[n] & +
+\left(\frac{b_1}{a_0}\right)x[n-1] + \left(\frac{b_2}{a_0}\right)x[n-2]
+\nonumber \\
+&-\left(\frac{a_1}{a_0}\right)y[n-1] - \left(\frac{a_2}{a_0}\right)y[n-2]
+\end{align} $$
+</div>
+
+<p>Esse é provavelmente o método melhor e mais fácil de implementar tanto na arquitetura 56K (DSPs Motorola/Freescale) quanto em outras arquiteturas de ponto fixo ou ponto flutuante com acumulador de largura dupla.</p>
+
+<div class="translator-note">
+<div class="translator-note-title">Lendo a Direct Form 1 em português</div>
+A saída atual <code>y[n]</code> é igual a:
+<ul style="list-style: none; padding-left: 16px; margin: 8px 0;">
+<li>→ uma fração da entrada atual <code>x[n]</code></li>
+<li>→ mais frações das duas entradas anteriores <code>x[n-1]</code> e <code>x[n-2]</code></li>
+<li>→ menos frações das duas saídas anteriores <code>y[n-1]</code> e <code>y[n-2]</code></li>
+</ul>
+É só isso. Cinco multiplicações e quatro somas por amostra. Por isso o biquad é o tijolo universal de DSP — é simples, eficiente e expressa qualquer filtro de segunda ordem.
+</div>
+
+<h2>Parâmetros definidos pelo usuário</h2>
+
+<p>Comece com estes parâmetros:</p>
+
+<ul class="param-list">
+  <li><span class="param-name">F<sub>s</sub></span> — a frequência de amostragem (sample rate). Tipicamente 44100 Hz ou 48000 Hz.</li>
+  <li><span class="param-name">f<sub>0</sub></span> — Frequência Central, Frequência de Corte, ou frequência do ponto médio do shelf, dependendo do tipo de filtro. A "frequência significativa". <em>"Onde a coisa acontece, cara."</em></li>
+  <li><span class="param-name">dBgain</span> — usado apenas para filtros peaking e shelving. Ganho positivo realça a banda; negativo atenua.</li>
+  <li><span class="param-name">Q ou BW ou S</span> — três jeitos diferentes de especificar a "largura" da ação do filtro. Você usa <em>um</em> deles:
+    <ul style="list-style: none; padding-left: 24px; margin: 8px 0;">
+      <li><strong>Q</strong> — a definição padrão de engenharia elétrica, <em>exceto</em> para o peaking EQ, no qual <code>A·Q</code> é o Q clássico de EE. Esse ajuste foi feito para que um boost de N dB seguido de um corte de N dB (com Q e f₀/Fₛ idênticos) resulte em um filtro de ganho unitário precisamente plano — um "fio".</li>
+      <li><strong>BW</strong> — a largura de banda em <em>oitavas</em>. Para BPF e notch, é a largura entre as frequências de -3 dB. Para peaking EQ, é entre as frequências do ponto médio (dBgain/2).</li>
+      <li><strong>S</strong> — um parâmetro de "inclinação do shelf" (apenas para shelving EQ). Quando S = 1, a inclinação é a mais íngreme possível mantendo o ganho monotonicamente crescente ou decrescente com a frequência. A inclinação em dB/oitava permanece proporcional a S para outros valores, dado f₀/Fₛ e dBgain fixos.</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="translator-note">
+<div class="translator-note-title">Qual usar — Q, BW ou S?</div>
+Na prática:
+<ul style="list-style: none; padding-left: 16px; margin: 8px 0;">
+<li>→ <strong>Q</strong> é o mais comum em mesas digitais e plugins. Valores típicos: 0.5 (largo) a 10 (estreito). Acima de 10 é "cirúrgico", quase ressonância.</li>
+<li>→ <strong>BW</strong> é mais musical. "1 oitava de largura" é uma noção que faz sentido pra músico.</li>
+<li>→ <strong>S</strong> é específico de shelving. Default S=1 funciona pra quase tudo.</li>
+</ul>
+Você pode oferecer Q ou BW ao usuário e converter internamente — o cookbook mostra a relação adiante.
+</div>
+
+<h2>Variáveis intermediárias</h2>
+
+<p>Calcule estas variáveis intermediárias:</p>
+
+<ol>
+<li><strong>Apenas para filtros peaking e shelving EQ:</strong>
+<div class="formula-display">
+<div class="formula-label">A — fator de ganho linear</div>
+$$ \begin{align} A &= \sqrt{10^{\mathrm{dBgain}/20}} \\ &= 10^{\mathrm{dBgain}/40} \end{align} $$
+</div>
+</li>
+<li><strong>Frequência angular normalizada:</strong>
+<div class="formula-display">
+<div class="formula-label">ω₀ — frequência angular normalizada (radianos por amostra)</div>
+$$ \omega_0 = 2 \pi \frac{f_0}{F_s} $$
+</div>
+</li>
+<li><strong>Pré-calcular seno e cosseno:</strong>
+<div class="formula-display">
+$$ \cos \omega_0, \quad \sin \omega_0 $$
+</div>
+</li>
+<li><strong>Alpha — variável de largura:</strong>
+<div class="formula-display">
+<div class="formula-label">α — três formas de calcular, dependendo de qual parâmetro de largura você usar</div>
+$$ \begin{align}
+\alpha &= \frac{\sin \omega_0}{2 Q} & \textrm{(caso: Q)} \\
+&= \sin \omega_0 \, \sinh\left(\frac{\log 2}{2} \cdot \mathrm{BW} \cdot \frac{\omega_0}{\sin \omega_0}\right) & \textrm{(caso: BW)} \\
+&= \frac{\sin \omega_0}{2} \sqrt{\left(A + \frac{1}{A}\right) \left(\frac{1}{S} - 1\right) + 2} & \textrm{(caso: S)}
+\end{align} $$
+</div>
+</li>
+</ol>
+
+<div class="translator-note">
+<div class="translator-note-title">α é o "tempero" do filtro</div>
+Repare que <code>ω₀</code> (que vem da frequência) e <code>α</code> (que vem da largura) são todas as variáveis intermediárias que você precisa. Todos os tipos de filtro a seguir são construídos a partir delas mais o cosseno/seno de ω₀ — e, para peaking/shelving, o fator A do ganho.<br><br>
+Implementação prática: calcule essas variáveis uma vez quando o usuário mudar um parâmetro, depois rode os 6 coeficientes do tipo de filtro escolhido. O cálculo dos coeficientes acontece raramente; a aplicação do filtro acontece a 48 mil vezes por segundo.
+</div>
+
+<h3>Relações entre Q, BW e S</h3>
+
+<p>A relação entre largura de banda (BW) e Q é, para filtro digital com BLT:</p>
+
+<div class="formula-display">
+$$ \frac{1}{Q} = 2\sinh\left(\frac{\log 2}{2} \cdot \mathrm{BW} \cdot \frac{\omega_0}{\sin \omega_0}\right) $$
+</div>
+
+<p>ou, para o protótipo analógico:</p>
+
+<div class="formula-display">
+$$ \frac{1}{Q} = 2 \sinh\left(\frac{\log 2}{2} \cdot \mathrm{BW}\right) $$
+</div>
+
+<p>A relação entre inclinação de shelf (S) e Q é:</p>
+
+<div class="formula-display">
+$$ \frac{1}{Q} = \sqrt{\left(A + \frac{1}{A}\right) \left(\frac{1}{S} - 1\right) + 2} $$
+</div>
+
+<p>A expressão a seguir é uma variável intermediária útil para filtros de shelving EQ:</p>
+
+<div class="formula-display">
+$$ 2\sqrt{A}\,\alpha = (\sin \omega_0)\, \sqrt{\left(A^2 + 1\right)\left(\frac{1}{S}-1\right) + 2A} $$
+</div>
+
+<h2>As fórmulas — por tipo de filtro</h2>
+
+<p>Finalmente, calcule os coeficientes para o tipo de filtro que você quer. Os protótipos analógicos H(s) são mostrados para cada tipo, em frequência normalizada.</p>
+
+<!-- LPF -->
+<div class="filter-card" data-filter="lpf">
+<h3>LPF — <em>Low-Pass Filter</em></h3>
+<div class="filter-card-subtitle">Passa-baixas. Deixa graves passarem, atenua agudos.</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Protótipo analógico H(s)</div>
+<div class="formula-display">
+$$ H(s) = \frac{1}{s^2 + \displaystyle\frac{s}{Q} + 1} $$
+</div>
+</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Coeficientes digitais</div>
+<div class="formula-display">
+$$ \begin{align}
+b_0 &= \frac{1-\cos\omega_0}{2} \\
+b_1 &= 1-\cos\omega_0 \\
+b_2 &= \frac{1-\cos\omega_0}{2} \\
+a_0 &= 1 + \alpha \\
+a_1 &= -2\cos\omega_0 \\
+a_2 &= 1 - \alpha
+\end{align} $$
+</div>
+</div>
+
+<div class="filter-card-use">Uso típico: <em>corte de agudos no canal de baixo, simulação de cabine de guitarra, anti-aliasing, suavização geral.</em></div>
+</div>
+
+<!-- HPF -->
+<div class="filter-card" data-filter="hpf">
+<h3>HPF — <em>High-Pass Filter</em></h3>
+<div class="filter-card-subtitle">Passa-altas. Deixa agudos passarem, atenua graves.</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Protótipo analógico H(s)</div>
+<div class="formula-display">
+$$ H(s) = \frac{s^2}{s^2 + \displaystyle\frac{s}{Q} + 1} $$
+</div>
+</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Coeficientes digitais</div>
+<div class="formula-display">
+$$ \begin{align}
+b_0 &= \frac{1 + \cos \omega_0}{2} \\
+b_1 &= -(1 + \cos \omega_0) \\
+b_2 &= \frac{1 + \cos \omega_0}{2} \\
+a_0 &= 1 + \alpha \\
+a_1 &= -2\cos \omega_0 \\
+a_2 &= 1 - \alpha
+\end{align} $$
+</div>
+</div>
+
+<div class="filter-card-use">Uso típico: <em>corte de rumble e DC offset em microfones (HPF a 80-120 Hz é padrão em vocal), eliminar zoada de palco em mics overhead, limpar canais de prato.</em></div>
+</div>
+
+<!-- BPF (constant skirt gain) -->
+<div class="filter-card" data-filter="bpf1">
+<h3>BPF — <em>Band-Pass Filter</em> (ganho de borda constante, pico = Q)</h3>
+<div class="filter-card-subtitle">Passa-banda. Deixa só uma faixa específica passar. Variante 1: ganho de borda constante, pico proporcional a Q.</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Protótipo analógico H(s)</div>
+<div class="formula-display">
+$$ H(s) = \frac{s}{s^2 + \displaystyle\frac{s}{Q} + 1} $$
+</div>
+</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Coeficientes digitais</div>
+<div class="formula-display">
+$$ \begin{align}
+b_0 &= \frac{\sin\omega_0}{2} = Q \alpha \\
+b_1 &= 0 \\
+b_2 &= -\frac{\sin\omega_0}{2} = -Q \alpha \\
+a_0 &= 1 + \alpha \\
+a_1 &= -2\cos\omega_0 \\
+a_2 &= 1 - \alpha
+\end{align} $$
+</div>
+</div>
+
+<div class="filter-card-use">Uso típico: <em>analisador de espectro (banco de BPFs), efeitos de wah-wah, isolar uma frequência específica para análise.</em></div>
+</div>
+
+<!-- BPF (constant 0 dB) -->
+<div class="filter-card" data-filter="bpf2">
+<h3>BPF — <em>Band-Pass Filter</em> (pico constante a 0 dB)</h3>
+<div class="filter-card-subtitle">Passa-banda. Variante 2: pico sempre em 0 dB, independente de Q.</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Protótipo analógico H(s)</div>
+<div class="formula-display">
+$$ H(s) = \frac{\displaystyle\frac{s}{Q}}{s^2 + \displaystyle\frac{s}{Q} + 1} $$
+</div>
+</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Coeficientes digitais</div>
+<div class="formula-display">
+$$ \begin{align}
+b_0 &= \alpha \\
+b_1 &= 0 \\
+b_2 &= -\alpha \\
+a_0 &= 1 + \alpha \\
+a_1 &= -2\cos \omega_0 \\
+a_2 &= 1 - \alpha
+\end{align} $$
+</div>
+</div>
+
+<div class="filter-card-use">Uso típico: <em>sidechain de de-esser (filtra só sibilantes para detecção), isolamento de banda em cross-over, vocoder.</em></div>
+</div>
+
+<!-- Notch -->
+<div class="filter-card" data-filter="notch">
+<h3>Notch — <em>Band-Reject</em></h3>
+<div class="filter-card-subtitle">Rejeita-banda. Mata uma frequência específica, deixa o resto passar.</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Protótipo analógico H(s)</div>
+<div class="formula-display">
+$$ H(s) = \frac{s^2 + 1}{s^2 + \displaystyle\frac{s}{Q} + 1} $$
+</div>
+</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Coeficientes digitais</div>
+<div class="formula-display">
+$$ \begin{align}
+b_0 &= 1 \\
+b_1 &= -2\cos \omega_0 \\
+b_2 &= 1 \\
+a_0 &= 1 + \alpha \\
+a_1 &= -2\cos \omega_0 \\
+a_2 &= 1 - \alpha
+\end{align} $$
+</div>
+</div>
+
+<div class="filter-card-use">Uso típico: <em>matar feedback (frequência específica que está realimentando), eliminar hum de 50/60 Hz da rede elétrica, remoção cirúrgica de ressonância de sala.</em></div>
+</div>
+
+<!-- APF -->
+<div class="filter-card" data-filter="apf">
+<h3>APF — <em>All-Pass Filter</em></h3>
+<div class="filter-card-subtitle">Passa-tudo. Deixa todas as frequências passarem com ganho 1, mas mexe na fase. Parece inútil, é fundamental.</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Protótipo analógico H(s)</div>
+<div class="formula-display">
+$$ H(s) = \frac{s^2 - \displaystyle\frac{s}{Q} + 1}{s^2 + \displaystyle\frac{s}{Q} + 1} $$
+</div>
+</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Coeficientes digitais</div>
+<div class="formula-display">
+$$ \begin{align}
+b_0 &= 1 - \alpha \\
+b_1 &= -2\cos\omega_0 \\
+b_2 &= 1 + \alpha \\
+a_0 &= 1 + \alpha \\
+a_1 &= -2\cos\omega_0 \\
+a_2 &= 1 - \alpha
+\end{align} $$
+</div>
+</div>
+
+<div class="filter-card-use">Uso típico: <em>phaser (cadeia de APFs em série), correção de fase entre canais, base para reverb por feedback delay network, alinhamento temporal de subwoofer e PA principal.</em></div>
+</div>
+
+<!-- Peaking EQ -->
+<div class="filter-card" data-filter="peakeq">
+<h3>Peaking EQ — <em>banda paramétrica</em></h3>
+<div class="filter-card-subtitle">EQ paramétrico. O filtro mais comum em mesas digitais. Realça ou atenua uma banda em torno de f₀.</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Protótipo analógico H(s)</div>
+<div class="formula-display">
+$$ H(s) = \frac{s^2 + s\displaystyle\frac{A}{Q} + 1}{s^2 + \displaystyle\frac{s}{AQ} + 1} $$
+</div>
+</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Coeficientes digitais</div>
+<div class="formula-display">
+$$ \begin{align}
+b_0 &= 1 + \alpha A \\
+b_1 &= -2\cos\omega_0 \\
+b_2 &= 1 - \alpha A \\
+a_0 &= 1 + \frac{\alpha}{A} \\
+a_1 &= -2\cos\omega_0 \\
+a_2 &= 1 - \frac{\alpha}{A}
+\end{align} $$
+</div>
+</div>
+
+<div class="filter-card-use">Uso típico: <em>EQ de canal de qualquer mesa (4 bandas paramétricas é o padrão da indústria). Realçar voz em 3 kHz, atenuar mud em 250 Hz, dar brilho em 8 kHz, etc.</em></div>
+</div>
+
+<!-- Low Shelf -->
+<div class="filter-card" data-filter="lowshelf">
+<h3>Low Shelf — <em>shelving de graves</em></h3>
+<div class="filter-card-subtitle">Realça ou atenua tudo abaixo de f₀, com transição em forma de degrau.</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Protótipo analógico H(s)</div>
+<div class="formula-display">
+$$ H(s) = A \frac{s^2 + \displaystyle\frac{\sqrt{A}}{Q} s + A}{As^2 + \displaystyle\frac{\sqrt{A}}{Q} s + 1} $$
+</div>
+</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Coeficientes digitais</div>
+<div class="formula-display">
+$$ \begin{align}
+b_0 &= A\left( (A+1) - (A-1)\cos\omega_0 + 2\sqrt{A}\, \alpha \right) \\
+b_1 &= 2A\Big( (A-1) - (A+1)\cos\omega_0 \Big) \\
+b_2 &= A\left( (A+1) - (A-1)\cos\omega_0 - 2\sqrt{A}\, \alpha \right) \\
+a_0 &= (A+1) + (A-1)\cos\omega_0 + 2\sqrt{A}\, \alpha \\
+a_1 &= -2\Big( (A-1) + (A+1)\cos\omega_0 \Big) \\
+a_2 &= (A+1) + (A-1)\cos\omega_0 - 2\sqrt{A}\, \alpha
+\end{align} $$
+</div>
+</div>
+
+<div class="filter-card-use">Uso típico: <em>"botão de bass" do toca-discos, peso geral em kick e baixo, calor em vocal masculino, simulação de tilt-EQ.</em></div>
+</div>
+
+<!-- High Shelf -->
+<div class="filter-card" data-filter="highshelf">
+<h3>High Shelf — <em>shelving de agudos</em></h3>
+<div class="filter-card-subtitle">Realça ou atenua tudo acima de f₀, com transição em forma de degrau.</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Protótipo analógico H(s)</div>
+<div class="formula-display">
+$$ H(s) = A \frac{As^2 + \displaystyle\frac{\sqrt{A}}{Q}s + 1}{s^2 + \displaystyle\frac{\sqrt{A}}{Q} s + A} $$
+</div>
+</div>
+
+<div class="filter-card-section">
+<div class="filter-card-section-title">Coeficientes digitais</div>
+<div class="formula-display">
+$$ \begin{align}
+b_0 &= A\left( (A+1) + (A-1)\cos\omega_0 + 2\sqrt{A}\alpha \right) \\
+b_1 &= -2A\Big( (A-1) + (A+1)\cos\omega_0 \Big) \\
+b_2 &= A\left( (A+1) + (A-1)\cos\omega_0 - 2\sqrt{A}\alpha \right) \\
+a_0 &= (A+1) - (A-1)\cos\omega_0 + 2\sqrt{A}\alpha \\
+a_1 &= 2\Big( (A-1) - (A+1)\cos\omega_0 \Big) \\
+a_2 &= (A+1) - (A-1)\cos\omega_0 - 2\sqrt{A}\alpha
+\end{align} $$
+</div>
+</div>
+
+<div class="filter-card-use">Uso típico: <em>brilho geral em vocal e overhead de bateria, "ar" em piano, escuta de monitor, simulação de "presença" de mesa analógica vintage.</em></div>
+</div>
+
+<div class="translator-note">
+<div class="translator-note-title">Observação prática — chain de canal padrão de mesa</div>
+Em mesa digital típica, cada canal tem:
+<ul style="list-style: none; padding-left: 16px; margin: 8px 0;">
+<li>→ <strong>1 HPF</strong> (corte de rumble, fixo em ~80 Hz na maioria das mesas)</li>
+<li>→ <strong>1 Low Shelf</strong> (banda 1, f variável de 60-400 Hz)</li>
+<li>→ <strong>2 Peaking EQ</strong> paramétricos (bandas 2 e 3, full range)</li>
+<li>→ <strong>1 High Shelf</strong> (banda 4, f variável de 2k-12k)</li>
+</ul>
+Esses 5 biquads em série dão ~99% do que se precisa pra modelar voz/instrumento. As fórmulas acima implementam todos eles.
+</div>
+
+<h2>Apêndice — A Transformada Bilinear na prática</h2>
+
+<p>Para curiosos: a Transformada Bilinear (com compensação de frequency warping) substitui:</p>
+
+<div class="formula-display">
+<div class="formula-label">Substituição BLT (normalizada)</div>
+$$ s \leftarrow \frac{1}{\tan\displaystyle\frac{\omega_0}{2}} \times \frac{1-z^{-1}}{1+z^{-1}} $$
+</div>
+
+<p>e usa estas identidades trigonométricas:</p>
+
+<div class="formula-display">
+$$ \tan\frac{\omega_0}{2} = \frac{\sin\omega_0}{1+\cos\omega_0} $$
+</div>
+
+<div class="formula-display">
+$$ \left(\tan\frac{\omega_0}{2}\right)^2 = \frac{1-\cos\omega_0}{1+\cos\omega_0} $$
+</div>
+
+<p>Resultando nestas substituições:</p>
+
+<div class="formula-display">
+$$ 1 \leftarrow \frac{1+\cos\omega_0}{1+\cos\omega_0} \times \frac{1+2z^{-1}+z^{-2}}{1+2z^{-1}+z^{-2}} $$
+</div>
+
+<div class="formula-display">
+$$ s \leftarrow \frac{1+\cos\omega_0}{\sin\omega_0} \times \frac{1-z^{-1}}{1+z^{-1}} = \frac{1+\cos\omega_0}{\sin\omega_0} \times \frac{1-z^{-2}}{1+2z^{-1}+z^{-2}} $$
+</div>
+
+<div class="formula-display">
+$$ s^2 \leftarrow \frac{1+\cos\omega_0}{1-\cos\omega_0} \times \frac{1-2z^{-1}+z^{-2}}{1+2z^{-1}+z^{-2}} $$
+</div>
+
+<p>O fator a seguir é comum a todos os termos, tanto no numerador quanto no denominador, e pode ser fatorado para fora — portanto pode ser deixado de fora nas substituições anteriores:</p>
+
+<div class="formula-display">
+$$ \frac{1+\cos\omega_0}{1+2z^{-1}+z^{-2}} $$
+</div>
+
+<p>Resultando em:</p>
+
+<div class="formula-display">
+$$ 1 \leftarrow \frac{1+2z^{-1}+z^{-2}}{1+\cos\omega_0} $$
+</div>
+
+<div class="formula-display">
+$$ s \leftarrow \frac{1-z^{-2}}{\sin\omega_0} $$
+</div>
+
+<div class="formula-display">
+$$ s^2 \leftarrow \frac{1-2z^{-1}+z^{-2}}{1-\cos\omega_0} $$
+</div>
+
+<p>Adicionalmente, todos os termos no numerador e denominador podem ser multiplicados por um fator comum sin²ω₀, finalmente resultando nestas substituições:</p>
+
+<div class="formula-display">
+$$ 1 \leftarrow (1 + 2z^{-1} + z^{-2}) (1 - \cos\omega_0) $$
+</div>
+
+<div class="formula-display">
+$$ s \leftarrow (1-z^{-2})\sin\omega_0 $$
+</div>
+
+<div class="formula-display">
+$$ s^2 \leftarrow (1 - 2z^{-1} + z^{-2}) (1 + \cos\omega_0) $$
+</div>
+
+<div class="formula-display">
+$$ 1 + s^2 \leftarrow 2\, (1 - 2\cos\omega_0\,z^{-1} + z^{-2}) $$
+</div>
+
+<p>As fórmulas dos coeficientes biquad acima resultam disso, depois de uma pequena simplificação.</p>
+
+<div class="translator-note">
+<div class="translator-note-title">Pra que serve esse apêndice</div>
+Você não precisa derivar isso. As fórmulas finais já estão prontas. Esta seção mostra <em>de onde elas vêm</em> — útil pra:
+<ul style="list-style: none; padding-left: 16px; margin: 8px 0;">
+<li>→ Derivar variações (filtros customizados que o cookbook não cobre)</li>
+<li>→ Entender por que o prewarping é necessário</li>
+<li>→ Convencer você de que essas fórmulas não saíram do nada — vêm de matemática rigorosa</li>
+<li>→ Estudar para concursos ou pós em DSP 😄</li>
+</ul>
+</div>
+
+<h2>Agradecimentos</h2>
+
+<p>Agradecimentos especiais a <a href="mailto:rbj@audioimagination.com" style="color: #7ab0c4;">Robert Bristow-Johnson</a> por criar o Audio EQ Cookbook e permitir sua adaptação e uso para a Web Audio API.</p>
+
+<p>Agradecimentos a Peter Krautzberger pela ajuda na adaptação dessas fórmulas matemáticas para MathML, e à equipe MathJax por fazer a extensão JavaScript que viabiliza o uso de matemática na web.</p>
+
+<p>Agradecimentos a Peter Jipsen, criador do <a href="http://www1.chapman.edu/~jipsen/mathml/asciimath.html" style="color: #7ab0c4;">ASCIIMathML</a>, por facilitar a conversão de notação matemática ASCII para MathML.</p>
+
+<p>Convertido para fórmulas TeX (em vez de MathML) por Raymond Toy.</p>
+
+<a class="toc-link-original" href="https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html" target="_blank">→ Documento original em inglês</a>
+
+</article>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-next">
+      <div class="footer-next-label">Como usar este documento</div>
+      <div class="footer-next-title">Implemente <em>uma vez</em>, use sempre.</div>
+      <div class="footer-next-desc">Você não precisa decorar essas fórmulas. Implementa elas em código uma vez (uma função por tipo de filtro, recebe f₀, Q, dBgain, retorna [b0, b1, b2, a0, a1, a2]), testa contra um analisador de frequência, e nunca mais mexe. O Módulo 04 do material já tem a versão Rust do peaking EQ; expandir pra todos os 9 tipos é trabalho mecânico depois desse cookbook.</div>
+    </div>
+  </div>
+  <div class="footer-meta">
+    Áudio em Rust — BR · tradução comentada · texto original © Robert Bristow-Johnson · tradução mantida por Jefferson
+  </div>
+</footer>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

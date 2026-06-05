@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 01 — Áudio Digital: do Som à Amostra | Rust para Áudio</title>
+<meta name="description" content="Material de estudo brasileiro sobre áudio digital e Rust para construção de plugins e consoles digitais. Módulo 1: fundamentos de amostragem, quantização e representação digital do som.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Áudio em Rust — BR
+   Estilos compartilhados entre todos os módulos
+   ============================================================ */
+
+:root {
+  --bg: #0a0908;
+  --bg-elevated: #12100f;
+  --bg-code: #161413;
+  --border: #2a2624;
+  --border-strong: #3d3734;
+  --text: #e8e3dc;
+  --text-muted: #9a918a;
+  --text-dim: #6b635d;
+  --accent: #d4704a;
+  --accent-bright: #e8825a;
+  --accent-dim: #5c3120;
+  --warning: #c9a961;
+  --success: #7ea87e;
+  --danger: #c46a5a;
+  --link: #d4704a;
+  --selection: #5c3120;
+
+  /* Trilhas (usado em módulos com comparação Rust/FAUST) */
+  --track-rust: #d4704a;
+  --track-rust-dim: #5c3120;
+  --track-faust: #7ab0c4;
+  --track-faust-dim: #2a4550;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter Tight', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  --max-width: 780px;
+  --wide-width: 1100px;
+  --tracks-width: 1240px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+::selection { background: var(--selection); color: var(--text); }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 17px;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+}
+
+/* === HEADER === */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 9, 8, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  max-width: var(--tracks-width);
+  margin: 0 auto;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.header-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* === HERO === */
+.hero {
+  max-width: var(--tracks-width);
+  margin: 0 auto;
+  padding: 80px 32px 60px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-label::before {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 96px);
+  line-height: 0.95;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin-bottom: 32px;
+  max-width: 1000px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+}
+
+.hero-subtitle {
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  max-width: 680px;
+  margin-bottom: 48px;
+  font-weight: 400;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.meta-value {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--text);
+  font-style: italic;
+}
+
+/* === TRACKS INDICATOR (módulos com trilhas paralelas) === */
+.tracks-indicator {
+  display: flex;
+  gap: 20px;
+  margin-top: 32px;
+  padding: 20px 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.track-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.track-badge.rust .track-dot { background: var(--track-rust); box-shadow: 0 0 10px var(--track-rust); }
+.track-badge.faust .track-dot { background: var(--track-faust); box-shadow: 0 0 10px var(--track-faust); }
+
+.track-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.track-badge.rust span:last-child { color: var(--track-rust); }
+.track-badge.faust span:last-child { color: var(--track-faust); }
+
+/* === TOC === */
+.toc {
+  max-width: var(--max-width);
+  margin: 60px auto 80px;
+  padding: 0 32px;
+  position: relative;
+  z-index: 2;
+}
+
+.toc-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.toc-list {
+  list-style: none;
+  counter-reset: toc-counter;
+}
+
+.toc-list li {
+  counter-increment: toc-counter;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+}
+
+.toc-list li:hover { border-bottom-color: var(--accent); }
+
+.toc-list li::before {
+  content: counter(toc-counter, decimal-leading-zero);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  min-width: 32px;
+}
+
+.toc-list a {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 17px;
+  flex: 1;
+  transition: color 0.2s;
+}
+
+.toc-list a:hover { color: var(--accent); }
+
+/* === ARTICLE === */
+article {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 32px;
+  position: relative;
+  z-index: 2;
+}
+
+.tracks-section { max-width: var(--tracks-width); }
+
+section {
+  padding: 80px 0;
+  border-top: 1px solid var(--border);
+}
+
+section:first-of-type { border-top: none; }
+
+.section-number {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+  display: block;
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1.05;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 32px;
+  color: var(--text);
+}
+
+h2 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin-top: 48px;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+h4 {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 32px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+p {
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+.lead {
+  font-size: 21px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-weight: 300;
+  margin-bottom: 40px;
+}
+
+.lead em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-dim);
+  transition: border-color 0.2s;
+}
+
+a:hover { border-bottom-color: var(--accent); }
+
+strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+em { font-style: italic; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--bg-code);
+  padding: 2px 7px;
+  border-radius: 3px;
+  color: var(--accent-bright);
+  border: 1px solid var(--border);
+}
+
+/* === CALLOUTS === */
+.callout {
+  margin: 32px 0;
+  padding: 24px 28px;
+  background: var(--bg-elevated);
+  border-left: 3px solid var(--accent);
+  position: relative;
+}
+
+.callout-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.callout p:last-child { margin-bottom: 0; }
+
+.callout.warning { border-left-color: var(--warning); }
+.callout.warning .callout-title { color: var(--warning); }
+.callout.success { border-left-color: var(--success); }
+.callout.success .callout-title { color: var(--success); }
+.callout.danger { border-left-color: var(--danger); }
+.callout.danger .callout-title { color: var(--danger); }
+
+/* === CODE BLOCKS === */
+.code-block {
+  margin: 28px 0;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.code-header {
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.code-lang { color: var(--accent); }
+
+pre {
+  padding: 20px 24px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Syntax highlighting tokens */
+.tk-kw { color: #d4704a; font-weight: 500; }
+.tk-fn { color: #c9a961; }
+.tk-str { color: #7ea87e; }
+.tk-num { color: #b08db0; }
+.tk-cmt { color: #6b635d; font-style: italic; }
+.tk-type { color: #7ab0c4; }
+.tk-op { color: #9a918a; }
+
+/* === LISTS === */
+ul, ol {
+  margin: 20px 0;
+  padding-left: 24px;
+}
+
+li {
+  margin-bottom: 10px;
+  padding-left: 8px;
+}
+
+ul li::marker { color: var(--accent); }
+ol li::marker {
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* === TABLES === */
+.table-wrap {
+  margin: 32px 0;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+th {
+  background: var(--bg-elevated);
+  padding: 12px 16px;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+tr:last-child td { border-bottom: none; }
+
+/* === FIGURES === */
+.figure {
+  margin: 40px 0;
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.figure-caption {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-dim);
+  font-style: italic;
+  font-family: var(--font-display);
+}
+
+.svg-figure, .waveform-svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* === FORMULAS === */
+.formula {
+  margin: 32px 0;
+  padding: 28px 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  text-align: center;
+  overflow-x: auto;
+  color: var(--text);
+  line-height: 2;
+}
+
+.formula-caption {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-dim);
+  margin-top: 12px;
+  text-align: center;
+}
+
+/* === TRACKS (Rust/FAUST lado a lado) === */
+.tracks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin: 40px 0;
+}
+
+.track {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+
+.track-header {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.track.rust .track-header {
+  background: rgba(212, 112, 74, 0.08);
+  border-bottom-color: var(--track-rust-dim);
+  color: var(--track-rust);
+}
+
+.track.faust .track-header {
+  background: rgba(122, 176, 196, 0.06);
+  border-bottom-color: var(--track-faust-dim);
+  color: var(--track-faust);
+}
+
+.track-header::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.track.rust .track-header::before {
+  background: var(--track-rust);
+  box-shadow: 0 0 8px var(--track-rust);
+}
+
+.track.faust .track-header::before {
+  background: var(--track-faust);
+  box-shadow: 0 0 8px var(--track-faust);
+}
+
+.track-body { padding: 24px 28px; }
+
+.track-body p { font-size: 16px; }
+.track-body p:last-child { margin-bottom: 0; }
+
+.track-body .code-block {
+  margin: 16px -28px;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+
+.track-body pre { font-size: 13px; }
+
+/* === EXPERIMENT === */
+.experiment {
+  margin: 48px 0;
+  padding: 32px;
+  background: linear-gradient(135deg, rgba(212, 112, 74, 0.04) 0%, rgba(212, 112, 74, 0) 100%);
+  border: 1px solid var(--accent-dim);
+  border-radius: 8px;
+}
+
+.experiment-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.experiment-label::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.experiment h3 {
+  margin-top: 0;
+  color: var(--text);
+}
+
+/* === GLOSSARY === */
+.glossary {
+  margin-top: 60px;
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.glossary-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-style: italic;
+  font-weight: 400;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.glossary dl dt {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  margin-top: 20px;
+  margin-bottom: 6px;
+  letter-spacing: 0.03em;
+}
+
+.glossary dl dt:first-child { margin-top: 0; }
+
+.glossary dl dd {
+  color: var(--text-muted);
+  font-size: 15px;
+  margin-bottom: 0;
+}
+
+/* === FOOTER === */
+footer {
+  max-width: var(--tracks-width);
+  margin: 120px auto 0;
+  padding: 60px 32px 60px;
+  border-top: 1px solid var(--border);
+  position: relative;
+  z-index: 2;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  margin-bottom: 48px;
+}
+
+.footer-next {
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  grid-column: span 2;
+}
+
+.footer-next-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.footer-next-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.footer-next-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.footer-next-desc {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.footer-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align: center;
+  letter-spacing: 0.05em;
+  padding-top: 40px;
+  border-top: 1px solid var(--border);
+}
+
+.footer-meta a {
+  color: var(--accent);
+  border-bottom: none;
+}
+
+/* === STACK DIAGRAM (específico do módulo 03 de arquiteturas) === */
+.stack-diagram {
+  margin: 40px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.stack-layer {
+  padding: 14px 20px;
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.stack-layer:hover { border-color: var(--accent-dim); }
+
+.stack-layer-name {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.stack-layer-desc {
+  color: var(--text-dim);
+  font-size: 12px;
+  font-family: var(--font-body);
+}
+
+.stack-layer.app { background: rgba(212, 112, 74, 0.08); border-color: var(--accent-dim); }
+.stack-layer.app .stack-layer-name { color: var(--accent); }
+
+.stack-layer.abstraction { background: rgba(122, 176, 196, 0.06); border-color: var(--track-faust-dim); }
+.stack-layer.abstraction .stack-layer-name { color: var(--track-faust); }
+
+.stack-layer.hardware { background: rgba(126, 168, 126, 0.04); border-color: rgba(126, 168, 126, 0.2); }
+.stack-layer.hardware .stack-layer-name { color: var(--success); }
+
+/* === RESPONSIVE === */
+@media (max-width: 900px) {
+  .tracks {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 48px 24px 40px; }
+  .hero-meta { gap: 24px; }
+  .toc, article { padding: 0 24px; }
+  .header-inner { padding: 14px 24px; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-next { padding: 24px; }
+  footer { padding: 48px 24px; }
+  pre { padding: 16px; font-size: 13px; }
+  .code-block { margin: 20px -24px; border-radius: 0; border-left: none; border-right: none; }
+  .callout { padding: 20px; }
+  .experiment { padding: 24px; margin: 32px -24px; border-radius: 0; border-left: none; border-right: none; }
+  .track-body { padding: 20px 22px; }
+  .track-body .code-block { margin: 14px -22px; }
+  .formula { padding: 20px; font-size: 14px; margin: 24px -24px; border-radius: 0; border-left: none; border-right: none; }
+  .stack-layer { flex-direction: column; align-items: flex-start; gap: 4px; }
+}
+
+/* === ANIMATIONS === */
+@media (prefers-reduced-motion: no-preference) {
+  .hero > * {
+    opacity: 0;
+    animation: fadeUp 0.8s ease-out forwards;
+  }
+  .hero-label { animation-delay: 0.1s; }
+  .hero h1 { animation-delay: 0.2s; }
+  .hero-subtitle { animation-delay: 0.35s; }
+  .hero-meta { animation-delay: 0.5s; }
+  .tracks-indicator { animation-delay: 0.65s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <span class="brand-dot"></span>
+      Áudio em Rust — <em>BR</em>
+    </a>
+    <span class="header-meta">MÓDULO 01 / 11</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Módulo 01 — Fundamentos</div>
+  <h1>Do som à <em>amostra</em>: o que acontece quando o áudio vira número.</h1>
+  <p class="hero-subtitle">Antes de processar áudio em Rust, você precisa entender o que está processando. Este módulo resolve isso em um fim de semana — sem jargão desnecessário, sem matemática de graduação em engenharia, com código que roda.</p>
+  <div class="hero-meta">
+    <div class="meta-item">
+      <span class="meta-label">Leitura</span>
+      <span class="meta-value">≈ 35 min</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Experimento</span>
+      <span class="meta-value">≈ 2 h</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Pré-requisito</span>
+      <span class="meta-value">Rust instalado</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Entregáveis</span>
+      <span class="meta-value">3 programas Rust</span>
+    </div>
+  </div>
+</div>
+
+<nav class="toc" aria-label="Sumário do módulo">
+  <div class="toc-title">Sumário</div>
+  <ol class="toc-list">
+    <li><a href="#problema">O problema real: por que isso importa para você</a></li>
+    <li><a href="#amostragem">O que é amostragem (sem fórmula, ainda)</a></li>
+    <li><a href="#sample-rate">Sample rate: por que 48 kHz virou padrão</a></li>
+    <li><a href="#aliasing">Aliasing: quando o digital mente para você</a></li>
+    <li><a href="#quantizacao">Quantização e bit depth: a régua que mede o som</a></li>
+    <li><a href="#formatos">Float, int, PCM: os formatos que você vai ver o tempo todo</a></li>
+    <li><a href="#experimento">Experimento: gerar e salvar um WAV em Rust</a></li>
+    <li><a href="#glossario">Glossário rápido</a></li>
+  </ol>
+</nav>
+
+<article>
+
+<section id="problema">
+<span class="section-number">§ 01</span>
+<h2>O problema <em>real</em>.</h2>
+
+<p class="lead">Você vai escrever um plugin que processa a voz do pastor. Antes de escrever uma única linha de DSP, você precisa responder: <em>o que exatamente entra na tua função?</em></p>
+
+<p>A resposta é: uma sequência de números. Milhares deles por segundo. Cada número representa a pressão do ar em um instante específico, capturada pelo microfone e convertida pela interface de áudio.</p>
+
+<p>Se você não entende como o som virou esses números — quantos números por segundo, qual o tamanho de cada um, qual a faixa de valores válida — você vai escrever código que <em>parece</em> funcionar mas produz áudio com distorção, ruído, ou silêncio. E não vai saber por quê.</p>
+
+<p>Este módulo resolve isso. Ao fim, você olha para um array <code>[f32]</code> no seu código Rust e sabe exatamente o que cada posição significa no mundo físico.</p>
+
+<div class="callout">
+<div class="callout-title">Atalho mental</div>
+<p>Áudio digital = fotografar o som muito rápido. Cada foto é uma <em>amostra</em>. Muitas amostras por segundo formam a ilusão de continuidade — mesmo princípio de cinema, só que em vez de 24 fotos por segundo, são 48.000.</p>
+</div>
+
+</section>
+
+<section id="amostragem">
+<span class="section-number">§ 02</span>
+<h2>Amostragem, <em>sem fórmula</em>.</h2>
+
+<p>O som é uma onda de pressão que varia no tempo. Contínua. Fluida. Um microfone captura essa onda como uma tensão elétrica que varia do mesmo jeito — contínua também. Isso é áudio <strong>analógico</strong>.</p>
+
+<p>Computador não lida com "contínuo". Computador lida com números discretos. Então a interface de áudio faz o seguinte: ela mede a tensão elétrica vindo do microfone em intervalos regulares, extremamente rápidos, e anota o valor de cada medição.</p>
+
+<p>Cada medição é uma <strong>amostra</strong> (em inglês, <em>sample</em>). A sequência dessas amostras é o áudio digital.</p>
+
+<div class="figure">
+<svg class="waveform-svg" viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="90" x2="580" y2="90" stroke="#3d3734" stroke-width="1" stroke-dasharray="3,4"/>
+  <path d="M 20 90 Q 80 20, 140 90 T 260 90 T 380 90 T 500 90 T 580 90"
+        fill="none" stroke="#d4704a" stroke-width="2" opacity="0.5"/>
+  <g fill="#e8825a">
+    <line x1="40" y1="90" x2="40" y2="84" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="40" cy="84" r="3"/>
+    <line x1="70" y1="90" x2="70" y2="55" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="70" cy="55" r="3"/>
+    <line x1="100" y1="90" x2="100" y2="40" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="100" cy="40" r="3"/>
+    <line x1="130" y1="90" x2="130" y2="62" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="130" cy="62" r="3"/>
+    <line x1="160" y1="90" x2="160" y2="95" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="160" cy="95" r="3"/>
+    <line x1="190" y1="90" x2="190" y2="125" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="190" cy="125" r="3"/>
+    <line x1="220" y1="90" x2="220" y2="140" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="220" cy="140" r="3"/>
+    <line x1="250" y1="90" x2="250" y2="118" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="250" cy="118" r="3"/>
+    <line x1="280" y1="90" x2="280" y2="92" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="280" cy="92" r="3"/>
+    <line x1="310" y1="90" x2="310" y2="60" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="310" cy="60" r="3"/>
+    <line x1="340" y1="90" x2="340" y2="42" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="340" cy="42" r="3"/>
+    <line x1="370" y1="90" x2="370" y2="65" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="370" cy="65" r="3"/>
+    <line x1="400" y1="90" x2="400" y2="95" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="400" cy="95" r="3"/>
+    <line x1="430" y1="90" x2="430" y2="128" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="430" cy="128" r="3"/>
+    <line x1="460" y1="90" x2="460" y2="142" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="460" cy="142" r="3"/>
+    <line x1="490" y1="90" x2="490" y2="115" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="490" cy="115" r="3"/>
+    <line x1="520" y1="90" x2="520" y2="88" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="520" cy="88" r="3"/>
+    <line x1="550" y1="90" x2="550" y2="58" stroke="#e8825a" stroke-width="2"/>
+    <circle cx="550" cy="58" r="3"/>
+  </g>
+  <text x="300" y="172" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#6b635d">tempo →</text>
+</svg>
+<div class="figure-caption">Onda analógica (laranja pálido) e suas amostras discretas (pontos brilhantes). Cada ponto é um número que vai para a memória.</div>
+</div>
+
+<p>A pergunta natural: <strong>com que frequência a interface mede?</strong> Essa é a <strong>sample rate</strong> (taxa de amostragem) — e é aqui que começam as decisões importantes.</p>
+
+</section>
+
+<section id="sample-rate">
+<span class="section-number">§ 03</span>
+<h2>Sample rate: por que 48 <em>mil</em>.</h2>
+
+<p>Sample rate é quantas amostras por segundo. Unidade: hertz (Hz) ou kilohertz (kHz).</p>
+
+<ul>
+  <li><strong>44.100 Hz (44.1 kHz)</strong> — padrão do CD, herança dos anos 80</li>
+  <li><strong>48.000 Hz (48 kHz)</strong> — padrão de vídeo, broadcast, áudio profissional moderno</li>
+  <li><strong>96.000 Hz (96 kHz)</strong> — estúdios high-end, overkill para live</li>
+  <li><strong>192.000 Hz</strong> — mastering, arquivamento, placebo audiófilo</li>
+</ul>
+
+<h3>De onde vem esses números?</h3>
+
+<p>Tem um teorema com nome difícil — Nyquist-Shannon — que diz o seguinte em português claro: <strong>para capturar uma frequência de X Hz, você precisa amostrar pelo menos a 2X Hz</strong>.</p>
+
+<p>O ouvido humano ouve até ~20 kHz (na juventude; depois dos 30, uns 15-17 kHz é o topo real). Então para capturar tudo que o ouvido ouve, precisamos de pelo menos 40 kHz de amostragem.</p>
+
+<p>Por que não 40 kHz exatos? Porque o filtro que "limpa" frequências acima do limite não é perfeito — ele precisa de uma margem. 44.1 e 48 kHz são essas margens, escolhidas por razões históricas diferentes (o 44.1 veio de gravação em fita de vídeo VHS que os engenheiros da Sony usavam para gravar áudio digital nos anos 70).</p>
+
+<div class="callout">
+<div class="callout-title">Regra prática para seus projetos</div>
+<p>Use <strong>48 kHz</strong> como padrão. É o padrão de vídeo, de broadcast, e o que sua interface USB vai rodar por default. Só mude para 44.1 kHz se for gravar especificamente para CD (raro hoje) ou se o hardware exigir.</p>
+</div>
+
+<h3>Quanta memória isso consome?</h3>
+
+<p>Vamos fazer a conta. A 48 kHz, com áudio estéreo (2 canais) e 32 bits por amostra (4 bytes):</p>
+
+<div class="code-block">
+<div class="code-header"><span>cálculo</span><span class="code-lang">aritmética</span></div>
+<pre><code>48.000 amostras/s × 2 canais × 4 bytes = 384.000 bytes/s
+                                      ≈ 375 KB/s
+                                      ≈ 22 MB/minuto
+                                      ≈ 1,3 GB/hora</code></pre>
+</div>
+
+<p>Para uma mesa com 32 canais processados a 48 kHz / 32-bit float, o fluxo interno é ~6 MB/s. Pouco para um computador moderno. É por isso que uma CPU de mini-PC N100 dá conta de mixer digital — não é processamento pesado, é processamento <em>constante e pontual no tempo</em>. Voltamos nisso depois.</p>
+
+</section>
+
+<section id="aliasing">
+<span class="section-number">§ 04</span>
+<h2>Aliasing: quando o digital <em>mente</em>.</h2>
+
+<p>Consequência direta do Nyquist: se aparecer na entrada uma frequência mais alta que metade da sample rate, ela não some simplesmente. Ela <strong>reflete</strong> e aparece como uma frequência mais baixa, diferente da original.</p>
+
+<p>Isso se chama <strong>aliasing</strong>. O nome vem de "apelido" — a frequência original se disfarça de outra.</p>
+
+<p>Exemplo concreto: você está a 48 kHz (Nyquist = 24 kHz). Entra na interface um sinal ultrassônico de 30 kHz. Esse sinal aparece como se fosse 18 kHz. Contaminação pura.</p>
+
+<p>Por isso toda interface de áudio séria tem um <strong>filtro anti-aliasing analógico</strong> antes do conversor A/D. Esse filtro corta tudo acima de ~22 kHz antes da amostragem acontecer. Interfaces baratas têm filtro ruim e podem deixar passar aliasing; interfaces profissionais têm filtro bem projetado.</p>
+
+<div class="callout warning">
+<div class="callout-title">Quando você vai encontrar isso na prática</div>
+<p>Quando você gerar áudio por código — por exemplo, uma onda quadrada ou um oscilador digital para efeitos — esse sinal <em>gerado</em> pode ter harmônicos acima de Nyquist. Se você não filtrar, vai aparecer aliasing. Isso é problema de quem escreve sintetizadores e distorções, não tanto de quem só processa áudio vindo do microfone. Mas é bom saber.</p>
+</div>
+
+</section>
+
+<section id="quantizacao">
+<span class="section-number">§ 05</span>
+<h2>Quantização: a <em>régua</em> que mede o som.</h2>
+
+<p>Sample rate resolve "com que frequência medir". Quantização resolve "com que precisão medir cada valor".</p>
+
+<p>Quando a interface mede a tensão elétrica no microfone, ela precisa converter esse número analógico (infinitamente preciso) em um número digital com precisão finita. Quanto mais bits você usa para representar cada amostra, mais preciso o número.</p>
+
+<h3>Os bit depths que importam</h3>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>Bit depth</th>
+      <th>Valores possíveis</th>
+      <th>Dynamic range teórico</th>
+      <th>Onde é usado</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>16-bit int</code></td>
+      <td>65.536</td>
+      <td>96 dB</td>
+      <td>CD, MP3, streaming</td>
+    </tr>
+    <tr>
+      <td><code>24-bit int</code></td>
+      <td>16.777.216</td>
+      <td>144 dB</td>
+      <td>Gravação pro, conversores A/D</td>
+    </tr>
+    <tr>
+      <td><code>32-bit float</code></td>
+      <td>~4.3 bilhões (com range enorme)</td>
+      <td>~1528 dB</td>
+      <td>DAW interno, DSP, processamento</td>
+    </tr>
+    <tr>
+      <td><code>64-bit float</code></td>
+      <td>(absurdo, nunca falta)</td>
+      <td>(astronômico)</td>
+      <td>Mastering paranoico</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>"Dynamic range" é a diferença entre o som mais alto que você consegue representar sem clipar e o ruído de fundo que a própria digitalização produz. Para referência: a diferença entre um sussurro e um show de rock é ~80 dB. 96 dB de 16-bit int cobre isso, mas com pouca margem. 24-bit int cobre com folga enorme.</p>
+
+<h3>Por que 32-bit float é o rei do processamento</h3>
+
+<p>Enquanto áudio está sendo gravado ou tocado, 24-bit int é suficiente. Mas enquanto áudio está sendo <em>processado</em> — somado, multiplicado, filtrado — você quer 32-bit float. Razões:</p>
+
+<ol>
+  <li><strong>Não clipa internamente.</strong> 32-bit float suporta valores acima de 1.0 e abaixo de -1.0 sem estourar. Você pode somar 100 canais cheios e a matemática não quebra. Só precisa normalizar no final.</li>
+  <li><strong>Matemática rápida em CPU moderna.</strong> Processadores têm unidades SIMD (SSE, AVX, NEON) otimizadas para float32. Int24 não existe como tipo nativo — você tem que emular com int32.</li>
+  <li><strong>Range dinâmico gigante.</strong> Ruído de quantização fica muito abaixo de qualquer coisa audível.</li>
+</ol>
+
+<div class="callout success">
+<div class="callout-title">Regra prática</div>
+<p>Você vai processar áudio em <code>f32</code> (Rust) ou <code>float</code> (C). Sempre. Converte para int só na entrada/saída da interface de áudio. Todo o seu código de DSP trabalha com floats normalizados no range aproximado de <code>-1.0</code> a <code>+1.0</code>, onde <code>0.0</code> é silêncio e <code>1.0</code> é o pico máximo de amplitude.</p>
+</div>
+
+</section>
+
+<section id="formatos">
+<span class="section-number">§ 06</span>
+<h2>Float, int, PCM: os <em>formatos</em>.</h2>
+
+<p>Algumas siglas que você vai ver constantemente:</p>
+
+<h3>PCM — Pulse Code Modulation</h3>
+<p>É o nome técnico para "áudio digital não comprimido". Quando você vê <code>PCM 16-bit</code> ou <code>PCM 24-bit</code>, significa: amostras armazenadas como inteiros, uma atrás da outra, sem compressão. WAV é PCM. AIFF é PCM. MP3 <em>não</em> é PCM (é comprimido).</p>
+
+<h3>L16 e L24</h3>
+<p>Dentro do AES67 e do RTP, você vê <code>L16</code> e <code>L24</code>. Significa "linear PCM 16-bit" e "linear PCM 24-bit" em formato big-endian. "Linear" porque é PCM direto, sem compressão não-linear como a-law/mu-law usada em telefonia.</p>
+
+<h3>Interleaved vs planar</h3>
+
+<p>Áudio estéreo tem dois canais. Como você guarda eles na memória?</p>
+
+<div class="code-block">
+<div class="code-header"><span>dois layouts</span><span class="code-lang">visualização</span></div>
+<pre><code><span class="tk-cmt">// Interleaved (intercalado): canais alternados</span>
+<span class="tk-op">[</span>L0, R0, L1, R1, L2, R2, L3, R3, ...<span class="tk-op">]</span>
+
+<span class="tk-cmt">// Planar: cada canal num buffer separado</span>
+<span class="tk-op">[</span>L0, L1, L2, L3, ...<span class="tk-op">]</span>
+<span class="tk-op">[</span>R0, R1, R2, R3, ...<span class="tk-op">]</span></code></pre>
+</div>
+
+<p>WAV e a maioria das APIs de hardware usam <strong>interleaved</strong>. Engines de DSP frequentemente preferem <strong>planar</strong>, porque processar um canal de cada vez é mais eficiente em cache. Você vai converter entre os dois com frequência. Acostume-se.</p>
+
+</section>
+
+<section id="experimento">
+<span class="section-number">§ 07</span>
+
+<div class="experiment">
+<div class="experiment-label">Experimento prático</div>
+<h3>Gerar uma senóide e salvar em WAV.</h3>
+
+<p>Objetivo: provar, mexendo com as próprias mãos, que áudio digital é "só" uma lista de números. Vamos gerar uma onda senoidal de 440 Hz (a nota Lá central de afinação), salvar como WAV, e tocar no player do sistema.</p>
+
+<h4>Passo 1 — Criar o projeto</h4>
+
+<div class="code-block">
+<div class="code-header"><span>terminal</span><span class="code-lang">bash</span></div>
+<pre><code>cargo new modulo01-senoide
+cd modulo01-senoide</code></pre>
+</div>
+
+<h4>Passo 2 — Adicionar a crate <code>hound</code> para escrever WAV</h4>
+
+<p>Edite <code>Cargo.toml</code> e adicione na seção <code>[dependencies]</code>:</p>
+
+<div class="code-block">
+<div class="code-header"><span>Cargo.toml</span><span class="code-lang">toml</span></div>
+<pre><code>[dependencies]
+hound = "3.5"</code></pre>
+</div>
+
+<h4>Passo 3 — Escrever o código</h4>
+
+<p>Substitua o conteúdo de <code>src/main.rs</code> por:</p>
+
+<div class="code-block">
+<div class="code-header"><span>src/main.rs</span><span class="code-lang">rust</span></div>
+<pre><code><span class="tk-kw">use</span> hound::{WavSpec, WavWriter, SampleFormat};
+<span class="tk-kw">use</span> std::f32::consts::PI;
+
+<span class="tk-kw">fn</span> <span class="tk-fn">main</span>() -&gt; Result&lt;(), Box&lt;<span class="tk-kw">dyn</span> std::error::Error&gt;&gt; {
+    <span class="tk-kw">let</span> sample_rate: <span class="tk-type">u32</span> = <span class="tk-num">48_000</span>;
+    <span class="tk-kw">let</span> duration_seconds: <span class="tk-type">f32</span> = <span class="tk-num">2.0</span>;
+    <span class="tk-kw">let</span> frequency: <span class="tk-type">f32</span> = <span class="tk-num">440.0</span>;
+    <span class="tk-kw">let</span> amplitude: <span class="tk-type">f32</span> = <span class="tk-num">0.5</span>;
+
+    <span class="tk-kw">let</span> total_samples = (sample_rate <span class="tk-kw">as</span> <span class="tk-type">f32</span> * duration_seconds) <span class="tk-kw">as</span> <span class="tk-type">u32</span>;
+
+    <span class="tk-kw">let</span> spec = WavSpec {
+        channels: <span class="tk-num">1</span>,
+        sample_rate,
+        bits_per_sample: <span class="tk-num">32</span>,
+        sample_format: SampleFormat::Float,
+    };
+
+    <span class="tk-kw">let</span> <span class="tk-kw">mut</span> writer = WavWriter::create(<span class="tk-str">"senoide_440hz.wav"</span>, spec)?;
+
+    <span class="tk-kw">for</span> n <span class="tk-kw">in</span> <span class="tk-num">0</span>..total_samples {
+        <span class="tk-kw">let</span> t = n <span class="tk-kw">as</span> <span class="tk-type">f32</span> / sample_rate <span class="tk-kw">as</span> <span class="tk-type">f32</span>;
+        <span class="tk-kw">let</span> sample = amplitude * (<span class="tk-num">2.0</span> * PI * frequency * t).<span class="tk-fn">sin</span>();
+        writer.<span class="tk-fn">write_sample</span>(sample)?;
+    }
+
+    writer.<span class="tk-fn">finalize</span>()?;
+    <span class="tk-fn">println!</span>(<span class="tk-str">"Gerei {} amostras em senoide_440hz.wav"</span>, total_samples);
+    <span class="tk-kw">Ok</span>(())
+}</code></pre>
+</div>
+
+<h4>Passo 4 — Rodar e ouvir</h4>
+
+<div class="code-block">
+<div class="code-header"><span>terminal</span><span class="code-lang">bash</span></div>
+<pre><code>cargo run</code></pre>
+</div>
+
+<p>Vai aparecer um arquivo <code>senoide_440hz.wav</code> na pasta do projeto. Dê duplo-clique e escute. <strong>Você acabou de gerar áudio a partir de matemática pura, sem gravar nada.</strong></p>
+
+<h4>Passo 5 — Experimentar</h4>
+
+<p>Agora mexa nos parâmetros e rode de novo: mude <code>frequency</code> para <code>880.0</code> (oitava acima), <code>110.0</code> (duas oitavas abaixo), <code>amplitude</code> para <code>0.1</code> ou <code>1.5</code> (cuidado com clip). Tente <code>sample_rate = 8_000</code> — qualidade de telefone.</p>
+
+<div class="callout success">
+<div class="callout-title">Checklist do que você aprendeu ao rodar isso</div>
+<p>Você sabe agora: (1) o que é sample rate na prática, (2) que áudio digital é uma sequência de <code>f32</code>, (3) o que significa amplitude entre -1.0 e 1.0, (4) como usar crates externas no Rust, (5) como escrever um loop que gera dados e um writer que persiste em disco.</p>
+</div>
+</div>
+
+</section>
+
+<section id="glossario">
+<div class="glossary">
+<div class="glossary-title">Glossário rápido</div>
+<dl>
+  <dt>AMOSTRA (SAMPLE)</dt>
+  <dd>Uma única medição de amplitude. Num áudio de 48 kHz mono, tem 48.000 amostras por segundo.</dd>
+  <dt>SAMPLE RATE</dt>
+  <dd>Quantas amostras por segundo. Unidade: Hz ou kHz. Padrão profissional: 48 kHz.</dd>
+  <dt>BIT DEPTH</dt>
+  <dd>Quantos bits usados para representar o valor de cada amostra.</dd>
+  <dt>QUANTIZAÇÃO</dt>
+  <dd>O processo de arredondar um valor analógico contínuo para o valor digital mais próximo disponível dado o bit depth.</dd>
+  <dt>NYQUIST</dt>
+  <dd>Metade da sample rate. Frequência máxima que o sinal digital consegue representar sem ambiguidade.</dd>
+  <dt>ALIASING</dt>
+  <dd>Quando frequências acima de Nyquist aparecem como frequências diferentes mais baixas no sinal digital.</dd>
+  <dt>PCM</dt>
+  <dd>Pulse Code Modulation. Áudio digital não comprimido armazenado como inteiros amostra-por-amostra.</dd>
+  <dt>L16 / L24</dt>
+  <dd>Formatos PCM usados em RTP/AES67. Linear 16-bit e 24-bit big-endian.</dd>
+  <dt>INTERLEAVED</dt>
+  <dd>Layout de memória onde canais alternam: L, R, L, R, L, R...</dd>
+  <dt>PLANAR</dt>
+  <dd>Layout de memória onde cada canal tem seu buffer separado.</dd>
+  <dt>CLIP</dt>
+  <dd>Quando a amostra excede o valor máximo representável e é cortada. Distorção feia.</dd>
+  <dt>HEADROOM</dt>
+  <dd>Margem entre o nível nominal do sinal e o ponto de clip.</dd>
+</dl>
+</div>
+</section>
+
+</article>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-next">
+      <div class="footer-next-label">Próximo módulo</div>
+      <div class="footer-next-title">02 — O bloco e o <em>callback</em></div>
+      <div class="footer-next-desc">Por que áudio é processado em blocos, o que é um audio callback, e como medir latência round-trip no seu setup real com a crate cpal.</div>
+    </div>
+  </div>
+  <div class="footer-meta">
+    Áudio em Rust — BR · material de estudo aberto · mantido por Jefferson · <a href="#">github.com/jeffersonsc</a>
+  </div>
+</footer>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
