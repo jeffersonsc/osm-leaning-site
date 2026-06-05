@@ -72,8 +72,24 @@ html, body {
 /* Header com toggle de idioma acima */
 .header-top {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 16px;
+  gap: 12px;
+}
+
+.home-crumb {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+.home-crumb:hover {
+  color: var(--text);
+  background: var(--bg-elev);
 }
 
 .info-header {
