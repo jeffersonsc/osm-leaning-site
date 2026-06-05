@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu primeiro channel strip — FAUST | Áudio em Rust — BR</title>
+<meta name="description" content="Projeto FAUST capstone: plugin de channel strip completo com input gain, HPF/LPF, gate manual, compressor, EQ 4 bandas paramétrico, delay, reverb e 4 meters. Pronto pra rodar no editor.faust.grame.fr.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0908;--bg-elevated:#12100f;--bg-code:#161413;--border:#2a2624;--text:#e8e3dc;--text-muted:#9a918a;--text-dim:#6b635d;--accent:#d4704a;--accent-bright:#e8825a;--warning:#c9a961;--success:#7ea87e;--faust:#7ab0c4;--faust-dim:#2a4550;--font-display:'Fraunces',Georgia,serif;--font-body:'Inter Tight',system-ui,sans-serif;--font-mono:'JetBrains Mono','Courier New',monospace;--max-width:820px;--wide-width:1100px}
+*{box-sizing:border-box;margin:0;padding:0}::selection{background:var(--faust-dim);color:var(--text)}html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;font-size:17px;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;z-index:1;opacity:0.4;mix-blend-mode:overlay}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--faust-dim)}a:hover{border-color:var(--accent)}
+header{position:sticky;top:0;z-index:100;background:rgba(10,9,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.header-inner{max-width:var(--wide-width);margin:0 auto;padding:16px 32px;display:flex;justify-content:space-between;align-items:center;gap:24px}
+.brand{font-family:var(--font-display);font-size:15px;font-weight:500;font-style:italic;color:var(--text);border:none;display:flex;align-items:center;gap:10px}
+.brand-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent)}
+.crumb,.header-meta{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);letter-spacing:0.05em;text-transform:uppercase;border:none}.crumb:hover{color:var(--accent)}
+.hero{max-width:var(--wide-width);margin:0 auto;padding:80px 32px 56px;position:relative;z-index:2}
+.hero-label{font-family:var(--font-mono);font-size:13px;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.hero-label::before{content:'';width:40px;height:1px;background:var(--accent)}
+.hero h1{font-family:var(--font-display);font-size:clamp(40px,6vw,72px);line-height:1;font-weight:400;letter-spacing:-0.03em;margin-bottom:28px;max-width:900px}
+.hero h1 em{font-style:italic;font-weight:300;color:var(--accent)}
+.hero-subtitle{font-size:19px;line-height:1.5;color:var(--text-muted);max-width:680px;margin-bottom:36px}
+.hero-meta{display:flex;gap:36px;padding-top:28px;border-top:1px solid var(--border);flex-wrap:wrap}
+.meta-item{display:flex;flex-direction:column;gap:4px}
+.meta-label{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em}
+.meta-value{font-family:var(--font-display);font-size:17px;color:var(--text);font-style:italic}
+article{max-width:var(--max-width);margin:0 auto;padding:0 32px;position:relative;z-index:2}
+section{margin-bottom:64px;scroll-margin-top:80px}
+.section-number{font-family:var(--font-mono);font-size:11px;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;display:block;margin-bottom:12px}
+article h2{font-family:var(--font-display);font-size:36px;font-weight:400;letter-spacing:-0.02em;margin-bottom:20px;line-height:1.1}
+article h2 em{font-style:italic;color:var(--accent);font-weight:300}
+article h3{font-family:var(--font-display);font-size:22px;font-weight:500;margin:32px 0 14px;color:var(--text)}
+article h4{font-family:var(--font-body);font-size:15px;font-weight:700;margin:20px 0 10px;color:var(--text);text-transform:uppercase;letter-spacing:0.04em}
+article p{margin-bottom:16px;color:var(--text)}
+article p.lead{font-size:21px;line-height:1.5;color:var(--text);margin-bottom:28px}
+article p em{font-style:italic}article p strong{font-weight:600;color:var(--text)}
+article ul,article ol{margin:0 0 18px 28px}article li{margin-bottom:8px;color:var(--text-muted)}article li strong{color:var(--text)}
+code{font-family:var(--font-mono);background:var(--bg-code);color:var(--accent);padding:1px 6px;border-radius:3px;font-size:0.92em;border:1px solid var(--border)}
+.code-block{margin:24px 0;background:var(--bg-code);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.code-header{display:flex;justify-content:space-between;padding:10px 16px;background:var(--bg-elevated);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:12px;color:var(--text-dim);gap:12px}
+.code-lang{color:var(--accent)}
+.code-block pre{padding:18px 20px;overflow-x:auto;font-family:var(--font-mono);font-size:14px;line-height:1.7;color:var(--text)}
+.code-block .tk-kw{color:#c4a4d4;font-weight:500}.code-block .tk-fn{color:var(--accent)}.code-block .tk-str{color:var(--success)}.code-block .tk-num{color:var(--warning)}.code-block .tk-cm{color:var(--text-dim);font-style:italic}
+.callout{margin:28px 0;padding:20px 24px;background:var(--bg-elevated);border-left:3px solid var(--accent);border-radius:0 6px 6px 0}
+.callout.faust{border-left-color:var(--faust)}.callout.warning{border-left-color:var(--warning)}.callout.success{border-left-color:var(--success)}
+.callout-title{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent);margin-bottom:10px}
+.callout.faust .callout-title{color:var(--faust)}.callout.warning .callout-title{color:var(--warning)}.callout.success .callout-title{color:var(--success)}
+.callout p:last-child,.callout ul:last-child{margin-bottom:0}
+.toc{margin:0 0 56px;padding:22px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px}
+.toc-title{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+.toc ol{margin:0;padding-left:22px}.toc li{margin-bottom:6px;color:var(--text-muted)}.toc a{color:var(--text-muted);border:none}.toc a:hover{color:var(--accent)}
+footer{max-width:var(--wide-width);margin:80px auto 0;padding:32px 32px 64px;border-top:1px solid var(--border);position:relative;z-index:2}
+.footer-grid{padding:24px 28px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;margin-bottom:24px}
+.footer-next-label{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px}
+.footer-next-title{font-family:var(--font-display);font-size:24px;font-weight:400;margin-bottom:6px}
+.footer-next-title em{font-style:italic;color:var(--accent);font-weight:300}
+.footer-next-title a{color:var(--text);border:none}.footer-next-title a:hover{color:var(--accent)}
+.footer-next-desc{color:var(--text-muted);font-size:14px}
+.footer-meta{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-meta a{color:var(--text-muted);border:none}.footer-meta a:hover{color:var(--accent)}
+@media (max-width:760px){.hero{padding:56px 24px 36px}.hero-meta{gap:24px}article{padding:0 24px}}
+.copy-btn{background:rgba(212,112,74,0.10);border:1px solid rgba(212,112,74,0.30);color:var(--accent);font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;padding:3px 9px;border-radius:3px;cursor:pointer;transition:all 0.15s;margin-left:auto;margin-right:8px}
+.copy-btn:hover{background:rgba(212,112,74,0.20);border-color:var(--accent);color:var(--accent-bright)}
+.copy-btn.copied{background:rgba(126,168,126,0.15);color:var(--success);border-color:var(--success)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../../index.html" class="crumb">← Church Audio Tech</a>
+    <a href="index.html" class="brand"><span class="brand-dot"></span>FAUST — <em>plugin</em></a>
+    <span class="header-meta">PROJETO</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Projeto — Channel Strip</div>
+  <h1>Meu primeiro <em>channel strip</em>.</h1>
+  <p class="hero-subtitle">Plugin de produção real juntando tudo dos módulos 01–06 num único arquivo: input gain, HPF/LPF com bypass, gate, compressor, EQ paramétrico de 4 bandas, send de delay, send de reverb, output gain e 4 meters. Copia, cola no editor.faust.grame.fr, dá Run — funciona direto no navegador.</p>
+  <div class="hero-meta">
+    <div class="meta-item"><span class="meta-label">Pré-requisitos</span><span class="meta-value">Módulos 01–06</span></div>
+    <div class="meta-item"><span class="meta-label">Linhas</span><span class="meta-value">≈ 80</span></div>
+    <div class="meta-item"><span class="meta-label">Estágios</span><span class="meta-value">8</span></div>
+    <div class="meta-item"><span class="meta-label">UI</span><span class="meta-value">6 tabs</span></div>
+  </div>
+</div>
+
+<article>
+
+<nav class="toc">
+  <div class="toc-title">Sumário</div>
+  <ol>
+    <li><a href="#topologia">Topologia do sinal</a></li>
+    <li><a href="#plugin">Plugin completo (channel_strip.dsp)</a></li>
+    <li><a href="#trucos">Truques de UI DAW-ready</a></li>
+    <li><a href="#proximos">Onde ir a partir daqui</a></li>
+  </ol>
+</nav>
+
+<section id="topologia">
+<span class="section-number">§ 01</span>
+<h2>Topologia do <em>sinal</em>.</h2>
+
+<p class="lead">O channel strip é a cadeia mais comum de uma mesa de som: cada estágio molda o sinal antes do próximo. Aqui está a ordem clássica — a mesma que você encontra num X32, Wing, Behringer Wing, etc.</p>
+
+<div class="code-block">
+<div class="code-header"><span>fluxo de sinal</span><span class="code-lang">ascii</span></div>
+<pre><code>IN → gain → [meter] → HPF → LPF → GATE → COMP → EQ₁ → EQ₂ → EQ₃ → EQ₄ → DELAY → REVERB → gain → [meter] → OUT
+                                  ↓       ↓
+                              [GR meter] [GR meter]</code></pre>
+</div>
+
+<p>Cada estágio é uma função FAUST independente. O sinal flui por <code>:</code> (composição série). Os meters são <strong>branches paralelos</strong> via <code>attach</code>, lendo o sinal sem consumi-lo.</p>
+
+<h3>O que cada estágio faz</h3>
+<ul>
+  <li><strong>Input gain</strong> — trim de entrada em dB pra normalizar o nível antes de processar.</li>
+  <li><strong>HPF (passa-alta, 80 Hz)</strong> — corta rumble de palco, vento no mic, vibração do pedestal.</li>
+  <li><strong>LPF (passa-baixa, 12 kHz)</strong> — corta hiss, agudos abrasivos, harmônicos de PA.</li>
+  <li><strong>Gate</strong> — silencia o canal quando o sinal cai abaixo do threshold (vazamento de outros mics, ruído de fundo).</li>
+  <li><strong>Compressor</strong> — reduz a diferença entre pico e nível médio (voz fica consistente sem clip).</li>
+  <li><strong>EQ 4 bandas paramétrico</strong> — esculpe o timbre (cada banda tem freq, gain e Q ajustáveis).</li>
+  <li><strong>Delay send</strong> — cópia do sinal repetida no tempo com feedback (eco controlado).</li>
+  <li><strong>Reverb send</strong> — cauda de ambiente (sala, hall, igreja).</li>
+  <li><strong>Output gain</strong> — ajuste final pra mandar pro mix bus.</li>
+</ul>
+
+</section>
+
+<section id="plugin">
+<span class="section-number">§ 02</span>
+<h2>Plugin <em>completo</em>.</h2>
+
+<p>Copia o bloco inteiro, cola no <a href="https://editor.faust.grame.fr" target="_blank" rel="noopener">editor.faust.grame.fr</a>, clica em <strong>Run</strong>. O plugin aparece com 6 tabs (Input, Filters, Gate, Comp, EQ, FX, Output) e roda direto.</p>
+
+<div class="callout faust">
+  <div class="callout-title">Detalhe importante sobre o gate</div>
+  <p>A função <code>co.gate_gain_mono</code> que muitos exemplos online usam <strong>não existe</strong> na versão atual da <code>stdfaust.lib</code> — ela dá erro <code>undefined symbol : gate_gain_mono</code>. Aqui o gate foi implementado <em>manual</em>: envelope follower (<code>an.amp_follower_ar</code>) + comparação com threshold + smoothing pra evitar zipper. Mesmo resultado, sem dependência quebrada.</p>
+</div>
+
+<div class="code-block">
+<div class="code-header"><span>channel_strip.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">declare</span> name      <span class="tk-str">"Channel Strip"</span>;
+<span class="tk-kw">declare</span> author    <span class="tk-str">"Jefferson Cunha"</span>;
+<span class="tk-kw">declare</span> version   <span class="tk-str">"1.0"</span>;
+<span class="tk-kw">declare</span> category  <span class="tk-str">"Channel Strip"</span>;
+<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+
+<span class="tk-cm">//================== INPUT ==================</span>
+in_gain     = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Input/[0]gain [unit:dB]"</span>, <span class="tk-num">0</span>, -<span class="tk-num">24</span>, <span class="tk-num">24</span>, <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
+in_meter(s) = <span class="tk-fn">attach</span>(s, s : abs : ba.<span class="tk-fn">linear2db</span> : <span class="tk-fn">hbargraph</span>(<span class="tk-str">"t:Input/[1]in [unit:dB]"</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>));
+
+<span class="tk-cm">//================== FILTERS (HPF / LPF com bypass) ==================</span>
+hpf_on   = <span class="tk-fn">checkbox</span>(<span class="tk-str">"t:Filters/[0]HPF on"</span>);
+hpf_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Filters/[1]HPF freq [unit:Hz][scale:log]"</span>, <span class="tk-num">80</span>,   <span class="tk-num">20</span>,   <span class="tk-num">500</span>,   <span class="tk-num">1</span>);
+lpf_on   = <span class="tk-fn">checkbox</span>(<span class="tk-str">"t:Filters/[2]LPF on"</span>);
+lpf_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Filters/[3]LPF freq [unit:Hz][scale:log]"</span>, <span class="tk-num">12000</span>, <span class="tk-num">1000</span>, <span class="tk-num">20000</span>, <span class="tk-num">1</span>);
+
+hpf = ba.<span class="tk-fn">bypass1</span>(<span class="tk-num">1</span> - hpf_on, fi.<span class="tk-fn">highpass</span>(<span class="tk-num">2</span>, hpf_freq));
+lpf = ba.<span class="tk-fn">bypass1</span>(<span class="tk-num">1</span> - lpf_on, fi.<span class="tk-fn">lowpass</span>(<span class="tk-num">2</span>, lpf_freq));
+
+<span class="tk-cm">//================== GATE (implementação manual — gate_gain_mono não existe) ==================</span>
+g_thresh  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Gate/[0]threshold [unit:dB]"</span>, -<span class="tk-num">40</span>, -<span class="tk-num">80</span>, <span class="tk-num">0</span>,    <span class="tk-num">0.1</span>);
+g_attack  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Gate/[1]attack [unit:ms]"</span>,    <span class="tk-num">1</span>,   <span class="tk-num">0.1</span>, <span class="tk-num">50</span>,   <span class="tk-num">0.1</span>) * <span class="tk-num">0.001</span>;
+g_release = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Gate/[2]release [unit:ms]"</span>,   <span class="tk-num">100</span>, <span class="tk-num">10</span>,  <span class="tk-num">1000</span>, <span class="tk-num">1</span>)   * <span class="tk-num">0.001</span>;
+
+<span class="tk-cm">// Envelope follower com attack/release (peak detector suavizado)</span>
+g_env(x) = abs(x) : an.<span class="tk-fn">amp_follower_ar</span>(g_attack, g_release);
+
+<span class="tk-cm">// Gate gain: 1 quando env &gt; threshold, 0 abaixo; 5ms de smoothing pra evitar clique</span>
+g_gain(x) = (g_env(x) &gt; ba.<span class="tk-fn">db2linear</span>(g_thresh)) : si.<span class="tk-fn">smooth</span>(ba.<span class="tk-fn">tau2pole</span>(<span class="tk-num">0.005</span>));
+
+g_meter(g)    = <span class="tk-fn">attach</span>(g, g : ba.<span class="tk-fn">linear2db</span> : <span class="tk-fn">hbargraph</span>(<span class="tk-str">"t:Gate/[3]GR [unit:dB]"</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>));
+gate_stage(x) = x * (x : g_gain : g_meter);
+
+<span class="tk-cm">//================== COMPRESSOR ==================</span>
+c_thresh  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Comp/[0]threshold [unit:dB]"</span>, -<span class="tk-num">18</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>,    <span class="tk-num">0.1</span>);
+c_ratio   = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Comp/[1]ratio"</span>,                <span class="tk-num">4</span>,   <span class="tk-num">1</span>,   <span class="tk-num">20</span>,   <span class="tk-num">0.1</span>);
+c_attack  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Comp/[2]attack [unit:ms]"</span>,     <span class="tk-num">10</span>,  <span class="tk-num">0.1</span>, <span class="tk-num">100</span>,  <span class="tk-num">0.1</span>) * <span class="tk-num">0.001</span>;
+c_release = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Comp/[3]release [unit:ms]"</span>,    <span class="tk-num">100</span>, <span class="tk-num">10</span>,  <span class="tk-num">1000</span>, <span class="tk-num">1</span>)   * <span class="tk-num">0.001</span>;
+c_makeup  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Comp/[4]makeup [unit:dB]"</span>,     <span class="tk-num">0</span>,   <span class="tk-num">0</span>,   <span class="tk-num">24</span>,   <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
+
+c_gain        = co.<span class="tk-fn">compression_gain_mono</span>(c_ratio, c_thresh, c_attack, c_release);
+c_meter(g)    = <span class="tk-fn">attach</span>(g, g : ba.<span class="tk-fn">linear2db</span> : <span class="tk-fn">hbargraph</span>(<span class="tk-str">"t:Comp/[5]GR [unit:dB]"</span>, -<span class="tk-num">24</span>, <span class="tk-num">0</span>));
+comp_stage(x) = x * (x : c_gain : c_meter) * c_makeup;
+
+<span class="tk-cm">//================== EQ 4 BANDAS PARAMÉTRICO ==================</span>
+b1_gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band1/[0]gain [unit:dB]"</span>,             <span class="tk-num">0</span>,    -<span class="tk-num">18</span>, <span class="tk-num">18</span>,    <span class="tk-num">0.1</span>);
+b1_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band1/[1]freq [unit:Hz][scale:log]"</span>, <span class="tk-num">120</span>,  <span class="tk-num">20</span>,  <span class="tk-num">500</span>,   <span class="tk-num">1</span>);
+b1_q    = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band1/[2]Q"</span>,                          <span class="tk-num">1.0</span>,  <span class="tk-num">0.1</span>, <span class="tk-num">10</span>,    <span class="tk-num">0.01</span>);
+
+b2_gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band2/[0]gain [unit:dB]"</span>,             <span class="tk-num">0</span>,    -<span class="tk-num">18</span>, <span class="tk-num">18</span>,    <span class="tk-num">0.1</span>);
+b2_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band2/[1]freq [unit:Hz][scale:log]"</span>, <span class="tk-num">500</span>,  <span class="tk-num">100</span>, <span class="tk-num">2000</span>,  <span class="tk-num">1</span>);
+b2_q    = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band2/[2]Q"</span>,                          <span class="tk-num">1.0</span>,  <span class="tk-num">0.1</span>, <span class="tk-num">10</span>,    <span class="tk-num">0.01</span>);
+
+b3_gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band3/[0]gain [unit:dB]"</span>,             <span class="tk-num">0</span>,    -<span class="tk-num">18</span>, <span class="tk-num">18</span>,    <span class="tk-num">0.1</span>);
+b3_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band3/[1]freq [unit:Hz][scale:log]"</span>, <span class="tk-num">2500</span>, <span class="tk-num">500</span>, <span class="tk-num">8000</span>,  <span class="tk-num">1</span>);
+b3_q    = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band3/[2]Q"</span>,                          <span class="tk-num">1.0</span>,  <span class="tk-num">0.1</span>, <span class="tk-num">10</span>,    <span class="tk-num">0.01</span>);
+
+b4_gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band4/[0]gain [unit:dB]"</span>,             <span class="tk-num">0</span>,    -<span class="tk-num">18</span>,  <span class="tk-num">18</span>,    <span class="tk-num">0.1</span>);
+b4_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band4/[1]freq [unit:Hz][scale:log]"</span>, <span class="tk-num">8000</span>, <span class="tk-num">2000</span>, <span class="tk-num">20000</span>, <span class="tk-num">1</span>);
+b4_q    = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band4/[2]Q"</span>,                          <span class="tk-num">1.0</span>,  <span class="tk-num">0.1</span>,  <span class="tk-num">10</span>,    <span class="tk-num">0.01</span>);
+
+eq = fi.<span class="tk-fn">peak_eq</span>(b1_gain, b1_freq, b1_q)
+   : fi.<span class="tk-fn">peak_eq</span>(b2_gain, b2_freq, b2_q)
+   : fi.<span class="tk-fn">peak_eq</span>(b3_gain, b3_freq, b3_q)
+   : fi.<span class="tk-fn">peak_eq</span>(b4_gain, b4_freq, b4_q);
+
+<span class="tk-cm">//================== DELAY (send com feedback) ==================</span>
+d_time = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/delay/[0]time [unit:ms]"</span>,    <span class="tk-num">250</span>, <span class="tk-num">1</span>, <span class="tk-num">2000</span>, <span class="tk-num">1</span>) * <span class="tk-num">0.001</span>;
+d_fb   = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/delay/[1]feedback [unit:%]"</span>, <span class="tk-num">30</span>,  <span class="tk-num">0</span>, <span class="tk-num">90</span>,   <span class="tk-num">1</span>) * <span class="tk-num">0.01</span>;
+d_mix  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/delay/[2]mix [unit:%]"</span>,      <span class="tk-num">0</span>,   <span class="tk-num">0</span>, <span class="tk-num">100</span>,  <span class="tk-num">1</span>) * <span class="tk-num">0.01</span>;
+
+delay_fx      = +~(de.<span class="tk-fn">fdelay</span>(<span class="tk-num">192000</span>, d_time * ma.SR) : *(d_fb));
+delay_send(x) = x * (<span class="tk-num">1</span> - d_mix) + delay_fx(x) * d_mix;
+
+<span class="tk-cm">//================== REVERB (send) ==================</span>
+r_size = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/reverb/[0]size [unit:%]"</span>, <span class="tk-num">70</span>, <span class="tk-num">0</span>, <span class="tk-num">100</span>, <span class="tk-num">1</span>) * <span class="tk-num">0.01</span>;
+r_damp = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/reverb/[1]damp [unit:%]"</span>, <span class="tk-num">30</span>, <span class="tk-num">0</span>, <span class="tk-num">100</span>, <span class="tk-num">1</span>) * <span class="tk-num">0.01</span>;
+r_mix  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/reverb/[2]mix [unit:%]"</span>,  <span class="tk-num">0</span>,  <span class="tk-num">0</span>, <span class="tk-num">100</span>, <span class="tk-num">1</span>) * <span class="tk-num">0.01</span>;
+
+<span class="tk-cm">// mono_freeverb(fb1, fb2, damp, spread) — fb1=room, fb2=diffusão</span>
+reverb_fx(x)   = x : re.<span class="tk-fn">mono_freeverb</span>(r_size, r_size, r_damp, <span class="tk-num">0</span>);
+reverb_send(x) = x * (<span class="tk-num">1</span> - r_mix) + reverb_fx(x) * r_mix;
+
+<span class="tk-cm">//================== OUTPUT ==================</span>
+out_gain     = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Output/[0]gain [unit:dB]"</span>, <span class="tk-num">0</span>, -<span class="tk-num">24</span>, <span class="tk-num">24</span>, <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
+out_meter(s) = <span class="tk-fn">attach</span>(s, s : abs : ba.<span class="tk-fn">linear2db</span> : <span class="tk-fn">hbargraph</span>(<span class="tk-str">"t:Output/[1]out [unit:dB]"</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>));
+
+<span class="tk-cm">//================== SIGNAL FLOW ==================</span>
+<span class="tk-fn">process</span>(x) = in_meter(x * in_gain)
+            : hpf : lpf
+            : gate_stage
+            : comp_stage
+            : eq
+            : delay_send
+            : reverb_send
+            : *(out_gain)
+            : out_meter;</code></pre>
+</div>
+
+</section>
+
+<section id="trucos">
+<span class="section-number">§ 03</span>
+<h2>Truques de UI <em>DAW-ready</em>.</h2>
+
+<p>Os detalhes que separam um plugin de aula de um plugin que dá pra usar de verdade:</p>
+
+<div class="callout">
+  <div class="callout-title">Ordem, unidade, bypass, segurança</div>
+  <ul>
+    <li><strong>Prefixo numérico <code>[0]</code>, <code>[1]</code>, <code>[2]</code>...</strong> no label força a ordem dos controles dentro de cada tab. Sem ele, o DAW exibe em ordem alfabética e o release vem antes do attack.</li>
+    <li><strong>Todos os tempos em ms × 0.001</strong> no slider e o cálculo interno em segundos. O DAW mostra "10 ms" enquanto o DSP recebe 0.01. Mais legível pro operador.</li>
+    <li><strong>Makeup em dB → linear via <code>: ba.db2linear</code></strong> no fim da chain do slider. Slider mostra dB, DSP multiplica por linear.</li>
+    <li><strong>Bypass real com <code>ba.bypass1</code></strong> — quando checkbox=off, o filtro é literalmente removido da cadeia (zero CPU), não só "freq alta demais".</li>
+    <li><strong>Feedback &lt; 90 %</strong> no delay pra evitar explodir no sustain. Pro auto-oscilação criativa, deixe 95.</li>
+  </ul>
+</div>
+
+<h3>Por que o gate foi feito manual</h3>
+
+<p>Várias referências online (incluindo respostas de IA) mencionam <code>co.gate_gain_mono(thresh, att, hold, rel)</code> como função padrão. Ela <strong>não existe</strong> na <code>compressors.lib</code> atual — só <code>co.gate_mono</code> (que retorna o áudio já gateado, sem o ganho separado).</p>
+
+<p>Pra ter um <em>GR meter</em> a gente precisa do ganho separado, então a gente constrói:</p>
+
+<div class="code-block">
+<div class="code-header"><span>gate manual</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-cm">// 1. Envelope do sinal (rastreador de pico)</span>
+g_env(x) = abs(x) : an.<span class="tk-fn">amp_follower_ar</span>(g_attack, g_release);
+
+<span class="tk-cm">// 2. Boolean: env acima do threshold? (0 ou 1)</span>
+<span class="tk-cm">// 3. Smoothing de 5ms pra evitar clique no transient</span>
+g_gain(x) = (g_env(x) &gt; ba.<span class="tk-fn">db2linear</span>(g_thresh)) : si.<span class="tk-fn">smooth</span>(ba.<span class="tk-fn">tau2pole</span>(<span class="tk-num">0.005</span>));</code></pre>
+</div>
+
+<p><code>an.amp_follower_ar(att, rel, x)</code> é o envelope follower padrão do FAUST, com tempos de attack e release separados. A comparação <code>&gt; threshold</code> gera 0 ou 1. O <code>si.smooth</code> com 5ms remove o clique na transição.</p>
+
+</section>
+
+<section id="proximos">
+<span class="section-number">§ 04</span>
+<h2>Onde ir a <em>partir</em> daqui.</h2>
+
+<p>Esse plugin já é completo o suficiente pra usar num culto. Próximos passos naturais:</p>
+<ul>
+  <li><strong>Versão estéreo</strong> — duplicar a chain pra L/R e linkar os meters (módulo 07 traz <code>process</code> de N canais).</li>
+  <li><strong>De-esser</strong> — adicionar um sidechain no compressor com filtro passa-banda na região de 5–8 kHz pra mic de pregador.</li>
+  <li><strong>Saturação tape</strong> — estágio de soft-clipping com <code>tanh</code> entre EQ e FX pra colorir.</li>
+  <li><strong>Sidechain</strong> — comprimir música via sinal do microfone (ducking quando o pregador fala).</li>
+  <li><strong>Preset bank</strong> — salvar valores típicos (voz pregador, voz cantor, instrumento) e exportar como VST3 com <code>faust2vst3</code> (módulo 08).</li>
+  <li><strong>Hold no gate</strong> — adicionar um terceiro tempo entre attack e release que segura o gate aberto por X ms depois que o sinal cai abaixo do threshold.</li>
+</ul>
+
+<div class="callout success">
+  <div class="callout-title">Pronto pro DAW</div>
+  <p>Depois de testar no editor.faust.grame.fr, o próximo passo é exportar como VST3/AU/LV2 com <code>faust2vst3 channel_strip.dsp</code> (módulo 08). Aí o plugin aparece direto no Reaper/Logic/Ardour pra usar nos canais de qualquer projeto.</p>
+</div>
+
+</section>
+
+</article>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-next-label">Voltar pro curso</div>
+    <div class="footer-next-title"><a href="index.html">Curso FAUST — <em>8 módulos</em></a></div>
+    <div class="footer-next-desc">Esse projeto consolida os módulos 01–06. Continue pra polifonia/MIDI (módulo 07) e export VST/LV2 (módulo 08).</div>
+  </div>
+  <div class="footer-meta">
+    <a href="06-ui-controles.html">← Módulo 06 (UI)</a>
+    <a href="index.html">↑ Curso FAUST</a>
+    <a href="../../index.html">← Church Audio Tech</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  document.querySelectorAll('.code-block').forEach(function(block){
+    var header = block.querySelector('.code-header');
+    if (!header || header.querySelector('.copy-btn')) return;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-btn';
+    btn.textContent = 'copiar';
+    btn.title = 'Copiar código pra área de transferência';
+    btn.addEventListener('click', function(){
+      var code = block.querySelector('pre code');
+      if (!code) return;
+      var text = code.textContent;
+      var ok = function(){
+        btn.textContent = '✓ copiado!';
+        btn.classList.add('copied');
+        setTimeout(function(){
+          btn.textContent = 'copiar';
+          btn.classList.remove('copied');
+        }, 1500);
+      };
+      var fail = function(){
+        btn.textContent = 'erro';
+        setTimeout(function(){ btn.textContent = 'copiar'; }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok, fail);
+      } else {
+        try {
+          var ta = document.createElement('textarea');
+          ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+          document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+          document.body.removeChild(ta); ok();
+        } catch(e){ fail(); }
+      }
+    });
+    var lang = header.querySelector('.code-lang');
+    if (lang) header.insertBefore(btn, lang); else header.appendChild(btn);
+  });
+})();
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
