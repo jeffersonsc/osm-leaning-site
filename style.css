@@ -1630,3 +1630,64 @@ table.viz .muted {
   .author-card .avatar { margin: 0 auto; }
   .author-card .socials { justify-content: center; }
 }
+
+/* Author card — projetos atuais */
+.author-card .projects {
+  margin: 0 0 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.author-card .projects-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-faded);
+  margin-bottom: 10px;
+}
+
+.author-card .project {
+  display: block;
+  padding: 14px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.15s;
+}
+
+.author-card .project:hover {
+  border-color: var(--terra);
+  transform: translateY(-1px);
+}
+
+.author-card .project-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.author-card .project-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.author-card .project-link {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--terra);
+}
+
+.author-card .project-desc {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.author-card .project-desc strong { color: var(--text); }
