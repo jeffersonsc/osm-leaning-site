@@ -1533,3 +1533,100 @@ table.viz .muted {
   color: var(--terra);
   font-weight: 600;
 }
+
+/* ============================================
+   Author card (hub root)
+   ============================================ */
+.author-card {
+  max-width: 720px;
+  margin: 56px auto 24px;
+  padding: 28px 32px;
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elev) 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.author-card .avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--terra) 0%, var(--navy) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  box-shadow: 0 4px 16px rgba(228, 119, 102, 0.25);
+}
+
+.author-card .body { min-width: 0; }
+
+.author-card .name {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.author-card .role {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--terra);
+  margin-bottom: 14px;
+}
+
+.author-card .bio {
+  color: var(--text-muted);
+  font-size: 14.5px;
+  line-height: 1.55;
+  margin: 0 0 18px;
+}
+
+.author-card .socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.author-card .socials a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.author-card .socials a:hover {
+  border-color: var(--terra);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.author-card .socials a svg { flex-shrink: 0; }
+
+@media (max-width: 640px) {
+  .author-card {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding: 24px 20px;
+    margin-top: 40px;
+  }
+  .author-card .avatar { margin: 0 auto; }
+  .author-card .socials { justify-content: center; }
+}
