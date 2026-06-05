@@ -365,6 +365,77 @@ eq_mono = fi.<span class="tk-fn">low_shelf</span>(low_gain, low_freq)
   </div>
 </footer>
 
+<style>
+.code-header { gap: 12px; }
+.copy-btn {
+  background: rgba(212, 112, 74, 0.10);
+  border: 1px solid rgba(212, 112, 74, 0.30);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-left: auto;
+  margin-right: 8px;
+}
+.copy-btn:hover {
+  background: rgba(212, 112, 74, 0.20);
+  border-color: var(--accent);
+  color: var(--accent-bright);
+}
+.copy-btn.copied {
+  background: rgba(126, 168, 126, 0.15);
+  color: var(--success);
+  border-color: var(--success);
+}
+</style>
+<script>
+(function(){
+  document.querySelectorAll('.code-block').forEach(function(block){
+    var header = block.querySelector('.code-header');
+    if (!header || header.querySelector('.copy-btn')) return;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-btn';
+    btn.textContent = 'copiar';
+    btn.title = 'Copiar código pra área de transferência';
+    btn.addEventListener('click', function(){
+      var code = block.querySelector('pre code');
+      if (!code) return;
+      var text = code.textContent;
+      var ok = function(){
+        btn.textContent = '✓ copiado!';
+        btn.classList.add('copied');
+        setTimeout(function(){
+          btn.textContent = 'copiar';
+          btn.classList.remove('copied');
+        }, 1500);
+      };
+      var fail = function(){
+        btn.textContent = 'erro';
+        setTimeout(function(){ btn.textContent = 'copiar'; }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok, fail);
+      } else {
+        try {
+          var ta = document.createElement('textarea');
+          ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+          document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+          document.body.removeChild(ta); ok();
+        } catch(e){ fail(); }
+      }
+    });
+    var lang = header.querySelector('.code-lang');
+    if (lang) header.insertBefore(btn, lang); else header.appendChild(btn);
+  });
+})();
+</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

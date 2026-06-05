@@ -222,12 +222,18 @@ wet(x) = x : (+ : delay_line) ~ *(feedback);
 <pre><code><span class="tk-kw">declare</span> name <span class="tk-str">"Freeverb Simples"</span>;
 <span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
 
-size  = <span class="tk-fn">hslider</span>(<span class="tk-str">"tamanho da sala"</span>, <span class="tk-num">0.5</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
-damp  = <span class="tk-fn">hslider</span>(<span class="tk-str">"damping"</span>, <span class="tk-num">0.5</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
+<span class="tk-cm">// Assinatura: re.mono_freeverb(fb1, fb2, damp, spread)</span>
+<span class="tk-cm">//   fb1  = feedback dos comb filters (≈ "tamanho da sala")</span>
+<span class="tk-cm">//   fb2  = feedback dos all-pass (geralmente 0.5)</span>
+<span class="tk-cm">//   damp = quanto o agudo decai (0 = nada, 1 = muito)</span>
+<span class="tk-cm">//   spread = espalhamento (0 a 1)</span>
+
+room   = <span class="tk-fn">hslider</span>(<span class="tk-str">"tamanho da sala"</span>, <span class="tk-num">0.7</span>, <span class="tk-num">0</span>, <span class="tk-num">0.95</span>, <span class="tk-num">0.01</span>);
+damp   = <span class="tk-fn">hslider</span>(<span class="tk-str">"damping"</span>, <span class="tk-num">0.5</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
 spread = <span class="tk-fn">hslider</span>(<span class="tk-str">"spread"</span>, <span class="tk-num">0.5</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
 mix    = <span class="tk-fn">hslider</span>(<span class="tk-str">"mix"</span>, <span class="tk-num">0.3</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
 
-wet(x) = x : re.<span class="tk-fn">mono_freeverb</span>(damp, <span class="tk-num">0.5</span>, size, spread);
+wet(x) = x : re.<span class="tk-fn">mono_freeverb</span>(room, <span class="tk-num">0.5</span>, damp, spread);
 
 <span class="tk-fn">process</span>(x) = x * (<span class="tk-num">1</span> - mix) + wet(x) * mix;</code></pre>
 </div>
@@ -294,8 +300,9 @@ mix = <span class="tk-fn">hslider</span>(<span class="tk-str">"mix"</span>, <spa
 pre_ms = <span class="tk-fn">hslider</span>(<span class="tk-str">"pre-delay [unit:ms]"</span>, <span class="tk-num">20</span>, <span class="tk-num">0</span>, <span class="tk-num">100</span>, <span class="tk-num">1</span>);
 pre_samples = pre_ms * ma.<span class="tk-fn">SR</span> / <span class="tk-num">1000</span>;
 
-<span class="tk-cm">// === reverb (Zita: soa mais natural pra voz) ===</span>
-rev_time = <span class="tk-fn">hslider</span>(<span class="tk-str">"reverb time [unit:s]"</span>, <span class="tk-num">1.2</span>, <span class="tk-num">0.5</span>, <span class="tk-num">3</span>, <span class="tk-num">0.1</span>);
+<span class="tk-cm">// === reverb (mono_freeverb: fb1 controla decay, damp suaviza agudos) ===</span>
+room = <span class="tk-fn">hslider</span>(<span class="tk-str">"tamanho da sala"</span>, <span class="tk-num">0.7</span>, <span class="tk-num">0.3</span>, <span class="tk-num">0.95</span>, <span class="tk-num">0.01</span>);
+damp = <span class="tk-fn">hslider</span>(<span class="tk-str">"damping"</span>, <span class="tk-num">0.6</span>, <span class="tk-num">0</span>, <span class="tk-num">1</span>, <span class="tk-num">0.01</span>);
 
 <span class="tk-cm">// === EQ no wet — corta grave e brilho exagerado ===</span>
 wet_hp = <span class="tk-fn">hslider</span>(<span class="tk-str">"wet/low cut [unit:Hz]"</span>, <span class="tk-num">200</span>, <span class="tk-num">50</span>, <span class="tk-num">800</span>, <span class="tk-num">1</span>);
@@ -304,9 +311,9 @@ wet_lp = <span class="tk-fn">hslider</span>(<span class="tk-str">"wet/high cut [
 <span class="tk-cm">// === mix ===</span>
 mix = <span class="tk-fn">hslider</span>(<span class="tk-str">"mix"</span>, <span class="tk-num">0.15</span>, <span class="tk-num">0</span>, <span class="tk-num">0.5</span>, <span class="tk-num">0.01</span>);
 
-<span class="tk-cm">// pipeline do wet</span>
+<span class="tk-cm">// pipeline do wet: pré-delay → reverb → EQ</span>
 wet(x) = x : de.<span class="tk-fn">delay</span>(<span class="tk-num">9600</span>, pre_samples)
-           : re.<span class="tk-fn">mono_freeverb</span>(<span class="tk-num">0.5</span>, <span class="tk-num">0.5</span>, rev_time * <span class="tk-num">0.3</span>, <span class="tk-num">0.6</span>)
+           : re.<span class="tk-fn">mono_freeverb</span>(room, <span class="tk-num">0.5</span>, damp, <span class="tk-num">0.6</span>)
            : fi.<span class="tk-fn">highpass</span>(<span class="tk-num">2</span>, wet_hp)
            : fi.<span class="tk-fn">lowpass</span>(<span class="tk-num">2</span>, wet_lp);
 
@@ -337,7 +344,7 @@ wet(x) = x : de.<span class="tk-fn">delay</span>(<span class="tk-num">9600</span
   <dt>ma.SR</dt>
   <dd>Sample rate atual (geralmente 48000).</dd>
   <dt>re.mono_freeverb</dt>
-  <dd>Freeverb mono. (damping, sidefreq, roomsize, spread).</dd>
+  <dd>Freeverb mono. Assinatura: <code>(fb1, fb2, damp, spread)</code>. fb1 ≈ tamanho da sala (0.3–0.95), fb2 ≈ 0.5, damp 0–1, spread 0–1.</dd>
   <dt>re.stereo_freeverb</dt>
   <dd>Versão stereo.</dd>
   <dt>re.zita_rev1</dt>
@@ -365,6 +372,77 @@ wet(x) = x : de.<span class="tk-fn">delay</span>(<span class="tk-num">9600</span
   </div>
 </footer>
 
+<style>
+.code-header { gap: 12px; }
+.copy-btn {
+  background: rgba(212, 112, 74, 0.10);
+  border: 1px solid rgba(212, 112, 74, 0.30);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-left: auto;
+  margin-right: 8px;
+}
+.copy-btn:hover {
+  background: rgba(212, 112, 74, 0.20);
+  border-color: var(--accent);
+  color: var(--accent-bright);
+}
+.copy-btn.copied {
+  background: rgba(126, 168, 126, 0.15);
+  color: var(--success);
+  border-color: var(--success);
+}
+</style>
+<script>
+(function(){
+  document.querySelectorAll('.code-block').forEach(function(block){
+    var header = block.querySelector('.code-header');
+    if (!header || header.querySelector('.copy-btn')) return;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-btn';
+    btn.textContent = 'copiar';
+    btn.title = 'Copiar código pra área de transferência';
+    btn.addEventListener('click', function(){
+      var code = block.querySelector('pre code');
+      if (!code) return;
+      var text = code.textContent;
+      var ok = function(){
+        btn.textContent = '✓ copiado!';
+        btn.classList.add('copied');
+        setTimeout(function(){
+          btn.textContent = 'copiar';
+          btn.classList.remove('copied');
+        }, 1500);
+      };
+      var fail = function(){
+        btn.textContent = 'erro';
+        setTimeout(function(){ btn.textContent = 'copiar'; }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok, fail);
+      } else {
+        try {
+          var ta = document.createElement('textarea');
+          ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+          document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+          document.body.removeChild(ta); ok();
+        } catch(e){ fail(); }
+      }
+    });
+    var lang = header.querySelector('.code-lang');
+    if (lang) header.insertBefore(btn, lang); else header.appendChild(btn);
+  });
+})();
+</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

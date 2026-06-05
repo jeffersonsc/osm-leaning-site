@@ -543,19 +543,30 @@ gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"gain"</span>, <s
   </tbody>
 </table>
 
+<p style="margin-top: 18px; color: var(--text-muted); font-size: 14px;"><em>Cada exemplo a seguir é um plugin completo independente — escolha UM e cole no editor. Cada bloco tem botão "copiar" no canto.</em></p>
+
 <div class="code-block">
-<div class="code-header"><span>exemplos</span><span class="code-lang">faust</span></div>
-<pre><code><span class="tk-cm">// passa o áudio direto</span>
-<span class="tk-fn">process</span> = _;
+<div class="code-header"><span>passa.dsp — bypass</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-cm">// passa o áudio direto, sem mudar</span>
+<span class="tk-fn">process</span> = _;</code></pre>
+</div>
 
-<span class="tk-cm">// dobra o ganho (cuidado com clip)</span>
-<span class="tk-fn">process</span> = _ * <span class="tk-num">2</span>;
+<div class="code-block">
+<div class="code-header"><span>dobrar.dsp — +6 dB</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-cm">// dobra o ganho (cuidado com clip)</span>
+<span class="tk-fn">process</span> = _ * <span class="tk-num">2</span>;</code></pre>
+</div>
 
-<span class="tk-cm">// abaixa 6 dB (multiplica por 0.5)</span>
-<span class="tk-fn">process</span> = _ * <span class="tk-num">0.5</span>;
+<div class="code-block">
+<div class="code-header"><span>atenuar.dsp — −6 dB</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-cm">// abaixa 6 dB (multiplica por 0.5)</span>
+<span class="tk-fn">process</span> = _ * <span class="tk-num">0.5</span>;</code></pre>
+</div>
 
-<span class="tk-cm">// soma o sinal a si mesmo atrasado por 1 amostra</span>
-<span class="tk-fn">process</span> = _ + mem;</code></pre>
+<div class="code-block">
+<div class="code-header"><span>delay1.dsp — atraso de 1 amostra</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-cm">// passa o sinal por um delay de 1 amostra (usa mem como primitiva de delay)</span>
+<span class="tk-fn">process</span> = mem;</code></pre>
 </div>
 
 </section>
@@ -571,12 +582,10 @@ gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"gain"</span>, <s
 <p>"A output vira B input". Leitura: "depois".</p>
 
 <div class="code-block">
-<div class="code-header"><span>sequencial</span><span class="code-lang">faust</span></div>
-<pre><code><span class="tk-cm">// pega o sinal, multiplica por 0.5, depois soma 1 amostra atrasada</span>
-<span class="tk-fn">process</span> = _ : * (<span class="tk-num">0.5</span>) : + ~ <span class="tk-num">0</span>;
+<div class="code-header"><span>sequencial.dsp</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
 
-<span class="tk-cm">// equivalente: passa por um filtro lowpass de 1kHz, depois pelo highpass de 80Hz</span>
-<span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
+<span class="tk-cm">// passa o sinal por lowpass 1 kHz, depois por highpass 80 Hz</span>
 <span class="tk-fn">process</span> = _ : fi.<span class="tk-fn">lowpass</span>(<span class="tk-num">1</span>, <span class="tk-num">1000</span>) : fi.<span class="tk-fn">highpass</span>(<span class="tk-num">1</span>, <span class="tk-num">80</span>);</code></pre>
 </div>
 
@@ -723,6 +732,77 @@ vol = <span class="tk-fn">hslider</span>(<span class="tk-str">"volume"</span>, <
   </div>
 </footer>
 
+<style>
+.code-header { gap: 12px; }
+.copy-btn {
+  background: rgba(212, 112, 74, 0.10);
+  border: 1px solid rgba(212, 112, 74, 0.30);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-left: auto;
+  margin-right: 8px;
+}
+.copy-btn:hover {
+  background: rgba(212, 112, 74, 0.20);
+  border-color: var(--accent);
+  color: var(--accent-bright);
+}
+.copy-btn.copied {
+  background: rgba(126, 168, 126, 0.15);
+  color: var(--success);
+  border-color: var(--success);
+}
+</style>
+<script>
+(function(){
+  document.querySelectorAll('.code-block').forEach(function(block){
+    var header = block.querySelector('.code-header');
+    if (!header || header.querySelector('.copy-btn')) return;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-btn';
+    btn.textContent = 'copiar';
+    btn.title = 'Copiar código pra área de transferência';
+    btn.addEventListener('click', function(){
+      var code = block.querySelector('pre code');
+      if (!code) return;
+      var text = code.textContent;
+      var ok = function(){
+        btn.textContent = '✓ copiado!';
+        btn.classList.add('copied');
+        setTimeout(function(){
+          btn.textContent = 'copiar';
+          btn.classList.remove('copied');
+        }, 1500);
+      };
+      var fail = function(){
+        btn.textContent = 'erro';
+        setTimeout(function(){ btn.textContent = 'copiar'; }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok, fail);
+      } else {
+        try {
+          var ta = document.createElement('textarea');
+          ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+          document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+          document.body.removeChild(ta); ok();
+        } catch(e){ fail(); }
+      }
+    });
+    var lang = header.querySelector('.code-lang');
+    if (lang) header.insertBefore(btn, lang); else header.appendChild(btn);
+  });
+})();
+</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
