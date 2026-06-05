@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cabos: escolher e soldar · Curso de equipamentos</title>
+  <meta name="description" content="Tipos de cabo, gauge AWG, capacitância. Tutorial passo a passo de soldagem de XLR, P10, Speakon e RCA com ferramentas e técnica.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="index.html">Equipamentos</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Bloco 4 / 6</div>
+        <h1>Cabos: escolher e soldar</h1>
+      </div>
+      <div class="subtitle">XLR, P10, Speakon, RCA<br>com ferro de solda e paciência</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>Cabo é onde 90% dos problemas de áudio começam. Conector frouxo, solda fria, blindagem solta, gauge errado. Aprender a montar próprios cabos não é só economia — é controle. Quando estraga, você conhece o cabo o suficiente pra consertar em 5 minutos.</p>
+
+      <h2>Tipos de cabo</h2>
+
+      <div class="stat-grid">
+        <div class="stat" style="background: var(--bg-card); border: 1px solid var(--border); padding: 16px; border-radius: 6px;">
+          <div style="color: var(--navy); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Blindado</div>
+          <div style="font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px;">Microfone e linha</div>
+          <div style="font-size: 13px; color: var(--text-muted);">2 fios internos (vivo/quente + retorno/frio) envolvidos por malha ou folha (blindagem terra). Bloqueia interferência. Sinal fraco (mV).</div>
+        </div>
+        <div class="stat" style="background: var(--bg-card); border: 1px solid var(--border); padding: 16px; border-radius: 6px;">
+          <div style="color: var(--terra); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Alto-falante</div>
+          <div style="font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px;">Amp → caixa passiva</div>
+          <div style="font-size: 13px; color: var(--text-muted);">2 fios grossos, sem blindagem. Carrega alta corrente. Gauge importa muito.</div>
+        </div>
+      </div>
+
+      <div class="warn-box">
+        <div class="title">⚠ Não troque os papéis</div>
+        <p><strong>Cabo de microfone ligando amp → caixa passiva</strong> esquenta e queima. <strong>Cabo de alto-falante ligando mesa → caixa ativa</strong> funciona mas pega interferência (sem blindagem) e pode chiar. Cada um pro seu propósito.</p>
+      </div>
+
+      <h2>Gauge AWG — qual cabo de alto-falante usar</h2>
+
+      <p>AWG é a medida americana de espessura de fio. <strong>Quanto menor o número, mais grosso o cabo</strong>. Pra alto-falante, escolha pela combinação de potência e distância:</p>
+
+      <table class="ref-table-lg">
+        <thead>
+          <tr><th>AWG</th><th>mm² ≈</th><th>Comprimento máx (8Ω)</th><th>Uso típico</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>16 AWG</td><td>1,3 mm²</td><td>até 6 m</td><td>monitor de palco curto, caixa próxima</td></tr>
+          <tr><td>14 AWG</td><td>2,1 mm²</td><td>até 12 m</td><td>caixa principal em sala média</td></tr>
+          <tr><td>12 AWG</td><td>3,3 mm²</td><td>até 20 m</td><td>templo grande, sub potente</td></tr>
+          <tr><td>10 AWG</td><td>5,3 mm²</td><td>até 30 m</td><td>line array, sistema de alta potência</td></tr>
+        </tbody>
+      </table>
+
+      <p style="color: var(--text-muted); font-size: 14px;">Cabo fino demais pra distância longa <strong>perde potência</strong> no caminho (a resistência do cobre vira calor em vez de virar som). Em 4 Ω a perda é o dobro — divide o comprimento máximo por 2.</p>
+
+      <h2>Capacitância e cabo de mic longo</h2>
+
+      <p>Cabo de microfone tem outro problema: <strong>capacitância</strong>. Cada metro de cabo guarda um pouquinho de carga elétrica, e o efeito acumulado é cortar os agudos quando o cabo é longo demais.</p>
+
+      <table class="ref-table-lg">
+        <thead>
+          <tr><th>Cabo de mic</th><th>Comprimento confortável</th><th>Acima disso</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>cabo barato (alta capacitância)</td><td>até 15 m</td><td>perde brilho, voz fica abafada</td></tr>
+          <tr><td>cabo decente (Canare, Mogami)</td><td>até 30 m</td><td>ainda ok pra fala</td></tr>
+          <tr><td>cabo profissional baixa capacitância</td><td>até 100 m</td><td>investimento que vale</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Ferramentas pra soldar</h2>
+
+      <div class="callout terra">
+        <div class="head">O kit mínimo</div>
+        <div class="item">
+          <div class="key">Ferro de solda 30–40 W</div>
+          <div class="val">Não compre os de 25 W — esquenta pouco e demora. Não compre 100 W também — queima componente. Sweet spot é 30–40 W com ponta fina.</div>
+        </div>
+        <div class="item">
+          <div class="key">Estanho 60/40 com fluxo</div>
+          <div class="val">Diâmetro 0,8–1,0 mm. Sem chumbo (lead-free) é mais difícil, fique no 60/40 pra aprender.</div>
+        </div>
+        <div class="item">
+          <div class="key">Descascador de fio</div>
+          <div class="val">Ajustável pra calibres 22–10 AWG. Faca cega + dente também serve, mas marca o cobre.</div>
+        </div>
+        <div class="item">
+          <div class="key">Alicate de bico fino + corte</div>
+          <div class="val">Pra dobrar e cortar fios curtos no conector.</div>
+        </div>
+        <div class="item">
+          <div class="key">Multímetro</div>
+          <div class="val">Pra testar depois (assunto do <a href="05-multimetro.html" style="color: var(--terra);">Bloco 5</a>).</div>
+        </div>
+        <div class="item">
+          <div class="key">Suporte de solda ("terceira mão")</div>
+          <div class="val">Opcional mas economiza muita raiva. Garra crocodilo segura o cabo enquanto você solda.</div>
+        </div>
+      </div>
+
+      <h2>Soldagem de XLR (microfone)</h2>
+
+      <p>XLR balanceado tem 3 pinos: <strong>1 = terra/blindagem</strong>, <strong>2 = vivo/quente</strong> (positivo), <strong>3 = retorno/frio</strong> (negativo).</p>
+
+      <div class="diagrama-wrap">
+        <svg id="diag-xlr" viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pinout XLR macho com 3 pinos"></svg>
+        <div class="caption">XLR macho visto pela frente. Pino 1 sempre tem o fio terra/blindagem.</div>
+      </div>
+
+      <div class="solda-grid">
+        <div class="solda-step">
+          <div class="num">1</div>
+          <div class="body">
+            <h4>Descasque ~30 mm da capa externa</h4>
+            <p>Cuidado pra não cortar a blindagem (malha ou folha). Separe a blindagem dos 2 fios internos (geralmente vermelho e branco, ou azul e vermelho — não tem padrão fixo).</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">2</div>
+          <div class="body">
+            <h4>Trance a blindagem num único fio</h4>
+            <p>A malha vira um "rabicho" único que vai no pino 1. Se for blindagem de folha, ela vem com um fio dreno preto — esse dreno vai no pino 1.</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">3</div>
+          <div class="body">
+            <h4>Descasque ~5 mm de cada fio interno</h4>
+            <p>Quanto sai do plástico colorido. Não descasque demais — fio pelado em excesso encosta no pino vizinho.</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">4</div>
+          <div class="body">
+            <h4>Pré-estanhe os 3 fios e os 3 pinos</h4>
+            <p>"Pré-estanhar" é molhar com solda antes de juntar. Fio + solda no ferro = fio com cobertura prateada. Pino do conector + solda = mesma coisa. Depois você só junta os dois pré-estanhados.</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">5</div>
+          <div class="body">
+            <h4>Solda no pino certo</h4>
+            <p>Pino 1 = blindagem. Pino 2 = fio "vivo" (escolha um e seja consistente — geralmente o vermelho). Pino 3 = o outro fio. <strong>Os dois lados do cabo precisam ter a mesma escolha</strong> — senão você inverte a polaridade.</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">6</div>
+          <div class="body">
+            <h4>Monte a carcaça e teste</h4>
+            <p>Antes de fechar a carcaça, multímetro em continuidade: pino 1 → pino 1 do outro lado (deve apitar). Pino 2 → pino 2. Pino 3 → pino 3. Pino 1 → pino 2 (NÃO deve apitar). Se passou, fecha e usa.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Soldagem de P10 (TS mono ou TRS balanceado)</h2>
+
+      <p>P10 vem em 2 tipos: <strong>TS</strong> (Tip-Sleeve, 2 anéis) pra instrumento/desbalanceado, e <strong>TRS</strong> (Tip-Ring-Sleeve, 3 anéis) pra fone de ouvido estéreo ou linha balanceada.</p>
+
+      <div class="diagrama-wrap">
+        <svg id="diag-p10" viewBox="0 0 380 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="P10 TS e TRS comparados"></svg>
+        <div class="caption">TS: 1 sinal + terra. TRS: 2 sinais + terra (estéreo, ou balanceado).</div>
+      </div>
+
+      <div class="solda-grid">
+        <div class="solda-step">
+          <div class="num">1</div>
+          <div class="body">
+            <h4>P10 desmonta em 2 partes</h4>
+            <p>Rosqueie a carcaça e separe. A parte de trás é onde você solda. Passe a carcaça pelo cabo <em>antes</em> de soldar — esquecer disso é o erro mais comum (e a solda fica feita à toa).</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">2</div>
+          <div class="body">
+            <h4>TS pra instrumento</h4>
+            <p>Vivo (cabo central) → "tip" (ponta). Blindagem → "sleeve" (carcaça/anel maior).</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">3</div>
+          <div class="body">
+            <h4>TRS pra estéreo (P10 fone)</h4>
+            <p>Canal esquerdo → "tip". Canal direito → "ring" (anel do meio). Terra comum → "sleeve".</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">4</div>
+          <div class="body">
+            <h4>TRS pra balanceado</h4>
+            <p>Vivo → "tip". Frio (retorno) → "ring". Blindagem → "sleeve". Igual ao XLR mas no formato P10. Usado nas saídas direct out de mesa e em insertos.</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">5</div>
+          <div class="body">
+            <h4>Aperte o "grampo" de alívio</h4>
+            <p>Toda traseira de P10 tem uma abinha que prende a capa do cabo. Aperte com alicate antes de fechar — sem isso, o cabo é puxado a cada movimento e o fio se solta da solda em 1 semana de uso.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Soldagem de Speakon (NL2 / NL4)</h2>
+
+      <p>Speakon é o conector profissional pra alto-falante. Sem solda na maioria dos modelos atuais — só aperta com chave Allen. Mas alguns ainda exigem solda. Veja antes qual modelo você tem.</p>
+
+      <div class="solda-grid">
+        <div class="solda-step">
+          <div class="num">1</div>
+          <div class="body">
+            <h4>Modelo "tool-less" (preferível)</h4>
+            <p>Descasque 12–15 mm do fio, dobre, encaixe no terminal, aperte com Allen 2 mm. <strong>Sem solda</strong>. Speakon NL4FX e NL2FX modernos são assim.</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">2</div>
+          <div class="body">
+            <h4>Modelo antigo que exige solda</h4>
+            <p>Descasque 8 mm. Pré-estanhe fio e pino. Insira fio no orifício do pino, aplique ferro de fora, solda escorre. O pino aquece bem porque é massivo — use ferro de 40 W ou mais.</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">3</div>
+          <div class="body">
+            <h4>Pinos NL2 (caixa simples)</h4>
+            <p>1+ = positivo (vermelho/sinal). 1− = negativo (preto/retorno). Sempre o mesmo padrão no Brasil.</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">4</div>
+          <div class="body">
+            <h4>Pinos NL4 (bi-amp ou bridge)</h4>
+            <p>1+ / 1− = canal A (top). 2+ / 2− = canal B (sub). Bridge mono geralmente usa 1+ e 2+ (revisar manual do amp).</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">5</div>
+          <div class="body">
+            <h4>Trave o Speakon na caixa</h4>
+            <p>Insira o conector e gire 1/4 de volta no sentido horário até clicar. Pra remover, puxe a tampinha branca de cima e gire ao contrário. Esse trava é uma das melhores invenções de áudio profissional.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Soldagem de RCA</h2>
+
+      <p>RCA aparece pouco em PA profissional, mas muito em <strong>retornos de hometheater, mixer de DJ, equipamento de transmissão</strong>. Sempre desbalanceado, 2 contatos (vivo + terra).</p>
+
+      <div class="solda-grid">
+        <div class="solda-step">
+          <div class="num">1</div>
+          <div class="body">
+            <h4>Passe a carcaça antes</h4>
+            <p>Mesmo cuidado do P10 — carcaça vai pelo cabo antes de soldar.</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">2</div>
+          <div class="body">
+            <h4>Vivo no pino central</h4>
+            <p>Fio interno do cabo vai no pino central pequeno do RCA. Pré-estanhe os dois, junte com o ferro.</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">3</div>
+          <div class="body">
+            <h4>Blindagem na "saia" externa</h4>
+            <p>A blindagem vai na carcaça metálica externa (o cilindro maior do RCA). Solda numa abinha lateral que sai dela.</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">4</div>
+          <div class="body">
+            <h4>Rosqueie a carcaça plástica</h4>
+            <p>Aperta o cabo na entrada. Pronto.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Erros comuns que te custam tempo</h2>
+
+      <div class="warn-box">
+        <div class="title">⚠ Os 5 que sempre acontecem</div>
+        <ul>
+          <li><strong>Esquecer de passar a carcaça pelo cabo antes de soldar.</strong> Acontece sempre. Solde, perceba, xingue, desfaça, refaça.</li>
+          <li><strong>Solda fria</strong> — quando o estanho fica fosco e granulado em vez de brilhante. Causa: ferro frio, contato breve demais, ou fio sujo. Quebra em 1 semana de uso. Refaça.</li>
+          <li><strong>Fio descascado em excesso</strong> encostando no pino vizinho. Solta a blindagem solta no pino do meio = canal mudo ou ruidoso. Curto na blindagem.</li>
+          <li><strong>Polaridade invertida</strong> entre 2 cabos iguais. Os dois funcionam soltos, mas usados juntos cancelam grave (efeito comb).</li>
+          <li><strong>Não testar antes de fechar.</strong> Sempre multímetro em continuidade <em>antes</em> de aparafusar a carcaça. Achar problema depois é dobro do trabalho.</li>
+        </ul>
+      </div>
+
+      <h2>Resumo das soldas — pinout rápido</h2>
+
+      <table class="ref-table-lg">
+        <thead>
+          <tr><th>Conector</th><th>Pino</th><th>Sinal</th></tr>
+        </thead>
+        <tbody>
+          <tr><td rowspan="3">XLR balanc.</td><td>1</td><td>terra / blindagem</td></tr>
+          <tr><td>2</td><td>vivo (quente, +)</td></tr>
+          <tr><td>3</td><td>retorno (frio, −)</td></tr>
+          <tr><td rowspan="2">P10 TS</td><td>tip</td><td>vivo</td></tr>
+          <tr><td>sleeve</td><td>terra</td></tr>
+          <tr><td rowspan="3">P10 TRS bal.</td><td>tip</td><td>vivo (+)</td></tr>
+          <tr><td>ring</td><td>retorno (−)</td></tr>
+          <tr><td>sleeve</td><td>terra</td></tr>
+          <tr><td rowspan="2">Speakon NL2</td><td>1+</td><td>positivo</td></tr>
+          <tr><td>1−</td><td>negativo</td></tr>
+          <tr><td rowspan="2">RCA</td><td>central</td><td>vivo</td></tr>
+          <tr><td>externo</td><td>terra</td></tr>
+        </tbody>
+      </table>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="03-crossover-sub.html">← Bloco 3</a>
+    <a class="center" href="../index.html" title="Voltar para Church Audio Tech" style="text-decoration:none;">&#127968; Bloco 4 / 6 · Cabos e soldagem</a>
+    <a href="05-multimetro.html">Bloco 5 →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+
+    function el(svg, tag, attrs, text) {
+      const e = document.createElementNS(ns, tag);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      if (text !== undefined) e.textContent = text;
+      svg.appendChild(e);
+      return e;
+    }
+
+    // ============= XLR =============
+    const svgXlr = document.getElementById('diag-xlr');
+    if (svgXlr) {
+      // carcaça
+      el(svgXlr, 'circle', {cx:180, cy:100, r:75, fill:'#1A2332', stroke:'#8B97A8', 'stroke-width':2});
+      el(svgXlr, 'circle', {cx:180, cy:100, r:60, fill:'#0F1419', stroke:'#3D4D63', 'stroke-width':1.5});
+
+      // 3 pinos em triangulo (vista frontal macho)
+      // pino 1 (esquerda inferior)
+      el(svgXlr, 'circle', {cx:155, cy:120, r:12, fill:'#2D3B4D', stroke:'#34D399', 'stroke-width':2});
+      el(svgXlr, 'text', {x:155, y:124, 'text-anchor':'middle', fill:'#34D399', 'font-size':12, 'font-family':'monospace', 'font-weight':700}, '1');
+      // pino 2 (topo)
+      el(svgXlr, 'circle', {cx:180, cy:75, r:12, fill:'#2D3B4D', stroke:'#E47766', 'stroke-width':2});
+      el(svgXlr, 'text', {x:180, y:79, 'text-anchor':'middle', fill:'#E47766', 'font-size':12, 'font-family':'monospace', 'font-weight':700}, '2');
+      // pino 3 (direita inferior)
+      el(svgXlr, 'circle', {cx:205, cy:120, r:12, fill:'#2D3B4D', stroke:'#5B7BD8', 'stroke-width':2});
+      el(svgXlr, 'text', {x:205, y:124, 'text-anchor':'middle', fill:'#5B7BD8', 'font-size':12, 'font-family':'monospace', 'font-weight':700}, '3');
+
+      // legendas
+      el(svgXlr, 'text', {x:90, y:140, 'text-anchor':'end', fill:'#34D399', 'font-size':11, 'font-family':'sans-serif'}, '1 = terra');
+      el(svgXlr, 'text', {x:270, y:75, fill:'#E47766', 'font-size':11, 'font-family':'sans-serif'}, '2 = vivo (+)');
+      el(svgXlr, 'text', {x:270, y:140, fill:'#5B7BD8', 'font-size':11, 'font-family':'sans-serif'}, '3 = retorno (−)');
+
+      // setas
+      el(svgXlr, 'line', {x1:142, y1:130, x2:108, y2:138, stroke:'#34D399', 'stroke-width':1.5});
+      el(svgXlr, 'line', {x1:193, y1:75, x2:260, y2:72, stroke:'#E47766', 'stroke-width':1.5});
+      el(svgXlr, 'line', {x1:218, y1:130, x2:260, y2:138, stroke:'#5B7BD8', 'stroke-width':1.5});
+    }
+
+    // ============= P10 =============
+    const svgP10 = document.getElementById('diag-p10');
+    if (svgP10) {
+      // TS (cima)
+      // corpo do plug
+      el(svgP10, 'rect', {x:30, y:30, width:120, height:18, fill:'#3D4D63', stroke:'#8B97A8', 'stroke-width':1});
+      // tip
+      el(svgP10, 'polygon', {points:'150,30 175,39 150,48', fill:'#E47766'});
+      // labels
+      el(svgP10, 'text', {x:90, y:43, 'text-anchor':'middle', fill:'#E5E9F0', 'font-size':11, 'font-family':'sans-serif', 'font-weight':700}, 'sleeve');
+      el(svgP10, 'text', {x:163, y:65, 'text-anchor':'middle', fill:'#E47766', 'font-size':10, 'font-family':'sans-serif'}, 'tip');
+      el(svgP10, 'text', {x:200, y:43, fill:'#34D399', 'font-size':12, 'font-family':'sans-serif', 'font-weight':700}, 'TS — mono / desbalanceado');
+      el(svgP10, 'text', {x:200, y:60, fill:'#8B97A8', 'font-size':10, 'font-family':'sans-serif'}, 'instrumento, P10 simples');
+
+      // TRS (embaixo)
+      el(svgP10, 'rect', {x:30, y:100, width:90, height:18, fill:'#3D4D63', stroke:'#8B97A8', 'stroke-width':1});
+      el(svgP10, 'rect', {x:120, y:100, width:20, height:18, fill:'#F5B947', stroke:'#8B97A8', 'stroke-width':1});
+      el(svgP10, 'polygon', {points:'140,100 165,109 140,118', fill:'#E47766'});
+      el(svgP10, 'text', {x:75, y:113, 'text-anchor':'middle', fill:'#E5E9F0', 'font-size':11, 'font-family':'sans-serif', 'font-weight':700}, 'sleeve');
+      el(svgP10, 'text', {x:130, y:135, 'text-anchor':'middle', fill:'#F5B947', 'font-size':10, 'font-family':'sans-serif'}, 'ring');
+      el(svgP10, 'text', {x:153, y:135, 'text-anchor':'middle', fill:'#E47766', 'font-size':10, 'font-family':'sans-serif'}, 'tip');
+      el(svgP10, 'text', {x:200, y:113, fill:'#5B7BD8', 'font-size':12, 'font-family':'sans-serif', 'font-weight':700}, 'TRS — estéreo / balanceado');
+      el(svgP10, 'text', {x:200, y:130, fill:'#8B97A8', 'font-size':10, 'font-family':'sans-serif'}, 'fone, linha pro balanceado');
+    }
+  })();
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

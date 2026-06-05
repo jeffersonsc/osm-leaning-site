@@ -795,18 +795,18 @@ table.viz .muted {
 
 .tracks {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
   margin-bottom: 56px;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1280px) {
   .tracks {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 700px) {
   .tracks {
     grid-template-columns: 1fr;
     margin-bottom: 40px;
@@ -840,6 +840,7 @@ table.viz .muted {
 }
 
 .track.beginner .level { color: var(--green); }
+.track.equipment .level { color: var(--amber); }
 .track.advanced .level { color: var(--navy); }
 .track.expert .level { color: var(--terra); }
 
@@ -1300,4 +1301,235 @@ table.viz .muted {
 
 .crumb .sep {
   color: var(--text-faded);
+}
+
+/* ============================================
+   Trilha 2 — Curso de equipamentos
+   ============================================ */
+
+/* Diagrama (SVG ligação ou pinout) — wrapper centralizado */
+.diagrama-wrap {
+  margin: 28px 0;
+  padding: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.diagrama-wrap svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.diagrama-wrap .caption {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Solda — tutorial passo a passo */
+.solda-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.solda-step {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 18px;
+  align-items: start;
+  padding: 18px 20px;
+  background: var(--bg-card);
+  border-left: 3px solid var(--terra);
+  border-radius: 0 6px 6px 0;
+}
+
+.solda-step .num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--terra);
+  color: white;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.solda-step .body h4 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.solda-step .body p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.solda-step .body p + p { margin-top: 6px; }
+
+/* Checklist de problemas — sintoma → hipótese → teste */
+.problema-checklist {
+  margin: 24px 0;
+}
+
+.problema-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.problema-item .sintoma {
+  font-weight: 600;
+  color: var(--red);
+  font-size: 14px;
+}
+
+.problema-item .hipotese {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.problema-item .teste {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-family: var(--font-mono);
+}
+
+.problema-item .label {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-faded);
+  margin-bottom: 4px;
+}
+
+/* Bloco de posicionamento físico */
+.posicao-block {
+  margin: 28px 0;
+  padding: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.posicao-block h3 {
+  margin: 0 0 14px;
+  font-size: 18px;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.posicao-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.posicao-grid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.posicao-grid .points {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.posicao-grid .points li {
+  padding: 8px 0 8px 22px;
+  position: relative;
+  font-size: 14.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  border-bottom: 1px solid var(--border);
+}
+
+.posicao-grid .points li:last-child { border-bottom: none; }
+
+.posicao-grid .points li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--terra);
+  font-weight: 700;
+}
+
+.posicao-grid .points li strong { color: var(--text); }
+
+@media (max-width: 800px) {
+  .posicao-grid { grid-template-columns: 1fr; }
+  .problema-item { grid-template-columns: 1fr; gap: 8px; }
+}
+
+/* Tabela de referência grande (gauge, potência) */
+.ref-table-lg {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 22px 0;
+  font-size: 14px;
+}
+
+.ref-table-lg th {
+  text-align: left;
+  background: var(--bg-elev);
+  color: var(--terra);
+  padding: 12px 14px;
+  border-bottom: 2px solid var(--terra);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.ref-table-lg td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+.ref-table-lg tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.ref-table-lg td:first-child {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--terra);
+}
+
+.ref-table-lg .note {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* Conector tags inline */
+.conn-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--terra);
+  font-weight: 600;
 }

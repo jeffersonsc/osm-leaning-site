@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caixas ativas vs passivas · Curso de equipamentos</title>
+  <meta name="description" content="Diferença entre caixa de som ativa e passiva, conectores certos pra cada uma, erros que matam a caixa, e posicionamento físico (chão, tripé, suspensa).">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="index.html">Equipamentos</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Bloco 1 / 6</div>
+        <h1>Caixas ativas vs passivas</h1>
+      </div>
+      <div class="subtitle">a primeira coisa pra entender<br>antes de ligar qualquer coisa</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>Toda caixa de som tem um <strong>falante</strong> (o cone que vibra) e uma <strong>carcaça</strong>. A diferença entre <em>ativa</em> e <em>passiva</em> é onde mora o amplificador — dentro da caixa ou num rack separado.</p>
+
+      <h2>Caixa ativa</h2>
+
+      <p>A caixa ativa tem amplificador <strong>dentro</strong>. Você liga ela direto na <strong>tomada AC</strong>, e o cabo que sai da mesa é um sinal de linha (baixa potência) — cabo balanceado <span class="conn-tag">XLR</span> ou <span class="conn-tag">TRS/P10</span>.</p>
+
+      <div class="callout green">
+        <div class="head">Como reconhecer</div>
+        <p>Tem tomada de força. Tem chave liga/desliga. Geralmente tem botão de volume e LED de "ON". Atrás tem entrada XLR/TRS.</p>
+      </div>
+
+      <h2>Caixa passiva</h2>
+
+      <p>A caixa passiva só tem o falante (e um crossover passivo simples dentro, se for de duas vias). Não tem amplificador, não tem tomada de força. Precisa de um <strong>amplificador externo no rack</strong>, e o cabo que liga o amp à caixa é um <strong>cabo de alto-falante</strong> (alta potência) — geralmente <span class="conn-tag">Speakon</span>.</p>
+
+      <div class="callout navy">
+        <div class="head">Como reconhecer</div>
+        <p>Não tem tomada AC. Atrás só tem conectores de alto-falante (Speakon NL2/NL4 ou bornes de parafuso). Não tem LED.</p>
+      </div>
+
+      <h2>Ligação de cada uma</h2>
+
+      <div class="diagrama-wrap">
+        <svg id="diag-caixas" viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama comparando ligação de caixa ativa e passiva"></svg>
+        <div class="caption">Ativa: cabo de linha (XLR/TRS) + tomada AC. Passiva: cabo de alto-falante (Speakon) saindo do amp do rack.</div>
+      </div>
+
+      <h2>Erros que matam a caixa</h2>
+
+      <div class="warn-box">
+        <div class="title">⚠ Não faça nunca</div>
+        <ul>
+          <li><strong>Ligar caixa ativa na saída de amplificador.</strong> A saída do amp manda dezenas de volts — vai queimar a entrada de linha da caixa ativa na hora.</li>
+          <li><strong>Usar cabo de microfone (blindado fino) pra ligar amp em caixa passiva.</strong> Cabo de mic é fino demais pra corrente do alto-falante, vai esquentar, derreter, e a caixa vai chiar ou nem tocar.</li>
+          <li><strong>Ligar caixa passiva em "saída de linha" da mesa.</strong> Sem amp no meio, o sinal é fraco demais — a caixa fica muda ou quase. Quando você sobe o ganho desesperado pra ouvir, distorce ou queima a saída da mesa.</li>
+          <li><strong>Conectar duas caixas passivas de impedâncias diferentes em paralelo no mesmo amp</strong> sem calcular a impedância total. Se cair abaixo do mínimo do amp, ele entra em proteção ou queima.</li>
+        </ul>
+      </div>
+
+      <h2>Quando usar cada uma</h2>
+
+      <p><strong>Caixa ativa</strong> é a escolha óbvia pra igreja pequena ou média que ainda não tem rack montado, ou pra eventos ao ar livre, ou monitor de palco simples. Plug and play: tomada, cabo, ligou.</p>
+
+      <p><strong>Caixa passiva</strong> faz sentido quando você já tem rack montado com amplificadores de qualidade, ou quando precisa de várias caixas espalhadas e quer controlar tudo de um amp central. Em igrejas grandes com line array, é o padrão.</p>
+
+      <table class="ref-table-lg">
+        <thead>
+          <tr><th>Tamanho do templo</th><th>Sugestão</th><th>Por quê</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>até 100 pessoas</td><td>2× ativa 10"–12"</td><td>simples, sem rack, plug and play</td></tr>
+          <tr><td>100–300 pessoas</td><td>2× ativa 12"–15" + sub ativo</td><td>cobertura suficiente, ainda dá pra evitar rack</td></tr>
+          <tr><td>300–800 pessoas</td><td>passiva 15" + amp dedicado<br>ou ativa de alta potência (RCF, QSC, JBL)</td><td>passiva vira melhor relação custo/qualidade nessa faixa</td></tr>
+          <tr><td>+800 pessoas</td><td>line array passiva + sub passivo + processador</td><td>controle de cobertura e SPL constante na sala</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Onde colocar a caixa fisicamente</h2>
+
+      <p>Caixa boa no lugar errado soa ruim. Caixa ruim no lugar certo já melhora. Os três jeitos de instalar:</p>
+
+      <div class="posicao-block">
+        <h3>1. PA no chão (sem suporte)</h3>
+        <div class="posicao-grid">
+          <svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PA no chão direcionando o som pro alto dos pés">
+            <!-- chão -->
+            <line x1="20" y1="170" x2="340" y2="170" stroke="#5A6478" stroke-width="2"/>
+            <!-- caixa -->
+            <rect x="40" y="120" width="44" height="50" fill="#2D3B4D" stroke="#E47766" stroke-width="2"/>
+            <circle cx="62" cy="145" r="10" fill="#1A2332" stroke="#8B97A8" stroke-width="1"/>
+            <!-- pessoa (silhueta simples) -->
+            <circle cx="250" cy="80" r="10" fill="#5B7BD8"/>
+            <rect x="244" y="90" width="12" height="40" fill="#5B7BD8"/>
+            <line x1="250" y1="130" x2="240" y2="170" stroke="#5B7BD8" stroke-width="3"/>
+            <line x1="250" y1="130" x2="260" y2="170" stroke="#5B7BD8" stroke-width="3"/>
+            <!-- som indo pro alto -->
+            <path d="M 90 145 L 230 80" stroke="#E47766" stroke-width="2" stroke-dasharray="4 3" fill="none"/>
+            <path d="M 90 150 L 230 130" stroke="#E47766" stroke-width="2" stroke-dasharray="4 3" fill="none"/>
+            <text x="160" y="100" fill="#E47766" font-size="11" font-family="sans-serif">som vai pros pés</text>
+            <text x="170" y="195" fill="#F87171" font-size="11" font-family="sans-serif">✗ não bate na cabeça</text>
+          </svg>
+          <ul class="points">
+            <li><strong>Só serve</strong> se a congregação sentar no chão (raro).</li>
+            <li>Som bate nos pés/joelhos, perde os agudos antes de chegar na cabeça.</li>
+            <li>Solução barata: <strong>caixote/banco</strong> embaixo. Solução boa: tripé.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="posicao-block">
+        <h3>2. PA em tripé (o padrão da igreja média)</h3>
+        <div class="posicao-grid">
+          <svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PA em tripé na altura da orelha das pessoas em pé">
+            <!-- chão -->
+            <line x1="20" y1="200" x2="340" y2="200" stroke="#5A6478" stroke-width="2"/>
+            <!-- tripé -->
+            <line x1="70" y1="200" x2="60" y2="120" stroke="#8B97A8" stroke-width="2"/>
+            <line x1="70" y1="200" x2="80" y2="120" stroke="#8B97A8" stroke-width="2"/>
+            <line x1="70" y1="160" x2="70" y2="120" stroke="#8B97A8" stroke-width="2"/>
+            <!-- caixa em cima -->
+            <rect x="50" y="80" width="40" height="48" fill="#2D3B4D" stroke="#34D399" stroke-width="2"/>
+            <circle cx="70" cy="105" r="9" fill="#1A2332" stroke="#8B97A8" stroke-width="1"/>
+            <!-- inclinação leve pra baixo -->
+            <path d="M 70 80 Q 75 70 90 70" stroke="#34D399" stroke-width="1.5" fill="none"/>
+            <text x="90" y="65" fill="#34D399" font-size="10" font-family="sans-serif">inclina ↓</text>
+            <!-- pessoa em pé -->
+            <circle cx="260" cy="105" r="10" fill="#5B7BD8"/>
+            <rect x="254" y="115" width="12" height="55" fill="#5B7BD8"/>
+            <line x1="260" y1="170" x2="248" y2="200" stroke="#5B7BD8" stroke-width="3"/>
+            <line x1="260" y1="170" x2="272" y2="200" stroke="#5B7BD8" stroke-width="3"/>
+            <!-- som horizontal -->
+            <path d="M 95 105 L 240 105" stroke="#34D399" stroke-width="2" fill="none"/>
+            <polygon points="240,105 232,101 232,109" fill="#34D399"/>
+            <text x="125" y="98" fill="#34D399" font-size="11" font-family="sans-serif">ear-line ≈ 1,60 m</text>
+            <text x="240" y="92" fill="#5B7BD8" font-size="11" font-family="sans-serif">orelha</text>
+          </svg>
+          <ul class="points">
+            <li>Tripé põe a caixa na <strong>linha das orelhas</strong> (≈ 1,60 m) — som chega direto.</li>
+            <li>Incline a caixa <strong>levemente pra baixo</strong> em direção ao meio da congregação.</li>
+            <li>Distância da parede: <strong>pelo menos 1 m</strong> pra reduzir reflexão.</li>
+            <li>Suporte com base larga ou peso na base — caixa caindo no culto é desastre.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="posicao-block">
+        <h3>3. PA suspensa (gancho, truss, parede)</h3>
+        <div class="posicao-grid">
+          <svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PA suspensa em truss apontando pra congregação">
+            <!-- truss/teto -->
+            <rect x="20" y="20" width="320" height="14" fill="none" stroke="#8B97A8" stroke-width="2"/>
+            <line x1="40" y1="34" x2="40" y2="60" stroke="#8B97A8" stroke-width="2"/>
+            <line x1="320" y1="34" x2="320" y2="60" stroke="#8B97A8" stroke-width="2"/>
+            <!-- gancho -->
+            <line x1="80" y1="34" x2="80" y2="55" stroke="#8B97A8" stroke-width="1.5"/>
+            <!-- caixa pendurada inclinada -->
+            <g transform="translate(60,55) rotate(15)">
+              <rect x="0" y="0" width="40" height="48" fill="#2D3B4D" stroke="#5B7BD8" stroke-width="2"/>
+              <circle cx="20" cy="22" r="9" fill="#1A2332" stroke="#8B97A8" stroke-width="1"/>
+            </g>
+            <!-- pessoa -->
+            <circle cx="260" cy="135" r="10" fill="#5B7BD8"/>
+            <rect x="254" y="145" width="12" height="50" fill="#5B7BD8"/>
+            <line x1="260" y1="195" x2="248" y2="210" stroke="#5B7BD8" stroke-width="3"/>
+            <line x1="260" y1="195" x2="272" y2="210" stroke="#5B7BD8" stroke-width="3"/>
+            <!-- som inclinado -->
+            <path d="M 100 95 L 235 135" stroke="#5B7BD8" stroke-width="2" fill="none"/>
+            <polygon points="235,135 226,131 230,140" fill="#5B7BD8"/>
+            <text x="115" y="115" fill="#5B7BD8" font-size="11" font-family="sans-serif">aponta pro meio</text>
+            <!-- chão -->
+            <line x1="20" y1="210" x2="340" y2="210" stroke="#5A6478" stroke-width="2"/>
+          </svg>
+          <ul class="points">
+            <li>Solução pro templo grande ou pra liberar o palco visualmente.</li>
+            <li>Inclinação <strong>aponta pro 2/3 da congregação</strong>, não pro fundo.</li>
+            <li>Use cabo de aço <strong>de segurança</strong> além do gancho principal.</li>
+            <li>Caixa pendurada precisa ser <strong>certificada</strong> pra suspensão (não é toda caixa que pode).</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>Resumo — antes de comprar e ligar</h2>
+
+      <div class="tip-box">
+        <div class="title">Checklist rápido</div>
+        <ul>
+          <li>Caixa <strong>ativa</strong>: cabo XLR/TRS da mesa + tomada AC.</li>
+          <li>Caixa <strong>passiva</strong>: cabo Speakon do amp + zero tomada na caixa.</li>
+          <li>Use <strong>tripé</strong> se a congregação fica em pé. Caixa no chão é desperdício.</li>
+          <li>Inclinação <strong>leve pra baixo</strong>, apontando pro centro da plateia.</li>
+          <li><strong>1 metro de parede</strong>, no mínimo, pra reduzir reflexão.</li>
+        </ul>
+      </div>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="index.html">← Índice equipamentos</a>
+    <a class="center" href="../index.html" title="Voltar para Church Audio Tech" style="text-decoration:none;">&#127968; Bloco 1 / 6 · Caixas ativas vs passivas</a>
+    <a href="02-amplificadores.html">Bloco 2 →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.getElementById('diag-caixas');
+    if (!svg) return;
+
+    function el(tag, attrs, text) {
+      const e = document.createElementNS(ns, tag);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+
+    // ========== ATIVA (esquerda) ==========
+    // mesa
+    svg.appendChild(el('rect', {x:20, y:140, width:90, height:50, fill:'#2D3B4D', stroke:'#8B97A8', 'stroke-width':1.5, rx:3}));
+    svg.appendChild(el('text', {x:65, y:170, 'text-anchor':'middle', fill:'#E5E9F0', 'font-size':12, 'font-family':'sans-serif'}, 'MESA'));
+    svg.appendChild(el('text', {x:65, y:130, 'text-anchor':'middle', fill:'#8B97A8', 'font-size':10, 'font-family':'sans-serif'}, 'saída de linha (XLR/TRS)'));
+
+    // cabo XLR
+    svg.appendChild(el('path', {d:'M 110 165 Q 160 165 200 130', stroke:'#34D399', 'stroke-width':2.5, fill:'none'}));
+    svg.appendChild(el('text', {x:155, y:155, fill:'#34D399', 'font-size':11, 'font-family':'sans-serif'}, 'XLR/TRS'));
+
+    // caixa ativa
+    svg.appendChild(el('rect', {x:200, y:80, width:80, height:110, fill:'#2D3B4D', stroke:'#34D399', 'stroke-width':2, rx:3}));
+    svg.appendChild(el('circle', {cx:240, cy:130, r:22, fill:'#1A2332', stroke:'#8B97A8', 'stroke-width':1.5}));
+    svg.appendChild(el('circle', {cx:240, cy:130, r:8, fill:'#0F1419'}));
+    svg.appendChild(el('text', {x:240, y:75, 'text-anchor':'middle', fill:'#34D399', 'font-size':12, 'font-family':'sans-serif', 'font-weight':700}, 'CAIXA ATIVA'));
+
+    // cabo AC
+    svg.appendChild(el('path', {d:'M 240 190 Q 240 220 290 240', stroke:'#F5B947', 'stroke-width':2.5, fill:'none'}));
+    svg.appendChild(el('text', {x:255, y:230, fill:'#F5B947', 'font-size':11, 'font-family':'sans-serif'}, 'AC'));
+    svg.appendChild(el('rect', {x:284, y:235, width:24, height:18, fill:'#F5B947', rx:2}));
+    svg.appendChild(el('text', {x:296, y:248, 'text-anchor':'middle', fill:'#0F1419', 'font-size':9, 'font-family':'sans-serif', 'font-weight':700}, '~'));
+
+    // divisor
+    svg.appendChild(el('line', {x1:360, y1:30, x2:360, y2:340, stroke:'#3D4D63', 'stroke-width':1, 'stroke-dasharray':'4 4'}));
+
+    // ========== PASSIVA (direita) ==========
+    // mesa
+    svg.appendChild(el('rect', {x:390, y:140, width:80, height:40, fill:'#2D3B4D', stroke:'#8B97A8', 'stroke-width':1.5, rx:3}));
+    svg.appendChild(el('text', {x:430, y:165, 'text-anchor':'middle', fill:'#E5E9F0', 'font-size':12, 'font-family':'sans-serif'}, 'MESA'));
+
+    // cabo de linha mesa → amp
+    svg.appendChild(el('path', {d:'M 470 160 L 530 160', stroke:'#34D399', 'stroke-width':2, fill:'none'}));
+    svg.appendChild(el('text', {x:495, y:152, 'text-anchor':'middle', fill:'#34D399', 'font-size':10, 'font-family':'sans-serif'}, 'XLR'));
+
+    // amp
+    svg.appendChild(el('rect', {x:530, y:140, width:80, height:40, fill:'#2D3B4D', stroke:'#E47766', 'stroke-width':2, rx:3}));
+    svg.appendChild(el('text', {x:570, y:165, 'text-anchor':'middle', fill:'#E47766', 'font-size':12, 'font-family':'sans-serif', 'font-weight':700}, 'AMP'));
+    svg.appendChild(el('text', {x:570, y:130, 'text-anchor':'middle', fill:'#8B97A8', 'font-size':10, 'font-family':'sans-serif'}, 'amplificador'));
+
+    // cabo de alto-falante amp → caixa passiva
+    svg.appendChild(el('path', {d:'M 610 160 Q 645 160 660 130', stroke:'#E47766', 'stroke-width':3, fill:'none'}));
+    svg.appendChild(el('text', {x:630, y:152, 'text-anchor':'middle', fill:'#E47766', 'font-size':11, 'font-family':'sans-serif'}, 'Speakon'));
+
+    // caixa passiva
+    svg.appendChild(el('rect', {x:620, y:80, width:80, height:110, fill:'#2D3B4D', stroke:'#5B7BD8', 'stroke-width':2, rx:3}));
+    svg.appendChild(el('circle', {cx:660, cy:130, r:22, fill:'#1A2332', stroke:'#8B97A8', 'stroke-width':1.5}));
+    svg.appendChild(el('circle', {cx:660, cy:130, r:8, fill:'#0F1419'}));
+    svg.appendChild(el('text', {x:660, y:75, 'text-anchor':'middle', fill:'#5B7BD8', 'font-size':12, 'font-family':'sans-serif', 'font-weight':700}, 'CAIXA PASSIVA'));
+
+    // chão
+    svg.appendChild(el('line', {x1:10, y1:300, x2:710, y2:300, stroke:'#5A6478', 'stroke-width':1.5}));
+
+    // labels embaixo
+    svg.appendChild(el('text', {x:180, y:325, 'text-anchor':'middle', fill:'#34D399', 'font-size':12, 'font-family':'sans-serif', 'font-weight':700}, 'ATIVA: cabo de linha + AC na caixa'));
+    svg.appendChild(el('text', {x:540, y:325, 'text-anchor':'middle', fill:'#5B7BD8', 'font-size':12, 'font-family':'sans-serif', 'font-weight':700}, 'PASSIVA: cabo de linha → amp → cabo de alto-falante'));
+  })();
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

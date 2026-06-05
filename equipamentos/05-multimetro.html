@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multímetro: testar e achar defeito · Curso de equipamentos</title>
+  <meta name="description" content="Como usar multímetro pra testar cabos, caixas e amplificadores: continuidade, curto, polaridade, impedância. Leituras esperadas e checklist de sintomas.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="index.html">Equipamentos</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Bloco 5 / 6</div>
+        <h1>Multímetro: testar e achar defeito</h1>
+      </div>
+      <div class="subtitle">a ferramenta que separa<br>"chuto que é" do "sei que é"</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>Multímetro custa de R$ 30 (básico que serve perfeitamente) a R$ 500 (Fluke profissional). Pra igreja, o de R$ 50 com função de <strong>continuidade que apita</strong> resolve 95% dos casos. Vamos focar nas 4 medidas que importam.</p>
+
+      <h2>As 4 funções que você vai usar</h2>
+
+      <table class="ref-table-lg">
+        <thead>
+          <tr><th>Função</th><th>Símbolo</th><th>Pra que serve</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Continuidade</td><td>🔊 ou ))) </td><td>"O fio tá conectado de uma ponta à outra?" Apita se sim.</td></tr>
+          <tr><td>Resistência</td><td>Ω</td><td>Mede impedância. Caixa 8Ω vai marcar 6–7Ω no multímetro (não bate exato).</td></tr>
+          <tr><td>Tensão DC</td><td>V⎓</td><td>Testar pilha (9V no multímetro, 1,5V em AA), fonte, bateria.</td></tr>
+          <tr><td>Tensão AC</td><td>V∼</td><td>Confirmar que a tomada tem 110V/220V (cuidado, fio vivo dá choque).</td></tr>
+        </tbody>
+      </table>
+
+      <p style="color: var(--text-muted); font-size: 14px;">Multímetro barato tem botão giratório. Multímetro um pouco melhor é "auto-range" (escolhe a faixa sozinho) — vale o investimento se você usa muito.</p>
+
+      <h2>Como medir continuidade</h2>
+
+      <ol>
+        <li>Gire o seletor pra função 🔊 (ou ))).</li>
+        <li>Encoste as duas pontas (vermelha e preta) uma na outra. O multímetro deve apitar — confirma que ele tá funcionando.</li>
+        <li>Encoste cada ponta numa extremidade do fio que você quer testar.</li>
+        <li><strong>Apitou</strong>: fio passa, sem rompimento.</li>
+        <li><strong>Não apitou</strong>: fio rompido em algum lugar.</li>
+      </ol>
+
+      <h2>Como medir impedância (Ω)</h2>
+
+      <ol>
+        <li>Gire o seletor pra função Ω (escala 200 ou 2k se não for auto-range).</li>
+        <li>Encoste pontas no objeto medido.</li>
+        <li>Leia no display.</li>
+      </ol>
+
+      <div class="tip-box">
+        <div class="title">Por que caixa de 8Ω marca 6Ω no multímetro</div>
+        <p>Multímetro mede com sinal <strong>DC</strong> (corrente contínua). Caixa de som é projetada pra <strong>AC</strong> (sinal de áudio). A impedância "nominal" 8Ω é a média ao longo do espectro de áudio — em DC, ela marca menor (a resistência da bobina sozinha, sem o efeito do magnético).</p>
+        <p style="margin-top: 8px;">Ballpark: caixa 8Ω marca <strong>5–7 Ω</strong>. Caixa 4Ω marca <strong>2,5–3,5 Ω</strong>. Se marcar 0 = curto (queimou). Se marcar OL/infinito = aberto (rompido).</p>
+      </div>
+
+      <h2>Testar cabo XLR — passo a passo</h2>
+
+      <div class="solda-grid">
+        <div class="solda-step">
+          <div class="num">1</div>
+          <div class="body">
+            <h4>Multímetro em continuidade (apito)</h4>
+            <p>Cabo XLR tem 2 conectores: macho de um lado, fêmea do outro.</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">2</div>
+          <div class="body">
+            <h4>Testa cada pino contra o equivalente</h4>
+            <p>Pino 1 macho → pino 1 fêmea (deve apitar). Pino 2 → 2 (apita). Pino 3 → 3 (apita).</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">3</div>
+          <div class="body">
+            <h4>Testa que NÃO tem curto entre pinos</h4>
+            <p>Pino 1 macho → pino 2 (NÃO deve apitar). Pino 1 → 3 (NÃO). Pino 2 → 3 (NÃO).</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">4</div>
+          <div class="body">
+            <h4>Se qualquer combinação errada apitou: curto</h4>
+            <p>Provavelmente blindagem encostando em pino vivo dentro do conector. Abre, separa, refaz solda.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Testar cabo de alto-falante — passo a passo</h2>
+
+      <div class="solda-grid">
+        <div class="solda-step">
+          <div class="num">1</div>
+          <div class="body">
+            <h4>Continuidade nos 2 polos</h4>
+            <p>Pino 1+ de um Speakon → 1+ do outro (apita). Pino 1− → 1− (apita).</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">2</div>
+          <div class="body">
+            <h4>NÃO deve haver continuidade entre os polos</h4>
+            <p>1+ → 1− NÃO apita. Se apitar = curto (vai queimar amp ou entrar em proteção quando ligar).</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">3</div>
+          <div class="body">
+            <h4>Polaridade (importante!)</h4>
+            <p>Marque o cabo "vivo" com fita colorida nas duas pontas. Os dois lados precisam estar consistentes — se trocar dentro do cabo, polaridade da caixa inverte.</p>
+          </div>
+        </div>
+        <div class="solda-step">
+          <div class="num">4</div>
+          <div class="body">
+            <h4>Pra testar polaridade: pilha 9V</h4>
+            <p>Conecta cabo numa caixa. Encosta polo + da pilha no pino + do cabo e polo − no −. Vê o falante: cone vai pra <strong>frente</strong> = polaridade correta. Vai pra <strong>trás</strong> = invertida (refaz a solda numa das pontas).</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Medir caixa passiva e diagnosticar</h2>
+
+      <p>Caixa que não toca pode ser: bobina queimada, falante solto do crossover interno, ou conector com mau contato. Multímetro identifica:</p>
+
+      <table class="ref-table-lg">
+        <thead>
+          <tr><th>Leitura entre os 2 pinos da caixa</th><th>Diagnóstico</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>5–7 Ω (caixa 8Ω) ou 2,5–3,5 Ω (4Ω)</td><td>OK — caixa boa</td></tr>
+          <tr><td>0 Ω (curto)</td><td>Bobina queimada (curto). Caixa morta.</td></tr>
+          <tr><td>OL / ∞ (aberto)</td><td>Bobina rompida ou fio do crossover solto.</td></tr>
+          <tr><td>Muito acima do esperado</td><td>Fio interno mau contato, crossover passivo com problema.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Leituras esperadas — referência rápida</h2>
+
+      <table class="ref-table-lg">
+        <thead>
+          <tr><th>Componente</th><th>Função</th><th>Leitura esperada</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>cabo XLR (pino a pino)</td><td>continuidade</td><td>apita (~0 Ω)</td></tr>
+          <tr><td>cabo XLR (pino 1 vs 2)</td><td>continuidade</td><td>NÃO apita (∞)</td></tr>
+          <tr><td>cabo P10 TS</td><td>continuidade tip→tip</td><td>apita</td></tr>
+          <tr><td>cabo alto-falante</td><td>continuidade polo→polo</td><td>apita (&lt; 0,5 Ω)</td></tr>
+          <tr><td>caixa 8Ω</td><td>Ω</td><td>5–7 Ω</td></tr>
+          <tr><td>caixa 4Ω</td><td>Ω</td><td>2,5–3,5 Ω</td></tr>
+          <tr><td>pilha 9V boa</td><td>V⎓</td><td>8,5–9,5 V</td></tr>
+          <tr><td>fonte phantom 48V</td><td>V⎓ (entre pino 2 e 1 do XLR)</td><td>48 V (mesa ligada e phantom ON)</td></tr>
+          <tr><td>tomada 110V</td><td>V∼</td><td>108–127 V</td></tr>
+          <tr><td>tomada 220V</td><td>V∼</td><td>210–240 V</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Checklist de problemas: sintoma → causa → como testar</h2>
+
+      <div class="problema-checklist">
+        <div class="problema-item">
+          <div>
+            <span class="label">Sintoma</span>
+            <div class="sintoma">Canal mudo no meio do culto</div>
+          </div>
+          <div>
+            <span class="label">Causa provável</span>
+            <div class="hipotese">Cabo XLR com fio rompido perto do conector (vibração do palco) ou bateria do mic sem fio.</div>
+          </div>
+          <div>
+            <span class="label">Como testar</span>
+            <div class="teste">Troca o cabo. Continuidade pino a pino no que tirou.</div>
+          </div>
+        </div>
+
+        <div class="problema-item">
+          <div>
+            <span class="label">Sintoma</span>
+            <div class="sintoma">Ruído de "chiado" só nesse canal</div>
+          </div>
+          <div>
+            <span class="label">Causa provável</span>
+            <div class="hipotese">Blindagem do cabo solta na ponta (perdeu o terra), cabo perto de fonte chaveada, fio dreno cortado.</div>
+          </div>
+          <div>
+            <span class="label">Como testar</span>
+            <div class="teste">Continuidade pino 1 ↔ pino 1. Se não apita = blindagem rompida.</div>
+          </div>
+        </div>
+
+        <div class="problema-item">
+          <div>
+            <span class="label">Sintoma</span>
+            <div class="sintoma">Caixa tocando muito baixo, distorce no volume alto</div>
+          </div>
+          <div>
+            <span class="label">Causa provável</span>
+            <div class="hipotese">Falante com bobina meio queimada (impedância subiu), ou cabo de alto-falante com gauge fino demais.</div>
+          </div>
+          <div>
+            <span class="label">Como testar</span>
+            <div class="teste">Ohms na caixa. Se &gt; 12Ω em caixa de 8Ω = bobina danificada.</div>
+          </div>
+        </div>
+
+        <div class="problema-item">
+          <div>
+            <span class="label">Sintoma</span>
+            <div class="sintoma">Amp entrando em proteção logo que liga</div>
+          </div>
+          <div>
+            <span class="label">Causa provável</span>
+            <div class="hipotese">Curto no cabo de alto-falante, ou caixa com bobina em curto.</div>
+          </div>
+          <div>
+            <span class="label">Como testar</span>
+            <div class="teste">Continuidade entre 1+ e 1− do cabo (NÃO deve apitar). Ohms na caixa (não pode ser 0).</div>
+          </div>
+        </div>
+
+        <div class="problema-item">
+          <div>
+            <span class="label">Sintoma</span>
+            <div class="sintoma">Hum de 60 Hz constante (zumbido grave)</div>
+          </div>
+          <div>
+            <span class="label">Causa provável</span>
+            <div class="hipotese">Ground loop (terra entrando por mais de um caminho) ou cabo desbalanceado longo perto de fonte.</div>
+          </div>
+          <div>
+            <span class="label">Como testar</span>
+            <div class="teste">Tira terra do amp e re-mede. Troca cabos por balanceados. Confere fase das tomadas.</div>
+          </div>
+        </div>
+
+        <div class="problema-item">
+          <div>
+            <span class="label">Sintoma</span>
+            <div class="sintoma">Mic sem fio não funciona / sem som</div>
+          </div>
+          <div>
+            <span class="label">Causa provável</span>
+            <div class="hipotese">Pilha do transmissor descarregada, receptor sem fonte, antena solta.</div>
+          </div>
+          <div>
+            <span class="label">Como testar</span>
+            <div class="teste">V⎓ na pilha (deve ser &gt; 8,5V em 9V; &gt; 1,3V em AA). Fonte do receptor V⎓ na saída.</div>
+          </div>
+        </div>
+
+        <div class="problema-item">
+          <div>
+            <span class="label">Sintoma</span>
+            <div class="sintoma">Mic condensador não funciona, dinâmico funciona</div>
+          </div>
+          <div>
+            <span class="label">Causa provável</span>
+            <div class="hipotese">Phantom 48V desligado, ou cabo XLR com pino 2 ou 3 rompido (sem caminho pro phantom).</div>
+          </div>
+          <div>
+            <span class="label">Como testar</span>
+            <div class="teste">V⎓ no cabo: 48V entre pinos 1 e 2, e 1 e 3 (com phantom on).</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="tip-box">
+        <div class="title">Truque do "cabo de teste de bancada"</div>
+        <p>Monte um cabo curto (30 cm) com XLR macho de um lado e pontas pretas/vermelhas soltas do outro lado (3 pontas: pinos 1, 2, 3). Plugue na mesa, gira phantom on/off, e mede direto com multímetro. Você confirma que <em>a mesa</em> tá ok antes de blamar o cabo ou o mic.</p>
+      </div>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="04-cabos-soldagem.html">← Bloco 4</a>
+    <a class="center" href="../index.html" title="Voltar para Church Audio Tech" style="text-decoration:none;">&#127968; Bloco 5 / 6 · Multímetro</a>
+    <a href="06-sistema-completo.html">Bloco 6 →</a>
+  </nav>
+  <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

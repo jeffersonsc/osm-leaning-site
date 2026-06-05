@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crossover e subwoofer · Curso de equipamentos</title>
+  <meta name="description" content="Crossover passivo vs ativo, quando precisa de cada um, ponto de corte 80 Hz pra sub, posicionamento físico (centro, par, canto, cardióide).">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="index.html">Equipamentos</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Bloco 3 / 6</div>
+        <h1>Crossover + subwoofer</h1>
+      </div>
+      <div class="subtitle">dividir frequências entre caixas,<br>e onde colocar o sub no templo</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>Crossover é o "divisor de tráfego" do áudio. Pega o sinal completo da mesa e separa em <strong>faixas de frequência</strong>, mandando cada faixa pra caixa certa. Sem ele, sub não toca grave separado, e top não para de tentar reproduzir grave que não dá conta.</p>
+
+      <h2>Passivo (dentro da caixa) vs Ativo (rack)</h2>
+
+      <div class="stat-grid">
+        <div class="stat" style="background: var(--bg-card); border: 1px solid var(--border); padding: 16px; border-radius: 6px;">
+          <div style="color: var(--navy); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Passivo</div>
+          <div style="font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 6px;">Já vem dentro da caixa</div>
+          <div style="font-size: 13px; color: var(--text-muted);">Caixa de 2 vias (woofer + tweeter) tem crossover passivo interno separando grave do agudo. Você nem percebe que ele existe.</div>
+        </div>
+        <div class="stat" style="background: var(--bg-card); border: 1px solid var(--border); padding: 16px; border-radius: 6px;">
+          <div style="color: var(--terra); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Ativo</div>
+          <div style="font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 6px;">Caixa separada no rack</div>
+          <div style="font-size: 13px; color: var(--text-muted);">Necessário quando você tem <strong>sub separado</strong> das caixas principais. Vai entre a mesa e os amplificadores.</div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <div class="title">Quando você precisa de crossover ativo</div>
+        <p>Quando tem <strong>subwoofer separado</strong> com amplificador próprio. Sem o ativo, você não consegue mandar só o grave pro sub e só o resto pra caixa principal — todo mundo recebe tudo, e o som fica confuso.</p>
+        <p style="margin-top: 8px;">Se sua igreja só tem 2 caixas principais (sem sub), o crossover passivo interno delas já resolve. Não precisa comprar nada.</p>
+      </div>
+
+      <h2>Diagrama da ligação completa</h2>
+
+      <div class="diagrama-wrap">
+        <svg id="diag-cross" viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de ligação completa com crossover ativo, amplificadores e caixas"></svg>
+        <div class="caption">A mesa manda 1 sinal pro cross. O cross separa em "grave" (pro amp do sub) e "resto" (pro amp dos tops).</div>
+      </div>
+
+      <h2>Ponto de corte: por que 80 Hz é padrão</h2>
+
+      <p>O <strong>ponto de corte</strong> (ou <em>crossover frequency</em>) é a frequência em que o cross divide o sinal. Pra sub e top, o padrão da indústria é <strong>80 Hz</strong>. Esse número não foi tirado do céu:</p>
+
+      <ul>
+        <li><strong>Abaixo de 80 Hz</strong> a gente não consegue localizar de onde vem o som direito — então o sub pode ficar em qualquer lugar do templo sem o ouvido "puxar" pra ele.</li>
+        <li><strong>Acima de 80 Hz</strong> começa a localização, e voz/instrumento ficaria "puxada" pra onde o sub está. Por isso esse conteúdo precisa estar nas caixas principais (que ficam alinhadas com o palco).</li>
+        <li>É a faixa onde a maioria dos woofers de 12"–15" começa a perder eficiência, então passar pro sub libera o woofer pro que ele toca bem (médio-grave).</li>
+      </ul>
+
+      <h2>HP, LP, BP — os controles do cross</h2>
+
+      <table class="ref-table-lg">
+        <thead>
+          <tr><th>Sigla</th><th>Significado</th><th>Onde vai</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>HP</td>
+            <td>High-Pass — deixa passar agudo, corta grave</td>
+            <td>Saída pro <strong>top</strong> (caixa principal). HP em 80 Hz = top toca de 80 Hz pra cima.</td>
+          </tr>
+          <tr>
+            <td>LP</td>
+            <td>Low-Pass — deixa passar grave, corta agudo</td>
+            <td>Saída pro <strong>sub</strong>. LP em 80 Hz = sub toca de 80 Hz pra baixo.</td>
+          </tr>
+          <tr>
+            <td>BP</td>
+            <td>Band-Pass — passa só uma faixa</td>
+            <td>Usado em sistema de 3 vias (sub + médio dedicado + agudo). Raro em igreja.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="tip-box">
+        <div class="title">Inclinação do corte (slope)</div>
+        <p>O cross não corta o som de uma hora pra outra — ele atenua gradualmente. <strong>24 dB/oitava</strong> é o padrão atual (chamado <em>Linkwitz-Riley 24 dB</em>). Quer dizer que 1 oitava acima/abaixo do corte, o sinal já tá 24 dB mais fraco. É um corte limpo, sem buracos nem sobreposições.</p>
+        <p style="margin-top: 8px;">Modelos antigos usam 12 ou 18 dB/oitava, ainda funcionam, mas o som "junta" melhor com 24.</p>
+      </div>
+
+      <h2>Posicionamento físico do subwoofer</h2>
+
+      <p>O lugar do sub no templo muda <strong>drasticamente</strong> como o grave soa — sem ajuste de EQ, sem girar botão, só mudando o sub de lugar. Quatro arranjos comuns:</p>
+
+      <div class="posicao-block">
+        <h3>1. Sub no centro do palco (sob o pulpito)</h3>
+        <div class="posicao-grid">
+          <svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sub no centro do palco, +6dB de soma">
+            <!-- vista superior do templo -->
+            <rect x="20" y="20" width="320" height="180" fill="none" stroke="#5A6478" stroke-width="1.5"/>
+            <!-- palco -->
+            <rect x="20" y="20" width="320" height="40" fill="rgba(228, 119, 102, 0.1)" stroke="#E47766" stroke-width="1"/>
+            <text x="180" y="44" text-anchor="middle" fill="#E47766" font-size="10" font-family="sans-serif">PALCO</text>
+            <!-- sub centro -->
+            <rect x="166" y="45" width="28" height="14" fill="#E47766"/>
+            <text x="180" y="75" text-anchor="middle" fill="#E47766" font-size="10" font-family="sans-serif" font-weight="700">SUB</text>
+            <!-- ondas concêntricas -->
+            <circle cx="180" cy="52" r="40" fill="none" stroke="#E47766" stroke-width="1" stroke-dasharray="3 3"/>
+            <circle cx="180" cy="52" r="70" fill="none" stroke="#E47766" stroke-width="1" stroke-dasharray="3 3"/>
+            <circle cx="180" cy="52" r="100" fill="none" stroke="#E47766" stroke-width="1" stroke-dasharray="3 3"/>
+            <!-- congregação -->
+            <text x="180" y="180" text-anchor="middle" fill="#5B7BD8" font-size="11" font-family="sans-serif">congregação</text>
+          </svg>
+          <ul class="points">
+            <li><strong>Melhor som de grave</strong>: 1 sub central = ondas chegam em fase no templo todo.</li>
+            <li>Soma de <strong>+6 dB</strong> nas caixas principais (efeito monopolo).</li>
+            <li>Limita o palco (sub embaixo do pulpito pode incomodar pregação).</li>
+            <li>O padrão pra templo médio com 1 sub.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="posicao-block">
+        <h3>2. Par lateral (1 sub em cada lado do palco)</h3>
+        <div class="posicao-grid">
+          <svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Par de subs lateral causando cancelamento no centro">
+            <rect x="20" y="20" width="320" height="180" fill="none" stroke="#5A6478" stroke-width="1.5"/>
+            <rect x="20" y="20" width="320" height="40" fill="rgba(228, 119, 102, 0.1)" stroke="#E47766" stroke-width="1"/>
+            <text x="180" y="44" text-anchor="middle" fill="#E47766" font-size="10" font-family="sans-serif">PALCO</text>
+            <!-- subs lados -->
+            <rect x="50" y="45" width="28" height="14" fill="#E47766"/>
+            <rect x="282" y="45" width="28" height="14" fill="#E47766"/>
+            <text x="64" y="75" text-anchor="middle" fill="#E47766" font-size="9" font-family="sans-serif" font-weight="700">SUB L</text>
+            <text x="296" y="75" text-anchor="middle" fill="#E47766" font-size="9" font-family="sans-serif" font-weight="700">SUB R</text>
+            <!-- linha de cancelamento no centro -->
+            <line x1="180" y1="65" x2="180" y2="195" stroke="#F87171" stroke-width="2" stroke-dasharray="6 4"/>
+            <text x="180" y="120" text-anchor="middle" fill="#F87171" font-size="10" font-family="sans-serif" font-weight="700">cancela</text>
+            <text x="180" y="135" text-anchor="middle" fill="#F87171" font-size="10" font-family="sans-serif">no centro</text>
+          </svg>
+          <ul class="points">
+            <li><strong>Comb filtering</strong>: ondas chegam fora de fase no centro da nave → grave some.</li>
+            <li>Pessoas sentadas no centro reclamam "não tô ouvindo grave".</li>
+            <li>Solução comum errada: mais volume no sub (não resolve).</li>
+            <li>Evitar quando der. Se precisar, alinhamento de tempo (delay) entre os dois ajuda.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="posicao-block">
+        <h3>3. Sub no canto da parede</h3>
+        <div class="posicao-grid">
+          <svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sub no canto, boost por modo de sala">
+            <rect x="20" y="20" width="320" height="180" fill="none" stroke="#5A6478" stroke-width="1.5"/>
+            <rect x="20" y="20" width="320" height="40" fill="rgba(228, 119, 102, 0.1)" stroke="#E47766" stroke-width="1"/>
+            <text x="180" y="44" text-anchor="middle" fill="#E47766" font-size="10" font-family="sans-serif">PALCO</text>
+            <!-- sub canto -->
+            <rect x="22" y="62" width="28" height="14" fill="#F5B947"/>
+            <text x="36" y="92" text-anchor="middle" fill="#F5B947" font-size="10" font-family="sans-serif" font-weight="700">SUB</text>
+            <!-- boost label -->
+            <path d="M 30 95 Q 180 130 320 130" stroke="#F5B947" stroke-width="1.5" stroke-dasharray="4 3" fill="none"/>
+            <text x="180" y="155" text-anchor="middle" fill="#F5B947" font-size="11" font-family="sans-serif" font-weight="700">+9 dB no canto, mas grave "tubular"</text>
+            <text x="180" y="175" text-anchor="middle" fill="#F5B947" font-size="10" font-family="sans-serif">excita modo de sala</text>
+          </svg>
+          <ul class="points">
+            <li>Canto dá <strong>+9 dB</strong> de reforço (paredes refletem).</li>
+            <li>Mas excita <strong>modos de sala</strong> — algumas notas ficam ressonantes, outras somem.</li>
+            <li>Solução barata em templo pequeno, mas grave fica "tubular".</li>
+            <li>Funciona melhor com EQ paramétrico cortando as ressonâncias.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="posicao-block">
+        <h3>4. Cardióide (2 subs com 1 invertido)</h3>
+        <div class="posicao-grid">
+          <svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sub cardióide: 2 subs empilhados, 1 invertido em fase">
+            <rect x="20" y="20" width="320" height="180" fill="none" stroke="#5A6478" stroke-width="1.5"/>
+            <rect x="20" y="20" width="320" height="40" fill="rgba(228, 119, 102, 0.1)" stroke="#E47766" stroke-width="1"/>
+            <text x="180" y="44" text-anchor="middle" fill="#E47766" font-size="10" font-family="sans-serif">PALCO</text>
+            <!-- subs empilhados -->
+            <rect x="166" y="45" width="28" height="10" fill="#34D399"/>
+            <rect x="166" y="56" width="28" height="10" fill="#34D399"/>
+            <text x="180" y="80" text-anchor="middle" fill="#34D399" font-size="9" font-family="sans-serif" font-weight="700">SUB (cardióide)</text>
+            <!-- onda só pra frente -->
+            <path d="M 180 65 Q 100 130 60 195" stroke="#34D399" stroke-width="1.5" fill="none"/>
+            <path d="M 180 65 Q 260 130 300 195" stroke="#34D399" stroke-width="1.5" fill="none"/>
+            <!-- atrás cancela -->
+            <text x="180" y="34" text-anchor="middle" fill="#F87171" font-size="10" font-family="sans-serif">atrás cancela ↑</text>
+          </svg>
+          <ul class="points">
+            <li>2 subs empilhados, 1 com polaridade <strong>invertida</strong> e delay calibrado.</li>
+            <li><strong>Som vai só pra frente</strong>, atrás (palco) recebe muito menos grave.</li>
+            <li>Resolve "pregador escutando sub demais no microfone".</li>
+            <li>Requer alinhamento — usa OSM (<a href="../pt/07-alinhando-sub-top.html" style="color: var(--terra);">Trilha 3 · Bloco 7</a>) pra acertar.</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>Tabela: ponto de corte por tipo de caixa</h2>
+
+      <table class="ref-table-lg">
+        <thead>
+          <tr><th>Top (caixa principal)</th><th>HP sugerido</th><th>LP do sub</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>10"</td><td>120 Hz</td><td>120 Hz</td></tr>
+          <tr><td>12"</td><td>100 Hz</td><td>100 Hz</td></tr>
+          <tr><td>15"</td><td>80 Hz</td><td>80 Hz</td></tr>
+          <tr><td>line array 8"–10"</td><td>80–100 Hz</td><td>80–100 Hz</td></tr>
+          <tr><td>line array 12"</td><td>60–80 Hz</td><td>60–80 Hz</td></tr>
+        </tbody>
+      </table>
+
+      <p style="color: var(--text-muted); font-size: 14px; font-style: italic;">Ponto de corte do HP do top e LP do sub devem ser <strong>iguais</strong> — é a "costura" entre as duas caixas. Diferente = buraco ou sobreposição.</p>
+
+      <div class="tip-box">
+        <div class="title">Alinhamento depois do crossover</div>
+        <p>Configurar o cross é só metade do trabalho. Faltam: ajustar o <strong>nível</strong> do sub em relação ao top (balanço), e o <strong>tempo</strong> (delay) entre as duas caixas pra elas chegarem no ouvinte ao mesmo tempo.</p>
+        <p style="margin-top: 8px;">Isso é assunto da <a href="../pt/index.html" style="color: var(--terra);">Trilha 3 · OSM</a> — medir com microfone e software.</p>
+      </div>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="02-amplificadores.html">← Bloco 2</a>
+    <a class="center" href="../index.html" title="Voltar para Church Audio Tech" style="text-decoration:none;">&#127968; Bloco 3 / 6 · Crossover + subwoofer</a>
+    <a href="04-cabos-soldagem.html">Bloco 4 →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.getElementById('diag-cross');
+    if (!svg) return;
+
+    function el(tag, attrs, text) {
+      const e = document.createElementNS(ns, tag);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+
+    // ---- MESA (topo esquerdo) ----
+    svg.appendChild(el('rect', {x:30, y:30, width:120, height:50, fill:'#2D3B4D', stroke:'#8B97A8', 'stroke-width':1.5, rx:4}));
+    svg.appendChild(el('text', {x:90, y:60, 'text-anchor':'middle', fill:'#E5E9F0', 'font-size':14, 'font-family':'sans-serif', 'font-weight':700}, 'MESA'));
+
+    // ---- cabo MESA → CROSS ----
+    svg.appendChild(el('path', {d:'M 150 55 L 220 55', stroke:'#34D399', 'stroke-width':2, fill:'none'}));
+    svg.appendChild(el('polygon', {points:'220,55 213,51 213,59', fill:'#34D399'}));
+    svg.appendChild(el('text', {x:185, y:48, 'text-anchor':'middle', fill:'#34D399', 'font-size':10, 'font-family':'sans-serif'}, 'sinal completo'));
+
+    // ---- CROSSOVER ----
+    svg.appendChild(el('rect', {x:220, y:30, width:130, height:50, fill:'#2D3B4D', stroke:'#E47766', 'stroke-width':2, rx:4}));
+    svg.appendChild(el('text', {x:285, y:50, 'text-anchor':'middle', fill:'#E47766', 'font-size':13, 'font-family':'sans-serif', 'font-weight':700}, 'CROSSOVER'));
+    svg.appendChild(el('text', {x:285, y:68, 'text-anchor':'middle', fill:'#8B97A8', 'font-size':10, 'font-family':'sans-serif'}, '(ativo, no rack)'));
+
+    // ---- saída pro top (HP) ----
+    svg.appendChild(el('path', {d:'M 350 50 L 410 50 L 410 130 L 460 130', stroke:'#5B7BD8', 'stroke-width':2, fill:'none'}));
+    svg.appendChild(el('polygon', {points:'460,130 453,126 453,134', fill:'#5B7BD8'}));
+    svg.appendChild(el('text', {x:385, y:42, fill:'#5B7BD8', 'font-size':11, 'font-family':'sans-serif'}, 'HP > 80 Hz'));
+
+    // ---- saída pro sub (LP) ----
+    svg.appendChild(el('path', {d:'M 350 65 L 410 65 L 410 240 L 460 240', stroke:'#E47766', 'stroke-width':2, fill:'none'}));
+    svg.appendChild(el('polygon', {points:'460,240 453,236 453,244', fill:'#E47766'}));
+    svg.appendChild(el('text', {x:385, y:80, fill:'#E47766', 'font-size':11, 'font-family':'sans-serif'}, 'LP < 80 Hz'));
+
+    // ---- AMP TOP ----
+    svg.appendChild(el('rect', {x:460, y:108, width:100, height:44, fill:'#2D3B4D', stroke:'#5B7BD8', 'stroke-width':2, rx:3}));
+    svg.appendChild(el('text', {x:510, y:135, 'text-anchor':'middle', fill:'#5B7BD8', 'font-size':12, 'font-family':'sans-serif', 'font-weight':700}, 'AMP TOP'));
+
+    // ---- AMP SUB ----
+    svg.appendChild(el('rect', {x:460, y:220, width:100, height:44, fill:'#2D3B4D', stroke:'#E47766', 'stroke-width':2, rx:3}));
+    svg.appendChild(el('text', {x:510, y:247, 'text-anchor':'middle', fill:'#E47766', 'font-size':12, 'font-family':'sans-serif', 'font-weight':700}, 'AMP SUB'));
+
+    // ---- cabo amp → caixa top ----
+    svg.appendChild(el('path', {d:'M 560 130 L 620 130', stroke:'#5B7BD8', 'stroke-width':3, fill:'none'}));
+    svg.appendChild(el('text', {x:590, y:122, 'text-anchor':'middle', fill:'#8B97A8', 'font-size':10, 'font-family':'sans-serif'}, 'Speakon'));
+
+    // ---- caixa TOP ----
+    svg.appendChild(el('rect', {x:620, y:90, width:70, height:80, fill:'#2D3B4D', stroke:'#5B7BD8', 'stroke-width':2, rx:3}));
+    svg.appendChild(el('circle', {cx:655, cy:130, r:18, fill:'#1A2332', stroke:'#8B97A8', 'stroke-width':1.5}));
+    svg.appendChild(el('circle', {cx:655, cy:130, r:6, fill:'#0F1419'}));
+    svg.appendChild(el('text', {x:655, y:185, 'text-anchor':'middle', fill:'#5B7BD8', 'font-size':11, 'font-family':'sans-serif', 'font-weight':700}, 'TOP'));
+
+    // ---- cabo amp → sub ----
+    svg.appendChild(el('path', {d:'M 560 240 L 620 240', stroke:'#E47766', 'stroke-width':3, fill:'none'}));
+
+    // ---- caixa SUB ----
+    svg.appendChild(el('rect', {x:620, y:210, width:70, height:60, fill:'#2D3B4D', stroke:'#E47766', 'stroke-width':2, rx:3}));
+    svg.appendChild(el('circle', {cx:655, cy:240, r:14, fill:'#1A2332', stroke:'#8B97A8', 'stroke-width':1.5}));
+    svg.appendChild(el('circle', {cx:655, cy:240, r:5, fill:'#0F1419'}));
+    svg.appendChild(el('text', {x:655, y:285, 'text-anchor':'middle', fill:'#E47766', 'font-size':11, 'font-family':'sans-serif', 'font-weight':700}, 'SUB'));
+
+  })();
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

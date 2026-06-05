@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amplificadores na prática · Curso de equipamentos</title>
+  <meta name="description" content="Como casar amplificador e caixa pela potência, bridge mono pro sub, classes AB/D/H sem fórmula, pinout Speakon NL2/NL4, 70V vs 8 ohms, checklist de problemas.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <div class="page narrow">
+
+    <nav class="crumb">
+      <a href="../index.html">Church Audio Tech</a>
+      <span class="sep">/</span>
+      <a href="index.html">Equipamentos</a>
+    </nav>
+
+    <header class="info-header">
+      <div>
+        <div class="label">Bloco 2 / 6</div>
+        <h1>Amplificadores na prática</h1>
+      </div>
+      <div class="subtitle">casar amp e caixa,<br>sem queimar nada no caminho</div>
+    </header>
+
+    <article class="lesson-prose">
+
+      <p>O amplificador pega o sinal fraco que sai da mesa e transforma em sinal forte o suficiente pra mover o cone da caixa passiva. É o tradutor entre "milivolt na mesa" e "watts no falante".</p>
+
+      <h2>A regra que salva amplificador (e caixa)</h2>
+
+      <p>A escolha de amp começa pela <strong>potência RMS contínua da caixa</strong>. A regra prática:</p>
+
+      <div class="callout terra">
+        <div class="head">Regra de ouro</div>
+        <p><strong>Potência do amp ≈ 1,5 a 2× a potência RMS da caixa.</strong></p>
+        <p style="margin-top: 10px;">Caixa de 300 W RMS → amp de 450–600 W por canal.</p>
+      </div>
+
+      <p>Parece contra-intuitivo (amp <em>mais forte</em> que a caixa?), mas é exatamente por segurança. Amp subdimensionado é o maior assassino de falantes na igreja — mais do que sobrecarregar.</p>
+
+      <div class="tip-box">
+        <div class="title">Por que amp pequeno queima a caixa</div>
+        <p>Amp pequeno demais entra em <strong>clip</strong> (saturação) quando você sobe o volume. Clip não é só som distorcido — é o sinal virando uma onda quadrada, que tem o dobro de energia média que uma senoide do mesmo pico. Essa energia extra vira <strong>calor no falante</strong>, queimando a bobina antes do amp aparentar estar "no limite".</p>
+        <p>Amp <em>maior</em> que a caixa tem folga de headroom — chega no limite da caixa antes de clipar, e nesse ponto você (espero) abaixa o volume.</p>
+      </div>
+
+      <h2>Classes de amplificador</h2>
+
+      <p>"Classe" é como o circuito interno trabalha. Pra prática da igreja, três classes interessam:</p>
+
+      <table class="ref-table-lg">
+        <thead>
+          <tr><th>Classe</th><th>Eficiência</th><th>Calor</th><th>Som / uso</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>AB</td>
+            <td>~50%</td>
+            <td>esquenta muito</td>
+            <td>som "redondo", clássico de hi-fi. Pesado e grande. Cada vez menos comum.</td>
+          </tr>
+          <tr>
+            <td>D</td>
+            <td>~85–90%</td>
+            <td>quase nada</td>
+            <td>leve, compacto, padrão atual. Pode ter ventoinha barulhenta nos modelos baratos.</td>
+          </tr>
+          <tr>
+            <td>H</td>
+            <td>~70%</td>
+            <td>esquenta médio</td>
+            <td>mistura AB com chaveamento — meio termo de qualidade e eficiência. Comum em rack de PA.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="color: var(--text-muted); font-size: 14px;">Pra igreja, <strong>classe D</strong> é hoje a escolha padrão: ampla, leve e barata. Se você usa rack móvel pra eventos, classe D economiza horas de carga.</p>
+
+      <h2>Bridge mono — quando faz sentido</h2>
+
+      <p>Amplificador estéreo tem 2 canais (esquerdo e direito), cada um com sua potência. "Bridge mono" é uma ligação especial onde os <strong>dois canais se somam num só</strong>, gerando aproximadamente o <em>dobro</em> da potência num só conector.</p>
+
+      <div class="callout amber">
+        <div class="head">Quando usar bridge</div>
+        <p><strong>Pra subwoofer.</strong> Sub puxa muita corrente, precisa de potência alta num único alto-falante grande. Em vez de comprar um amp gigante só pro sub, você "bridga" um amp estéreo comum.</p>
+        <p style="margin-top: 8px;">Atenção: a impedância mínima do amp em bridge é o <strong>dobro</strong> da impedância em estéreo. Amp que aceita 4 Ω em estéreo só aceita 8 Ω em bridge. Ler o manual antes.</p>
+      </div>
+
+      <h2>Pinout Speakon — NL2 e NL4</h2>
+
+      <p>O conector padrão pra ligar amp em caixa passiva é o <strong>Speakon</strong> (Neutrik). Trava com um quarto de volta — não cai, não dá choque. Dois modelos comuns:</p>
+
+      <div class="diagrama-wrap">
+        <svg id="diag-speakon" viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pinout Speakon NL2 e NL4"></svg>
+        <div class="caption">NL2: 2 polos pra caixa de uma via ou sub. NL4: 4 polos pra caixa bi-amp ou pra usar 1 cabo com 2 caixas separadas.</div>
+      </div>
+
+      <h3>Como ligar bridge mono num Speakon NL4</h3>
+
+      <p>Pra usar bridge mono em sub com Speakon NL4, a ligação no <strong>lado do amp</strong> usa pinos especiais (geralmente 1+/2+ em vez de 1+/1−). Confira o manual do seu amp — muda de marca pra marca. Erro comum: ligar bridge nos pinos errados e o amp entra em proteção ou queima.</p>
+
+      <h2>70V vs baixa impedância (8 Ω / 4 Ω)</h2>
+
+      <p>Existem dois "mundos" de amplificação em áudio profissional:</p>
+
+      <div class="stat-grid">
+        <div class="stat" style="background: var(--bg-card); border: 1px solid var(--border); padding: 16px; border-radius: 6px;">
+          <div style="color: var(--terra); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Baixa impedância</div>
+          <div style="font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px;">8 Ω / 4 Ω</div>
+          <div style="font-size: 13px; color: var(--text-muted);">O padrão pra som ao vivo. Poucas caixas, cabos curtos, potência alta por ponto.</div>
+        </div>
+        <div class="stat" style="background: var(--bg-card); border: 1px solid var(--border); padding: 16px; border-radius: 6px;">
+          <div style="color: var(--navy); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Linha 70V / 100V</div>
+          <div style="font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px;">70 V</div>
+          <div style="font-size: 13px; color: var(--text-muted);">Pra muitas caixas espalhadas (shopping, escola, foyer). Cabo longo, potência baixa por caixa.</div>
+        </div>
+      </div>
+
+      <p>Na <strong>baixa impedância</strong> você liga 1 ou 2 caixas por canal de amp. O cabo é grosso, curto, alta corrente. É o som que enche o templo principal.</p>
+
+      <p>Na <strong>linha 70V</strong> você liga 10, 20, 50 caixas pequenas em paralelo no mesmo cabo (cada uma com transformador adaptando 70V → 8Ω no falante). Usada quando a igreja tem áreas espalhadas: foyer, sala de EBD, escolinha, área pais com bebê, estacionamento. Cabos longos e finos, baixa corrente.</p>
+
+      <div class="warn-box">
+        <div class="title">⚠ Não misture os mundos</div>
+        <p>Caixa de 8Ω comum <strong>não vai</strong> em linha 70V (não tem transformador, vai puxar corrente excessiva). Caixa de 70V <strong>não toca</strong> direto em amp de baixa impedância (transformador atrapalha). Pra cada zona, escolha um mundo e fique nele.</p>
+      </div>
+
+      <h2>Problemas comuns no amp</h2>
+
+      <div class="problema-checklist">
+        <div class="problema-item">
+          <div>
+            <span class="label">Sintoma</span>
+            <div class="sintoma">Amp entrando em proteção (apaga e volta)</div>
+          </div>
+          <div>
+            <span class="label">Causa provável</span>
+            <div class="hipotese">Impedância total abaixo do mínimo do amp (caixas demais em paralelo) ou curto-circuito no cabo de alto-falante.</div>
+          </div>
+          <div>
+            <span class="label">Como testar</span>
+            <div class="teste">Desconecta tudo. Liga só 1 caixa. Volta? Soma de Ω calcula.</div>
+          </div>
+        </div>
+
+        <div class="problema-item">
+          <div>
+            <span class="label">Sintoma</span>
+            <div class="sintoma">Clip light constante mesmo no volume médio</div>
+          </div>
+          <div>
+            <span class="label">Causa provável</span>
+            <div class="hipotese">Amp subdimensionado pra demanda, ou ganho da mesa altíssimo na saída master.</div>
+          </div>
+          <div>
+            <span class="label">Como testar</span>
+            <div class="teste">Abaixa master da mesa. Sumiu? Era ganho. Continua? Amp pequeno.</div>
+          </div>
+        </div>
+
+        <div class="problema-item">
+          <div>
+            <span class="label">Sintoma</span>
+            <div class="sintoma">Sub mudo, top toca</div>
+          </div>
+          <div>
+            <span class="label">Causa provável</span>
+            <div class="hipotese">Crossover ativo desligado, cabo do sub solto, polaridade trocada no bridge.</div>
+          </div>
+          <div>
+            <span class="label">Como testar</span>
+            <div class="teste">Confere LED do cross. Multímetro no cabo. Re-confere pinos do bridge.</div>
+          </div>
+        </div>
+
+        <div class="problema-item">
+          <div>
+            <span class="label">Sintoma</span>
+            <div class="sintoma">Amp esquenta absurdamente</div>
+          </div>
+          <div>
+            <span class="label">Causa provável</span>
+            <div class="hipotese">Ventoinha entupida de poeira, ou amp instalado no rack sem espaço de ar.</div>
+          </div>
+          <div>
+            <span class="label">Como testar</span>
+            <div class="teste">Tira do rack, sopra ventoinha, deixa 1U livre em cima e embaixo.</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>Tabela de potência sugerida</h2>
+
+      <table class="ref-table-lg">
+        <thead>
+          <tr><th>Templo (pessoas)</th><th>SPL alvo</th><th>Potência por lado</th><th>Sub (bridge)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>até 100</td><td>95 dB</td><td>200–300 W</td><td>opcional</td></tr>
+          <tr><td>100–300</td><td>100 dB</td><td>400–600 W</td><td>500–800 W</td></tr>
+          <tr><td>300–600</td><td>105 dB</td><td>800–1200 W</td><td>1200–2000 W</td></tr>
+          <tr><td>600–1000</td><td>105–110 dB</td><td>1500–2500 W</td><td>2000–4000 W</td></tr>
+          <tr><td>+1000</td><td>110+ dB</td><td>line array + processador dedicado</td><td>2× sub bridge ou cardióide</td></tr>
+        </tbody>
+      </table>
+
+      <p style="color: var(--text-muted); font-size: 14px; font-style: italic;">SPL é nível de pressão sonora — quanto maior o número, mais "alto". 100 dB é o limite confortável; acima de 110 dB começa a incomodar e prejudicar a audição com exposição longa.</p>
+
+    </article>
+
+  </div>
+
+  <nav class="nav-footer">
+    <a href="01-caixas-ativas-passivas.html">← Bloco 1</a>
+    <a class="center" href="../index.html" title="Voltar para Church Audio Tech" style="text-decoration:none;">&#127968; Bloco 2 / 6 · Amplificadores</a>
+    <a href="03-crossover-sub.html">Bloco 3 →</a>
+  </nav>
+
+  <script>
+  (function() {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.getElementById('diag-speakon');
+    if (!svg) return;
+
+    function el(tag, attrs, text) {
+      const e = document.createElementNS(ns, tag);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+
+    // ========== NL2 (esquerda) ==========
+    svg.appendChild(el('text', {x:170, y:30, 'text-anchor':'middle', fill:'#E47766', 'font-size':14, 'font-family':'sans-serif', 'font-weight':700}, 'NL2 — 2 polos'));
+    svg.appendChild(el('text', {x:170, y:48, 'text-anchor':'middle', fill:'#8B97A8', 'font-size':11, 'font-family':'sans-serif'}, 'caixa de 1 via ou sub simples'));
+
+    // carcaça externa
+    svg.appendChild(el('circle', {cx:170, cy:140, r:62, fill:'#1A2332', stroke:'#8B97A8', 'stroke-width':2}));
+    svg.appendChild(el('circle', {cx:170, cy:140, r:50, fill:'#0F1419', stroke:'#3D4D63', 'stroke-width':1.5}));
+
+    // pinos NL2 (2 polos: 1+ e 1-)
+    svg.appendChild(el('circle', {cx:145, cy:140, r:12, fill:'#2D3B4D', stroke:'#E47766', 'stroke-width':2}));
+    svg.appendChild(el('text', {x:145, y:144, 'text-anchor':'middle', fill:'#E47766', 'font-size':11, 'font-family':'monospace', 'font-weight':700}, '1+'));
+
+    svg.appendChild(el('circle', {cx:195, cy:140, r:12, fill:'#2D3B4D', stroke:'#5B7BD8', 'stroke-width':2}));
+    svg.appendChild(el('text', {x:195, y:144, 'text-anchor':'middle', fill:'#5B7BD8', 'font-size':11, 'font-family':'monospace', 'font-weight':700}, '1−'));
+
+    // legenda NL2
+    svg.appendChild(el('text', {x:170, y:225, 'text-anchor':'middle', fill:'#E5E9F0', 'font-size':11, 'font-family':'sans-serif'}, '1+ = vivo (vermelho)'));
+    svg.appendChild(el('text', {x:170, y:242, 'text-anchor':'middle', fill:'#E5E9F0', 'font-size':11, 'font-family':'sans-serif'}, '1− = retorno (preto)'));
+
+    // divisor
+    svg.appendChild(el('line', {x1:360, y1:20, x2:360, y2:250, stroke:'#3D4D63', 'stroke-width':1, 'stroke-dasharray':'4 4'}));
+
+    // ========== NL4 (direita) ==========
+    svg.appendChild(el('text', {x:540, y:30, 'text-anchor':'middle', fill:'#E47766', 'font-size':14, 'font-family':'sans-serif', 'font-weight':700}, 'NL4 — 4 polos'));
+    svg.appendChild(el('text', {x:540, y:48, 'text-anchor':'middle', fill:'#8B97A8', 'font-size':11, 'font-family':'sans-serif'}, 'bi-amp (top+sub) ou bridge mono'));
+
+    // carcaça
+    svg.appendChild(el('circle', {cx:540, cy:140, r:62, fill:'#1A2332', stroke:'#8B97A8', 'stroke-width':2}));
+    svg.appendChild(el('circle', {cx:540, cy:140, r:50, fill:'#0F1419', stroke:'#3D4D63', 'stroke-width':1.5}));
+
+    // 4 pinos: 1+, 1-, 2+, 2-
+    svg.appendChild(el('circle', {cx:520, cy:118, r:11, fill:'#2D3B4D', stroke:'#E47766', 'stroke-width':2}));
+    svg.appendChild(el('text', {x:520, y:122, 'text-anchor':'middle', fill:'#E47766', 'font-size':10, 'font-family':'monospace', 'font-weight':700}, '1+'));
+
+    svg.appendChild(el('circle', {cx:560, cy:118, r:11, fill:'#2D3B4D', stroke:'#5B7BD8', 'stroke-width':2}));
+    svg.appendChild(el('text', {x:560, y:122, 'text-anchor':'middle', fill:'#5B7BD8', 'font-size':10, 'font-family':'monospace', 'font-weight':700}, '1−'));
+
+    svg.appendChild(el('circle', {cx:520, cy:162, r:11, fill:'#2D3B4D', stroke:'#F5B947', 'stroke-width':2}));
+    svg.appendChild(el('text', {x:520, y:166, 'text-anchor':'middle', fill:'#F5B947', 'font-size':10, 'font-family':'monospace', 'font-weight':700}, '2+'));
+
+    svg.appendChild(el('circle', {cx:560, cy:162, r:11, fill:'#2D3B4D', stroke:'#34D399', 'stroke-width':2}));
+    svg.appendChild(el('text', {x:560, y:166, 'text-anchor':'middle', fill:'#34D399', 'font-size':10, 'font-family':'monospace', 'font-weight':700}, '2−'));
+
+    // legendas NL4
+    svg.appendChild(el('text', {x:540, y:225, 'text-anchor':'middle', fill:'#E5E9F0', 'font-size':11, 'font-family':'sans-serif'}, '1± = canal A (top / lado A)'));
+    svg.appendChild(el('text', {x:540, y:242, 'text-anchor':'middle', fill:'#E5E9F0', 'font-size':11, 'font-family':'sans-serif'}, '2± = canal B (sub / lado B / bridge)'));
+  })();
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
