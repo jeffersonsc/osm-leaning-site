@@ -1728,40 +1728,44 @@ table.viz .muted {
 
 .author-card .bio + .bio { margin-top: 10px; }
 
-/* Author card — bio com label lateral */
-.author-card .bio-section {
+/* Hub intro — hero + author-card lado a lado */
+.hub-intro {
   display: grid;
-  grid-template-columns: 110px 1fr;
-  gap: 20px;
-  margin: 0 0 18px;
-  align-items: start;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+  margin-bottom: 56px;
 }
 
-.author-card .bio-label {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--terra);
-  padding-top: 3px;
-  border-right: 1px solid var(--border);
-  padding-right: 12px;
-  text-align: right;
+.hub-intro .hub-hero {
+  text-align: left;
+  padding: 0;
 }
 
-.author-card .bio-text .bio { margin-bottom: 10px; }
-.author-card .bio-text .bio:last-child { margin-bottom: 0; }
+.hub-intro .hub-hero h1 {
+  font-size: 44px;
+  line-height: 1.05;
+}
 
-@media (max-width: 640px) {
-  .author-card .bio-section {
+.hub-intro .hub-hero p {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.hub-intro .author-card {
+  margin: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .hub-intro {
     grid-template-columns: 1fr;
-    gap: 6px;
+    gap: 40px;
   }
-  .author-card .bio-label {
-    border-right: none;
-    padding-right: 0;
-    text-align: left;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--border);
+  .hub-intro .hub-hero {
+    text-align: center;
+    padding: 40px 0 0;
   }
+  .hub-intro .hub-hero p { margin: 0 auto; }
+  .hub-intro .author-card { margin: 0 auto; max-width: 720px; }
 }
