@@ -1727,3 +1727,41 @@ table.viz .muted {
 }
 
 .author-card .bio + .bio { margin-top: 10px; }
+
+/* Author card — bio com label lateral */
+.author-card .bio-section {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 20px;
+  margin: 0 0 18px;
+  align-items: start;
+}
+
+.author-card .bio-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--terra);
+  padding-top: 3px;
+  border-right: 1px solid var(--border);
+  padding-right: 12px;
+  text-align: right;
+}
+
+.author-card .bio-text .bio { margin-bottom: 10px; }
+.author-card .bio-text .bio:last-child { margin-bottom: 0; }
+
+@media (max-width: 640px) {
+  .author-card .bio-section {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .author-card .bio-label {
+    border-right: none;
+    padding-right: 0;
+    text-align: left;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+}
