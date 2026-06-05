@@ -1554,14 +1554,9 @@ table.viz .muted {
   width: 84px;
   height: 84px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--terra) 0%, var(--navy) 100%);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 30px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  object-fit: cover;
+  display: block;
+  border: 2px solid var(--terra);
   box-shadow: 0 4px 16px rgba(228, 119, 102, 0.25);
 }
 
