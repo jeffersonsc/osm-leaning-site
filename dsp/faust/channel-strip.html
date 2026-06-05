@@ -82,7 +82,7 @@ footer{max-width:var(--wide-width);margin:80px auto 0;padding:32px 32px 64px;bor
 <div class="hero">
   <div class="hero-label">Projeto — Channel Strip</div>
   <h1>Meu primeiro <em>channel strip</em>.</h1>
-  <p class="hero-subtitle">Plugin de produção real juntando tudo dos módulos 01–06 num único arquivo: input gain, HPF/LPF com bypass, gate, compressor, EQ paramétrico de 4 bandas, send de delay, send de reverb, output gain e 4 meters. Copia, cola no editor.faust.grame.fr, dá Run — funciona direto no navegador.</p>
+  <p class="hero-subtitle">Plugin de produção real juntando tudo dos módulos 01–06 num único arquivo: input gain, HPF/LPF com bypass, gate, compressor, EQ paramétrico de 4 bandas, sends de delay e reverb, e <strong>MASTER fader vertical com meter</strong>. UI personalizada via <code>[style:knob]</code> + grupos aninhados pra ficar mais parecido com uma <em>channel strip de mesa digital</em>. Copia, cola no editor.faust.grame.fr, dá Run.</p>
   <div class="hero-meta">
     <div class="meta-item"><span class="meta-label">Pré-requisitos</span><span class="meta-value">Módulos 01–06</span></div>
     <div class="meta-item"><span class="meta-label">Linhas</span><span class="meta-value">≈ 80</span></div>
@@ -137,11 +137,23 @@ footer{max-width:var(--wide-width);margin:80px auto 0;padding:32px 32px 64px;bor
 <span class="section-number">§ 02</span>
 <h2>Plugin <em>completo</em>.</h2>
 
-<p>Copia o bloco inteiro, cola no <a href="https://editor.faust.grame.fr" target="_blank" rel="noopener">editor.faust.grame.fr</a>, clica em <strong>Run</strong>. O plugin aparece com 6 tabs (Input, Filters, Gate, Comp, EQ, FX, Output) e roda direto.</p>
+<p>Copia o bloco inteiro, cola no <a href="https://editor.faust.grame.fr" target="_blank" rel="noopener">editor.faust.grame.fr</a>, clica em <strong>Run</strong>. O plugin aparece com 7 tabs (Input, Filters, Gate, Comp, EQ, FX, Output) e roda direto.</p>
 
 <div class="callout faust">
-  <div class="callout-title">Detalhe importante sobre o gate</div>
-  <p>A função <code>co.gate_gain_mono</code> que muitos exemplos online usam <strong>não existe</strong> na versão atual da <code>stdfaust.lib</code> — ela dá erro <code>undefined symbol : gate_gain_mono</code>. Aqui o gate foi implementado <em>manual</em>: envelope follower (<code>an.amp_follower_ar</code>) + comparação com threshold + smoothing pra evitar zipper. Mesmo resultado, sem dependência quebrada.</p>
+  <div class="callout-title">Layout de mesa digital — escolhas visuais</div>
+  <ul>
+    <li><strong>Knobs em vez de sliders</strong> — <code>[style:knob]</code> em todo controle, parece mesa de verdade.</li>
+    <li><strong>EQ em colunas</strong> — cada banda (Low/LowMid/HighMid/High) num <code>v:</code> group dentro de um <code>h:bandas</code>, gain/freq/Q empilhados, 4 colunas lado-a-lado.</li>
+    <li><strong>FX em colunas</strong> — Delay e Reverb também em <code>v:</code> groups lado-a-lado dentro de <code>h:sends</code>.</li>
+    <li><strong>Filters em colunas</strong> — HPF e LPF cada um numa coluna com checkbox + freq.</li>
+    <li><strong>MASTER vertical</strong> — saída usa <code>vslider</code> (fader vertical) ao invés de knob, parece o fader master de uma mesa.</li>
+    <li><strong>Meters I/O verticais</strong> — <code>vbargraph</code> no input e output (canal de mesa), <code>hbargraph</code> nos GR meters (barra de redução).</li>
+  </ul>
+</div>
+
+<div class="callout">
+  <div class="callout-title">Sobre o gate</div>
+  <p>A função <code>co.gate_gain_mono</code> que muitos exemplos online usam <strong>não existe</strong> na <code>stdfaust.lib</code> — dá erro <code>undefined symbol : gate_gain_mono</code>. Aqui o gate foi implementado manual: envelope follower (<code>an.amp_follower_ar</code>) + comparação com threshold + smoothing pra evitar zipper.</p>
 </div>
 
 <div class="code-block">
@@ -153,22 +165,22 @@ footer{max-width:var(--wide-width);margin:80px auto 0;padding:32px 32px 64px;bor
 <span class="tk-kw">import</span>(<span class="tk-str">"stdfaust.lib"</span>);
 
 <span class="tk-cm">//================== INPUT ==================</span>
-in_gain     = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Input/[0]gain [unit:dB]"</span>, <span class="tk-num">0</span>, -<span class="tk-num">24</span>, <span class="tk-num">24</span>, <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
-in_meter(s) = <span class="tk-fn">attach</span>(s, s : abs : ba.<span class="tk-fn">linear2db</span> : <span class="tk-fn">hbargraph</span>(<span class="tk-str">"t:Input/[1]in [unit:dB]"</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>));
+in_gain     = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Input/[0]gain [unit:dB][style:knob]"</span>, <span class="tk-num">0</span>, -<span class="tk-num">24</span>, <span class="tk-num">24</span>, <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
+in_meter(s) = <span class="tk-fn">attach</span>(s, s : abs : ba.<span class="tk-fn">linear2db</span> : <span class="tk-fn">vbargraph</span>(<span class="tk-str">"t:Input/[1]in [unit:dB]"</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>));
 
-<span class="tk-cm">//================== FILTERS (HPF / LPF com bypass) ==================</span>
-hpf_on   = <span class="tk-fn">checkbox</span>(<span class="tk-str">"t:Filters/[0]HPF on"</span>);
-hpf_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Filters/[1]HPF freq [unit:Hz][scale:log]"</span>, <span class="tk-num">80</span>,   <span class="tk-num">20</span>,   <span class="tk-num">500</span>,   <span class="tk-num">1</span>);
-lpf_on   = <span class="tk-fn">checkbox</span>(<span class="tk-str">"t:Filters/[2]LPF on"</span>);
-lpf_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Filters/[3]LPF freq [unit:Hz][scale:log]"</span>, <span class="tk-num">12000</span>, <span class="tk-num">1000</span>, <span class="tk-num">20000</span>, <span class="tk-num">1</span>);
+<span class="tk-cm">//================== FILTERS (HPF / LPF lado-a-lado) ==================</span>
+hpf_on   = <span class="tk-fn">checkbox</span>(<span class="tk-str">"t:Filters/h:secao/v:HPF/[0]on"</span>);
+hpf_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Filters/h:secao/v:HPF/[1]freq [unit:Hz][scale:log][style:knob]"</span>, <span class="tk-num">80</span>,    <span class="tk-num">20</span>,   <span class="tk-num">500</span>,   <span class="tk-num">1</span>);
+lpf_on   = <span class="tk-fn">checkbox</span>(<span class="tk-str">"t:Filters/h:secao/v:LPF/[0]on"</span>);
+lpf_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Filters/h:secao/v:LPF/[1]freq [unit:Hz][scale:log][style:knob]"</span>, <span class="tk-num">12000</span>, <span class="tk-num">1000</span>, <span class="tk-num">20000</span>, <span class="tk-num">1</span>);
 
 hpf = ba.<span class="tk-fn">bypass1</span>(<span class="tk-num">1</span> - hpf_on, fi.<span class="tk-fn">highpass</span>(<span class="tk-num">2</span>, hpf_freq));
 lpf = ba.<span class="tk-fn">bypass1</span>(<span class="tk-num">1</span> - lpf_on, fi.<span class="tk-fn">lowpass</span>(<span class="tk-num">2</span>, lpf_freq));
 
-<span class="tk-cm">//================== GATE (implementação manual — gate_gain_mono não existe) ==================</span>
-g_thresh  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Gate/[0]threshold [unit:dB]"</span>, -<span class="tk-num">40</span>, -<span class="tk-num">80</span>, <span class="tk-num">0</span>,    <span class="tk-num">0.1</span>);
-g_attack  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Gate/[1]attack [unit:ms]"</span>,    <span class="tk-num">1</span>,   <span class="tk-num">0.1</span>, <span class="tk-num">50</span>,   <span class="tk-num">0.1</span>) * <span class="tk-num">0.001</span>;
-g_release = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Gate/[2]release [unit:ms]"</span>,   <span class="tk-num">100</span>, <span class="tk-num">10</span>,  <span class="tk-num">1000</span>, <span class="tk-num">1</span>)   * <span class="tk-num">0.001</span>;
+<span class="tk-cm">//================== GATE (knobs em linha + GR meter) ==================</span>
+g_thresh  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Gate/h:controles/[0]threshold [unit:dB][style:knob]"</span>, -<span class="tk-num">40</span>, -<span class="tk-num">80</span>, <span class="tk-num">0</span>,    <span class="tk-num">0.1</span>);
+g_attack  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Gate/h:controles/[1]attack [unit:ms][style:knob]"</span>,    <span class="tk-num">1</span>,   <span class="tk-num">0.1</span>, <span class="tk-num">50</span>,   <span class="tk-num">0.1</span>) * <span class="tk-num">0.001</span>;
+g_release = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Gate/h:controles/[2]release [unit:ms][style:knob]"</span>,   <span class="tk-num">100</span>, <span class="tk-num">10</span>,  <span class="tk-num">1000</span>, <span class="tk-num">1</span>)   * <span class="tk-num">0.001</span>;
 
 <span class="tk-cm">// Envelope follower com attack/release (peak detector suavizado)</span>
 g_env(x) = abs(x) : an.<span class="tk-fn">amp_follower_ar</span>(g_attack, g_release);
@@ -179,59 +191,60 @@ g_gain(x) = (g_env(x) &gt; ba.<span class="tk-fn">db2linear</span>(g_thresh)) : 
 g_meter(g)    = <span class="tk-fn">attach</span>(g, g : ba.<span class="tk-fn">linear2db</span> : <span class="tk-fn">hbargraph</span>(<span class="tk-str">"t:Gate/[3]GR [unit:dB]"</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>));
 gate_stage(x) = x * (x : g_gain : g_meter);
 
-<span class="tk-cm">//================== COMPRESSOR ==================</span>
-c_thresh  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Comp/[0]threshold [unit:dB]"</span>, -<span class="tk-num">18</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>,    <span class="tk-num">0.1</span>);
-c_ratio   = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Comp/[1]ratio"</span>,                <span class="tk-num">4</span>,   <span class="tk-num">1</span>,   <span class="tk-num">20</span>,   <span class="tk-num">0.1</span>);
-c_attack  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Comp/[2]attack [unit:ms]"</span>,     <span class="tk-num">10</span>,  <span class="tk-num">0.1</span>, <span class="tk-num">100</span>,  <span class="tk-num">0.1</span>) * <span class="tk-num">0.001</span>;
-c_release = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Comp/[3]release [unit:ms]"</span>,    <span class="tk-num">100</span>, <span class="tk-num">10</span>,  <span class="tk-num">1000</span>, <span class="tk-num">1</span>)   * <span class="tk-num">0.001</span>;
-c_makeup  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Comp/[4]makeup [unit:dB]"</span>,     <span class="tk-num">0</span>,   <span class="tk-num">0</span>,   <span class="tk-num">24</span>,   <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
+<span class="tk-cm">//================== COMPRESSOR (knobs em linha + GR meter) ==================</span>
+c_thresh  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Comp/h:controles/[0]threshold [unit:dB][style:knob]"</span>, -<span class="tk-num">18</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>,    <span class="tk-num">0.1</span>);
+c_ratio   = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Comp/h:controles/[1]ratio[style:knob]"</span>,                <span class="tk-num">4</span>,   <span class="tk-num">1</span>,   <span class="tk-num">20</span>,   <span class="tk-num">0.1</span>);
+c_attack  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Comp/h:controles/[2]attack [unit:ms][style:knob]"</span>,     <span class="tk-num">10</span>,  <span class="tk-num">0.1</span>, <span class="tk-num">100</span>,  <span class="tk-num">0.1</span>) * <span class="tk-num">0.001</span>;
+c_release = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Comp/h:controles/[3]release [unit:ms][style:knob]"</span>,    <span class="tk-num">100</span>, <span class="tk-num">10</span>,  <span class="tk-num">1000</span>, <span class="tk-num">1</span>)   * <span class="tk-num">0.001</span>;
+c_makeup  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Comp/h:controles/[4]makeup [unit:dB][style:knob]"</span>,     <span class="tk-num">0</span>,   <span class="tk-num">0</span>,   <span class="tk-num">24</span>,   <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
 
 c_gain        = co.<span class="tk-fn">compression_gain_mono</span>(c_ratio, c_thresh, c_attack, c_release);
 c_meter(g)    = <span class="tk-fn">attach</span>(g, g : ba.<span class="tk-fn">linear2db</span> : <span class="tk-fn">hbargraph</span>(<span class="tk-str">"t:Comp/[5]GR [unit:dB]"</span>, -<span class="tk-num">24</span>, <span class="tk-num">0</span>));
 comp_stage(x) = x * (x : c_gain : c_meter) * c_makeup;
 
-<span class="tk-cm">//================== EQ 4 BANDAS PARAMÉTRICO ==================</span>
-b1_gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band1/[0]gain [unit:dB]"</span>,             <span class="tk-num">0</span>,    -<span class="tk-num">18</span>, <span class="tk-num">18</span>,    <span class="tk-num">0.1</span>);
-b1_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band1/[1]freq [unit:Hz][scale:log]"</span>, <span class="tk-num">120</span>,  <span class="tk-num">20</span>,  <span class="tk-num">500</span>,   <span class="tk-num">1</span>);
-b1_q    = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band1/[2]Q"</span>,                          <span class="tk-num">1.0</span>,  <span class="tk-num">0.1</span>, <span class="tk-num">10</span>,    <span class="tk-num">0.01</span>);
+<span class="tk-cm">//================== EQ 4 BANDAS — vgroup por banda dentro de hgroup ==================</span>
+<span class="tk-cm">// Cada banda fica numa coluna (vgroup) com gain/freq/Q empilhados em knobs.</span>
+<span class="tk-cm">// As 4 colunas ficam lado-a-lado (hgroup "bandas") tipo channel strip de mesa.</span>
+b1_gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/h:bandas/v:Low/[0]gain [unit:dB][style:knob]"</span>,             <span class="tk-num">0</span>,    -<span class="tk-num">18</span>, <span class="tk-num">18</span>,    <span class="tk-num">0.1</span>);
+b1_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/h:bandas/v:Low/[1]freq [unit:Hz][scale:log][style:knob]"</span>,  <span class="tk-num">120</span>,  <span class="tk-num">20</span>,  <span class="tk-num">500</span>,   <span class="tk-num">1</span>);
+b1_q    = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/h:bandas/v:Low/[2]Q[style:knob]"</span>,                          <span class="tk-num">1.0</span>,  <span class="tk-num">0.1</span>, <span class="tk-num">10</span>,    <span class="tk-num">0.01</span>);
 
-b2_gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band2/[0]gain [unit:dB]"</span>,             <span class="tk-num">0</span>,    -<span class="tk-num">18</span>, <span class="tk-num">18</span>,    <span class="tk-num">0.1</span>);
-b2_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band2/[1]freq [unit:Hz][scale:log]"</span>, <span class="tk-num">500</span>,  <span class="tk-num">100</span>, <span class="tk-num">2000</span>,  <span class="tk-num">1</span>);
-b2_q    = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band2/[2]Q"</span>,                          <span class="tk-num">1.0</span>,  <span class="tk-num">0.1</span>, <span class="tk-num">10</span>,    <span class="tk-num">0.01</span>);
+b2_gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/h:bandas/v:LowMid/[0]gain [unit:dB][style:knob]"</span>,             <span class="tk-num">0</span>,    -<span class="tk-num">18</span>, <span class="tk-num">18</span>,    <span class="tk-num">0.1</span>);
+b2_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/h:bandas/v:LowMid/[1]freq [unit:Hz][scale:log][style:knob]"</span>,  <span class="tk-num">500</span>,  <span class="tk-num">100</span>, <span class="tk-num">2000</span>,  <span class="tk-num">1</span>);
+b2_q    = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/h:bandas/v:LowMid/[2]Q[style:knob]"</span>,                          <span class="tk-num">1.0</span>,  <span class="tk-num">0.1</span>, <span class="tk-num">10</span>,    <span class="tk-num">0.01</span>);
 
-b3_gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band3/[0]gain [unit:dB]"</span>,             <span class="tk-num">0</span>,    -<span class="tk-num">18</span>, <span class="tk-num">18</span>,    <span class="tk-num">0.1</span>);
-b3_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band3/[1]freq [unit:Hz][scale:log]"</span>, <span class="tk-num">2500</span>, <span class="tk-num">500</span>, <span class="tk-num">8000</span>,  <span class="tk-num">1</span>);
-b3_q    = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band3/[2]Q"</span>,                          <span class="tk-num">1.0</span>,  <span class="tk-num">0.1</span>, <span class="tk-num">10</span>,    <span class="tk-num">0.01</span>);
+b3_gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/h:bandas/v:HighMid/[0]gain [unit:dB][style:knob]"</span>,             <span class="tk-num">0</span>,    -<span class="tk-num">18</span>, <span class="tk-num">18</span>,    <span class="tk-num">0.1</span>);
+b3_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/h:bandas/v:HighMid/[1]freq [unit:Hz][scale:log][style:knob]"</span>,  <span class="tk-num">2500</span>, <span class="tk-num">500</span>, <span class="tk-num">8000</span>,  <span class="tk-num">1</span>);
+b3_q    = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/h:bandas/v:HighMid/[2]Q[style:knob]"</span>,                          <span class="tk-num">1.0</span>,  <span class="tk-num">0.1</span>, <span class="tk-num">10</span>,    <span class="tk-num">0.01</span>);
 
-b4_gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band4/[0]gain [unit:dB]"</span>,             <span class="tk-num">0</span>,    -<span class="tk-num">18</span>,  <span class="tk-num">18</span>,    <span class="tk-num">0.1</span>);
-b4_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band4/[1]freq [unit:Hz][scale:log]"</span>, <span class="tk-num">8000</span>, <span class="tk-num">2000</span>, <span class="tk-num">20000</span>, <span class="tk-num">1</span>);
-b4_q    = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/band4/[2]Q"</span>,                          <span class="tk-num">1.0</span>,  <span class="tk-num">0.1</span>,  <span class="tk-num">10</span>,    <span class="tk-num">0.01</span>);
+b4_gain = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/h:bandas/v:High/[0]gain [unit:dB][style:knob]"</span>,             <span class="tk-num">0</span>,    -<span class="tk-num">18</span>,  <span class="tk-num">18</span>,    <span class="tk-num">0.1</span>);
+b4_freq = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/h:bandas/v:High/[1]freq [unit:Hz][scale:log][style:knob]"</span>,  <span class="tk-num">8000</span>, <span class="tk-num">2000</span>, <span class="tk-num">20000</span>, <span class="tk-num">1</span>);
+b4_q    = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:EQ/h:bandas/v:High/[2]Q[style:knob]"</span>,                          <span class="tk-num">1.0</span>,  <span class="tk-num">0.1</span>,  <span class="tk-num">10</span>,    <span class="tk-num">0.01</span>);
 
 eq = fi.<span class="tk-fn">peak_eq</span>(b1_gain, b1_freq, b1_q)
    : fi.<span class="tk-fn">peak_eq</span>(b2_gain, b2_freq, b2_q)
    : fi.<span class="tk-fn">peak_eq</span>(b3_gain, b3_freq, b3_q)
    : fi.<span class="tk-fn">peak_eq</span>(b4_gain, b4_freq, b4_q);
 
-<span class="tk-cm">//================== DELAY (send com feedback) ==================</span>
-d_time = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/delay/[0]time [unit:ms]"</span>,    <span class="tk-num">250</span>, <span class="tk-num">1</span>, <span class="tk-num">2000</span>, <span class="tk-num">1</span>) * <span class="tk-num">0.001</span>;
-d_fb   = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/delay/[1]feedback [unit:%]"</span>, <span class="tk-num">30</span>,  <span class="tk-num">0</span>, <span class="tk-num">90</span>,   <span class="tk-num">1</span>) * <span class="tk-num">0.01</span>;
-d_mix  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/delay/[2]mix [unit:%]"</span>,      <span class="tk-num">0</span>,   <span class="tk-num">0</span>, <span class="tk-num">100</span>,  <span class="tk-num">1</span>) * <span class="tk-num">0.01</span>;
+<span class="tk-cm">//================== FX SENDS — Delay + Reverb lado-a-lado ==================</span>
+d_time = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/h:sends/v:Delay/[0]time [unit:ms][style:knob]"</span>,    <span class="tk-num">250</span>, <span class="tk-num">1</span>, <span class="tk-num">2000</span>, <span class="tk-num">1</span>) * <span class="tk-num">0.001</span>;
+d_fb   = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/h:sends/v:Delay/[1]feedback [unit:%][style:knob]"</span>, <span class="tk-num">30</span>,  <span class="tk-num">0</span>, <span class="tk-num">90</span>,   <span class="tk-num">1</span>) * <span class="tk-num">0.01</span>;
+d_mix  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/h:sends/v:Delay/[2]mix [unit:%][style:knob]"</span>,      <span class="tk-num">0</span>,   <span class="tk-num">0</span>, <span class="tk-num">100</span>,  <span class="tk-num">1</span>) * <span class="tk-num">0.01</span>;
 
 delay_fx      = +~(de.<span class="tk-fn">fdelay</span>(<span class="tk-num">192000</span>, d_time * ma.SR) : *(d_fb));
 delay_send(x) = x * (<span class="tk-num">1</span> - d_mix) + delay_fx(x) * d_mix;
 
-<span class="tk-cm">//================== REVERB (send) ==================</span>
-r_size = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/reverb/[0]size [unit:%]"</span>, <span class="tk-num">70</span>, <span class="tk-num">0</span>, <span class="tk-num">100</span>, <span class="tk-num">1</span>) * <span class="tk-num">0.01</span>;
-r_damp = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/reverb/[1]damp [unit:%]"</span>, <span class="tk-num">30</span>, <span class="tk-num">0</span>, <span class="tk-num">100</span>, <span class="tk-num">1</span>) * <span class="tk-num">0.01</span>;
-r_mix  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/reverb/[2]mix [unit:%]"</span>,  <span class="tk-num">0</span>,  <span class="tk-num">0</span>, <span class="tk-num">100</span>, <span class="tk-num">1</span>) * <span class="tk-num">0.01</span>;
+r_size = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/h:sends/v:Reverb/[0]size [unit:%][style:knob]"</span>, <span class="tk-num">70</span>, <span class="tk-num">0</span>, <span class="tk-num">100</span>, <span class="tk-num">1</span>) * <span class="tk-num">0.01</span>;
+r_damp = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/h:sends/v:Reverb/[1]damp [unit:%][style:knob]"</span>, <span class="tk-num">30</span>, <span class="tk-num">0</span>, <span class="tk-num">100</span>, <span class="tk-num">1</span>) * <span class="tk-num">0.01</span>;
+r_mix  = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:FX/h:sends/v:Reverb/[2]mix [unit:%][style:knob]"</span>,  <span class="tk-num">0</span>,  <span class="tk-num">0</span>, <span class="tk-num">100</span>, <span class="tk-num">1</span>) * <span class="tk-num">0.01</span>;
 
 <span class="tk-cm">// mono_freeverb(fb1, fb2, damp, spread) — fb1=room, fb2=diffusão</span>
 reverb_fx(x)   = x : re.<span class="tk-fn">mono_freeverb</span>(r_size, r_size, r_damp, <span class="tk-num">0</span>);
 reverb_send(x) = x * (<span class="tk-num">1</span> - r_mix) + reverb_fx(x) * r_mix;
 
-<span class="tk-cm">//================== OUTPUT ==================</span>
-out_gain     = <span class="tk-fn">hslider</span>(<span class="tk-str">"t:Output/[0]gain [unit:dB]"</span>, <span class="tk-num">0</span>, -<span class="tk-num">24</span>, <span class="tk-num">24</span>, <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
-out_meter(s) = <span class="tk-fn">attach</span>(s, s : abs : ba.<span class="tk-fn">linear2db</span> : <span class="tk-fn">hbargraph</span>(<span class="tk-str">"t:Output/[1]out [unit:dB]"</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>));
+<span class="tk-cm">//================== OUTPUT — MASTER fader vertical + meter vertical ==================</span>
+out_gain     = <span class="tk-fn">vslider</span>(<span class="tk-str">"t:Output/[0]MASTER [unit:dB]"</span>, <span class="tk-num">0</span>, -<span class="tk-num">24</span>, <span class="tk-num">24</span>, <span class="tk-num">0.1</span>) : ba.<span class="tk-fn">db2linear</span>;
+out_meter(s) = <span class="tk-fn">attach</span>(s, s : abs : ba.<span class="tk-fn">linear2db</span> : <span class="tk-fn">vbargraph</span>(<span class="tk-str">"t:Output/[1]out [unit:dB]"</span>, -<span class="tk-num">60</span>, <span class="tk-num">0</span>));
 
 <span class="tk-cm">//================== SIGNAL FLOW ==================</span>
 <span class="tk-fn">process</span>(x) = in_meter(x * in_gain)
@@ -263,6 +276,23 @@ out_meter(s) = <span class="tk-fn">attach</span>(s, s : abs : ba.<span class="tk
     <li><strong>Feedback &lt; 90 %</strong> no delay pra evitar explodir no sustain. Pro auto-oscilação criativa, deixe 95.</li>
   </ul>
 </div>
+
+<h3>Grupos aninhados pra layout de mesa</h3>
+
+<p>O segredo do visual de channel strip é aninhar prefixos de grupo no label. Cada <code>/</code> abre um nível, e os prefixos <code>h:</code>, <code>v:</code> e <code>t:</code> controlam a direção.</p>
+
+<div class="code-block">
+<div class="code-header"><span>anatomia do label de EQ</span><span class="code-lang">faust</span></div>
+<pre><code><span class="tk-str">"t:EQ/h:bandas/v:Low/[0]gain [unit:dB][style:knob]"</span>
+<span class="tk-cm">//  └─┬─┘ └──┬───┘ └─┬─┘ └────────────┬─────────────┘</span>
+<span class="tk-cm">//    │      │       │                │</span>
+<span class="tk-cm">//    │      │       │                └─ controle: gain em dB, com knob</span>
+<span class="tk-cm">//    │      │       └─ vgroup "Low": gain/freq/Q empilhados verticalmente</span>
+<span class="tk-cm">//    │      └─ hgroup "bandas": 4 bandas lado-a-lado (Low | LowMid | HighMid | High)</span>
+<span class="tk-cm">//    └─ tgroup "EQ": tab no topo do plugin</span></code></pre>
+</div>
+
+<p>O mesmo padrão se repete em <code>Filters</code> (HPF/LPF lado-a-lado), <code>FX</code> (Delay/Reverb lado-a-lado), <code>Gate</code> e <code>Comp</code> (knobs em linha + GR meter embaixo). Esse aninhamento é o que dá ao plugin a "cara" de uma channel strip de X32/Wing, mesmo dentro do editor padrão do FAUST.</p>
 
 <h3>Por que o gate foi feito manual</h3>
 
